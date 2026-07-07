@@ -1,7 +1,7 @@
 /* ============================================================
    HERKİM KİMYA — Veri Katmanı (gerçek şirket bilgileri)
    Kaynak: herkim.com.tr — 1975 kuruluşlu deri & tekstil kimyasalları
-   Distribütör: Türk Henkel · Camsar · BASF Türk
+   Deri & tekstil kimyasalları · binder üretimi
    Ürün adları / kategoriler üç dillidir (tr/en/ru).
    NOT: Bireysel ürünler temsilîdir; gerçek SKU listesi talep/giriş
    ile paylaşılır (tıpkı herkim.com.tr'deki gibi). Kendi portföyünüze
@@ -23,7 +23,7 @@ const HK_COMPANY = {
   mailQuote: "info@herkim.com.tr",
   whatsapp: "902163941125",   // wa.me — WhatsApp Business hattınızla değiştirin
   group: "https://www.herkimgroup.com",
-  brands: ["Türk Henkel", "Camsar", "BASF Türk"]
+  brands: ["Herkim", "Herkim", "Herkim"]
 };
 
 /* Ana kategoriler (üç dilli) */
@@ -49,36 +49,36 @@ const HK_SUBS = {
    n: ad (tr/en/ru), brand: marka, pack: ambalaj, tag: "yeni"|"one"|null */
 const HK_PRODUCTS = [
   // ---- Deri · Altkat ----
-  { id: 1,  sub: "altkat",  n: { tr: "Altkat Penetratörü",        en: "Base-Coat Penetrator",       ru: "Пенетратор грунта" },        brand: "Türk Henkel", pack: "120 kg varil", tag: "one" },
-  { id: 2,  sub: "altkat",  n: { tr: "İmpregnasyon Reçinesi",     en: "Impregnation Resin",         ru: "Пропиточная смола" },        brand: "BASF Türk",   pack: "120 kg varil", tag: null },
-  { id: 3,  sub: "altkat",  n: { tr: "Altkat Pigment Pastası",    en: "Base-Coat Pigment Paste",    ru: "Пигментная паста грунта" },  brand: "Camsar",      pack: "25 kg bidon",  tag: null },
+  { id: 1,  sub: "altkat",  n: { tr: "Altkat Penetratörü",        en: "Base-Coat Penetrator",       ru: "Пенетратор грунта" },        brand: "Herkim", pack: "120 kg varil", tag: "one" },
+  { id: 2,  sub: "altkat",  n: { tr: "İmpregnasyon Reçinesi",     en: "Impregnation Resin",         ru: "Пропиточная смола" },        brand: "Herkim",   pack: "120 kg varil", tag: null },
+  { id: 3,  sub: "altkat",  n: { tr: "Altkat Pigment Pastası",    en: "Base-Coat Pigment Paste",    ru: "Пигментная паста грунта" },  brand: "Herkim",      pack: "25 kg bidon",  tag: null },
   { id: 4,  sub: "altkat",  n: { tr: "Alpine Altkat Binderi",     en: "Alpine Base-Coat Binder",    ru: "Грунтовый биндер Alpine" },  brand: "Herkim",      pack: "120 kg varil", tag: "one" },
-  { id: 5,  sub: "altkat",  n: { tr: "Dolgu Altkat Sistemi",      en: "Filler Base-Coat System",    ru: "Наполняющий грунт" },        brand: "Türk Henkel", pack: "120 kg varil", tag: null },
+  { id: 5,  sub: "altkat",  n: { tr: "Dolgu Altkat Sistemi",      en: "Filler Base-Coat System",    ru: "Наполняющий грунт" },        brand: "Herkim", pack: "120 kg varil", tag: null },
 
   // ---- Deri · Finisaj ----
-  { id: 6,  sub: "finisaj", n: { tr: "Nitroselülozik Lak",        en: "Nitrocellulose Lacquer",     ru: "Нитроцеллюлозный лак" },     brand: "BASF Türk",   pack: "25 kg bidon",  tag: null },
-  { id: 7,  sub: "finisaj", n: { tr: "Su Bazlı Top Coat",         en: "Water-Based Top Coat",       ru: "Водный топ-кот" },           brand: "Türk Henkel", pack: "120 kg varil", tag: "yeni" },
-  { id: 8,  sub: "finisaj", n: { tr: "Tutuş (Handle) Ajanı",      en: "Handle Agent",               ru: "Агент грифа" },              brand: "Camsar",      pack: "25 kg bidon",  tag: null },
-  { id: 9,  sub: "finisaj", n: { tr: "Matlaştırıcı Ajan",         en: "Matting Agent",              ru: "Матирующий агент" },         brand: "BASF Türk",   pack: "25 kg bidon",  tag: null },
-  { id: 10, sub: "finisaj", n: { tr: "Kaymazlık Ajanı",           en: "Anti-Slip Agent",            ru: "Антискользящий агент" },     brand: "Türk Henkel", pack: "25 kg bidon",  tag: null },
-  { id: 11, sub: "finisaj", n: { tr: "Parlaklık (Gloss) Ajanı",   en: "Gloss Agent",                ru: "Агент блеска" },             brand: "Camsar",      pack: "25 kg bidon",  tag: null },
+  { id: 6,  sub: "finisaj", n: { tr: "Nitroselülozik Lak",        en: "Nitrocellulose Lacquer",     ru: "Нитроцеллюлозный лак" },     brand: "Herkim",   pack: "25 kg bidon",  tag: null },
+  { id: 7,  sub: "finisaj", n: { tr: "Su Bazlı Top Coat",         en: "Water-Based Top Coat",       ru: "Водный топ-кот" },           brand: "Herkim", pack: "120 kg varil", tag: "yeni" },
+  { id: 8,  sub: "finisaj", n: { tr: "Tutuş (Handle) Ajanı",      en: "Handle Agent",               ru: "Агент грифа" },              brand: "Herkim",      pack: "25 kg bidon",  tag: null },
+  { id: 9,  sub: "finisaj", n: { tr: "Matlaştırıcı Ajan",         en: "Matting Agent",              ru: "Матирующий агент" },         brand: "Herkim",   pack: "25 kg bidon",  tag: null },
+  { id: 10, sub: "finisaj", n: { tr: "Kaymazlık Ajanı",           en: "Anti-Slip Agent",            ru: "Антискользящий агент" },     brand: "Herkim", pack: "25 kg bidon",  tag: null },
+  { id: 11, sub: "finisaj", n: { tr: "Parlaklık (Gloss) Ajanı",   en: "Gloss Agent",                ru: "Агент блеска" },             brand: "Herkim",      pack: "25 kg bidon",  tag: null },
 
   // ---- Deri · Dolap Boyaları ----
-  { id: 12, sub: "dolap",   n: { tr: "Anilin Deri Boyası",        en: "Aniline Leather Dye",        ru: "Анилиновый краситель" },     brand: "BASF Türk",   pack: "25 kg torba",  tag: null },
-  { id: 13, sub: "dolap",   n: { tr: "Asit Deri Boyası",          en: "Acid Leather Dye",           ru: "Кислотный краситель" },      brand: "BASF Türk",   pack: "25 kg torba",  tag: null },
-  { id: 14, sub: "dolap",   n: { tr: "Direkt Deri Boyası",        en: "Direct Leather Dye",         ru: "Прямой краситель кожи" },    brand: "Camsar",      pack: "25 kg torba",  tag: null },
+  { id: 12, sub: "dolap",   n: { tr: "Anilin Deri Boyası",        en: "Aniline Leather Dye",        ru: "Анилиновый краситель" },     brand: "Herkim",   pack: "25 kg torba",  tag: null },
+  { id: 13, sub: "dolap",   n: { tr: "Asit Deri Boyası",          en: "Acid Leather Dye",           ru: "Кислотный краситель" },      brand: "Herkim",   pack: "25 kg torba",  tag: null },
+  { id: 14, sub: "dolap",   n: { tr: "Direkt Deri Boyası",        en: "Direct Leather Dye",         ru: "Прямой краситель кожи" },    brand: "Herkim",      pack: "25 kg torba",  tag: null },
 
   // ---- Tekstil · Proses ----
-  { id: 15, sub: "proses",  n: { tr: "Islatıcı Ajan",             en: "Wetting Agent",              ru: "Смачиватель" },              brand: "Türk Henkel", pack: "60 kg bidon",  tag: null },
-  { id: 16, sub: "proses",  n: { tr: "Yıkama / Sabunlama Ajanı",  en: "Scouring / Soaping Agent",   ru: "Моющий агент" },             brand: "BASF Türk",   pack: "60 kg bidon",  tag: null },
-  { id: 17, sub: "proses",  n: { tr: "Düzgünleştirici (Leveling)",en: "Leveling Agent",             ru: "Выравниватель" },            brand: "BASF Türk",   pack: "60 kg bidon",  tag: null },
-  { id: 18, sub: "proses",  n: { tr: "Silikon Yumuşatıcı",        en: "Silicone Softener",          ru: "Силиконовый смягчитель" },   brand: "Camsar",      pack: "120 kg varil", tag: "yeni" },
-  { id: 19, sub: "proses",  n: { tr: "Fikse Ajanı",               en: "Fixing Agent",               ru: "Фиксирующий агент" },        brand: "Türk Henkel", pack: "60 kg bidon",  tag: null },
+  { id: 15, sub: "proses",  n: { tr: "Islatıcı Ajan",             en: "Wetting Agent",              ru: "Смачиватель" },              brand: "Herkim", pack: "60 kg bidon",  tag: null },
+  { id: 16, sub: "proses",  n: { tr: "Yıkama / Sabunlama Ajanı",  en: "Scouring / Soaping Agent",   ru: "Моющий агент" },             brand: "Herkim",   pack: "60 kg bidon",  tag: null },
+  { id: 17, sub: "proses",  n: { tr: "Düzgünleştirici (Leveling)",en: "Leveling Agent",             ru: "Выравниватель" },            brand: "Herkim",   pack: "60 kg bidon",  tag: null },
+  { id: 18, sub: "proses",  n: { tr: "Silikon Yumuşatıcı",        en: "Silicone Softener",          ru: "Силиконовый смягчитель" },   brand: "Herkim",      pack: "120 kg varil", tag: "yeni" },
+  { id: 19, sub: "proses",  n: { tr: "Fikse Ajanı",               en: "Fixing Agent",               ru: "Фиксирующий агент" },        brand: "Herkim", pack: "60 kg bidon",  tag: null },
 
   // ---- Tekstil · Boyalar ----
-  { id: 20, sub: "tekboya", n: { tr: "Reaktif Boya",              en: "Reactive Dye",               ru: "Активный краситель" },       brand: "BASF Türk",   pack: "25 kg torba",  tag: null },
-  { id: 21, sub: "tekboya", n: { tr: "Dispers Boya",              en: "Disperse Dye",               ru: "Дисперсный краситель" },     brand: "BASF Türk",   pack: "25 kg torba",  tag: null },
-  { id: 22, sub: "tekboya", n: { tr: "Asit Boya (Tekstil)",       en: "Acid Dye (Textile)",         ru: "Кислотный краситель" },      brand: "Camsar",      pack: "25 kg torba",  tag: null },
+  { id: 20, sub: "tekboya", n: { tr: "Reaktif Boya",              en: "Reactive Dye",               ru: "Активный краситель" },       brand: "Herkim",   pack: "25 kg torba",  tag: null },
+  { id: 21, sub: "tekboya", n: { tr: "Dispers Boya",              en: "Disperse Dye",               ru: "Дисперсный краситель" },     brand: "Herkim",   pack: "25 kg torba",  tag: null },
+  { id: 22, sub: "tekboya", n: { tr: "Asit Boya (Tekstil)",       en: "Acid Dye (Textile)",         ru: "Кислотный краситель" },      brand: "Herkim",      pack: "25 kg torba",  tag: null },
 
   // ---- Binder · İnşaat Boya ----
   { id: 23, sub: "insaatB", n: { tr: "Akrilik İnşaat Binderi",    en: "Acrylic Construction Binder",ru: "Акриловый биндер" },         brand: "Herkim",      pack: "1000 kg IBC",  tag: "one" },
