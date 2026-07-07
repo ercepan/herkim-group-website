@@ -152,13 +152,6 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .tb-group { color: rgba(250,246,241,0.55); }
 .tb-group:hover { color: var(--crimson-hot); }
 
-/* İş ortağı markaları şeridi */
-.brands-strip { background: var(--white); border-bottom: 1px solid var(--line); }
-.brands-strip .wrap { display: flex; align-items: center; justify-content: center; gap: clamp(24px, 6vw, 72px); flex-wrap: wrap; padding: 22px var(--gutter); }
-.brands-strip .bs-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
-.brands-strip .bs-brand { font-family: var(--font-display); font-weight: 800; font-stretch: 108%; font-size: clamp(1.1rem, 2.2vw, 1.5rem); color: var(--ink-2); letter-spacing: -0.01em; opacity: 0.85; transition: color 0.2s, opacity 0.2s; }
-.brands-strip .bs-brand:hover { color: var(--crimson); opacity: 1; }
-
 /* ---------- Site başlığı ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 50;
