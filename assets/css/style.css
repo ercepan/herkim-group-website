@@ -477,7 +477,8 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   font-size: clamp(2.4rem, 5.4vw, 4rem); line-height: 1;
   color: var(--paper);
 }
-.stat-cell b i { font-style: normal; color: var(--crimson-hot); }
+.stat-cell b i { font-style: normal; font-size: 0.46em; vertical-align: 0.28em; color: var(--crimson-hot); font-weight: 800; margin-left: 2px; }
+.hstat b i { font-style: normal; font-size: 0.5em; vertical-align: 0.22em; color: var(--crimson); font-weight: 800; margin-left: 1px; }
 .stat-cell span { display: block; margin-top: 10px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,246,241,0.6); }
 
 /* ---------- Kurumsal önizleme / zaman çizelgesi ---------- */

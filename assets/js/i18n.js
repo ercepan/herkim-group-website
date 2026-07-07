@@ -126,7 +126,7 @@ const HK_I18N = {
     "home.docs.title": "Bütün dijital belgeler,\ntek yapı altında.",
     "home.news.kicker": "07 — Duyurular",
     "home.news.title": "Herkim'den haberler.",
-    "home.contact.kicker": "08 — İletişim",
+    "home.contact.kicker": "07 — İletişim",
     "home.contact.title": "Bir telefon kadar\nyakınız.",
     "home.contact.lead": "Ürün, fiyat veya teknik destek — satış ekibimiz mesai saatleri içinde en kısa sürede döner. Acil talepler için WhatsApp hattımız her zaman açık.",
 
@@ -433,7 +433,7 @@ const HK_I18N = {
     "home.docs.title": "All digital documents,\nunder one structure.",
     "home.news.kicker": "07 — News",
     "home.news.title": "News from Herkim.",
-    "home.contact.kicker": "08 — Contact",
+    "home.contact.kicker": "07 — Contact",
     "home.contact.title": "As close as\na phone call.",
     "home.contact.lead": "Product, price or technical support — our sales team replies as soon as possible during business hours. For urgent requests, our WhatsApp line is always open.",
 
@@ -740,7 +740,7 @@ const HK_I18N = {
     "home.docs.title": "Все цифровые документы\nв единой структуре.",
     "home.news.kicker": "07 — Новости",
     "home.news.title": "Новости Herkim.",
-    "home.contact.kicker": "08 — Контакты",
+    "home.contact.kicker": "07 — Контакты",
     "home.contact.title": "Мы всего\nв одном звонке.",
     "home.contact.lead": "Продукт, цена или техническая поддержка — наш отдел продаж ответит в кратчайшие сроки в рабочее время. Для срочных запросов линия WhatsApp всегда открыта.",
 

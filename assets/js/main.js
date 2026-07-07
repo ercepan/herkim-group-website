@@ -412,7 +412,6 @@
       { t: T("nav.productList"), h: "urun-listesi.html" },
       { t: T("nav.services"), h: "hizmetler.html" },
       { t: T("nav.docs"), h: "dokumanlar.html" },
-      { t: T("nav.news"), h: "duyurular.html" },
       { t: T("nav.contact"), h: "iletisim.html" }
     ];
     const row = (title, meta, href) => {
