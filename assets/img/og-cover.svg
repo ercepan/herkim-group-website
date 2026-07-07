@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#1B1216"/>
+  <!-- crimson kenar şeridi -->
+  <rect x="0" y="0" width="1200" height="10" fill="#A31C3C"/>
+  <rect x="0" y="620" width="1200" height="10" fill="#A31C3C"/>
+  <!-- altıgen doku (hafif) -->
+  <g fill="none" stroke="#FAF6F1" stroke-opacity="0.06" stroke-width="2">
+    <path d="M980 120 l60 35 v70 l-60 35 -60-35 v-70z"/>
+    <path d="M1080 178 l60 35 v70 l-60 35 -60-35 v-70z"/>
+    <path d="M980 236 l60 35 v70 l-60 35 -60-35 v-70z"/>
+    <path d="M1080 294 l60 35 v70 l-60 35 -60-35 v-70z"/>
+    <path d="M980 352 l60 35 v70 l-60 35 -60-35 v-70z"/>
+  </g>
+  <!-- HK logo -->
+  <g transform="translate(110 175)">
+    <circle cx="140" cy="140" r="132" fill="#FFFFFF" stroke="#A31C3C" stroke-width="12"/>
+    <g fill="#A31C3C" transform="translate(140 140) scale(0.78) translate(-160 -160)">
+      <rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/>
+      <polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/>
+    </g>
+  </g>
+  <!-- Metin -->
+  <g font-family="DejaVu Sans, Arial, sans-serif">
+    <text x="410" y="250" fill="#FFFFFF" font-size="88" font-weight="bold" letter-spacing="1">HERK&#304;M K&#304;MYA</text>
+    <text x="412" y="315" fill="#C42449" font-size="34" font-weight="bold" letter-spacing="2">DER&#304; &amp; TEKST&#304;L K&#304;MYASALLARI</text>
+    <text x="412" y="372" fill="#FAF6F1" fill-opacity="0.75" font-size="30">1975'ten beri &#183; T&#252;rk Henkel &#183; Camsar &#183; BASF T&#252;rk</text>
+    <!-- alt rozet -->
+    <rect x="412" y="420" width="240" height="60" rx="6" fill="#A31C3C"/>
+    <text x="532" y="460" fill="#FFFFFF" font-size="28" font-weight="bold" text-anchor="middle">herkim.com.tr</text>
+    <text x="690" y="460" fill="#FAF6F1" fill-opacity="0.55" font-size="24">50+ y&#305;l tecr&#252;be</text>
+  </g>
+</svg>

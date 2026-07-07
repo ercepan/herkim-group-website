@@ -477,6 +477,19 @@
     toast(T("toast.newsOk"));
   }));
 
+  /* ============ 13) Tanıtım videosu (tıklayınca yükle) ============ */
+  $$(".yt-facade").forEach(f => f.addEventListener("click", () => {
+    const id = f.dataset.yt;
+    if (!id) return;
+    const iframe = document.createElement("iframe");
+    iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id) + "?autoplay=1&rel=0&modestbranding=1";
+    iframe.title = "Herkim Kimya";
+    iframe.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture; fullscreen; web-share");
+    iframe.setAttribute("allowfullscreen", "");
+    iframe.setAttribute("loading", "lazy");
+    f.replaceWith(iframe);
+  }));
+
   /* WhatsApp bağlantıları */
   const setWa = () => $$("[data-wa]").forEach(a => {
     a.href = "https://wa.me/" + HK.whatsapp + "?text=" + encodeURIComponent(T("wa.msg"));

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ercepan.github.io/herkim-group-website/sitemap.xml

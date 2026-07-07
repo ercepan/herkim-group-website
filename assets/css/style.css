@@ -322,6 +322,16 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 @keyframes marquee { to { transform: translateX(-50%); } }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 
+/* ---------- Tanıtım videosu ---------- */
+.video-frame { max-width: 920px; margin: 0 auto; border: 2px solid var(--ink); border-radius: var(--radius); box-shadow: var(--shadow-offset); overflow: hidden; background: var(--ink); }
+.yt-facade { display: block; width: 100%; aspect-ratio: 16 / 9; background-size: cover; background-position: center; position: relative; cursor: pointer; border: 0; padding: 0; }
+.yt-facade::after { content: ""; position: absolute; inset: 0; background: rgba(27, 18, 22, 0.30); transition: background 0.25s; }
+.yt-facade:hover::after { background: rgba(27, 18, 22, 0.12); }
+.yt-play { position: absolute; inset: 0; margin: auto; width: 92px; height: 64px; display: grid; place-items: center; z-index: 1; transition: transform 0.2s var(--ease-out); }
+.yt-facade:hover .yt-play { transform: scale(1.09); }
+.yt-play svg { width: 92px; height: 64px; filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45)); }
+.video-frame iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+
 /* ---------- Bölüm iskeleti ---------- */
 .section { position: relative; padding: clamp(64px, 9vw, 120px) 0; }
 .section--tint { background: var(--paper-2); border-block: 1px solid var(--line-soft); }
