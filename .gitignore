@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editör
+.idea/
+*.swp
+*.swo
+
+# Bağımlılıklar / derleme (ileride eklenirse)
+node_modules/
+dist/
+.cache/
+
+# Ortam / gizli
+.env
+.env.*

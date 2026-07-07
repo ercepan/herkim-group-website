@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>İletişim &amp; Teklif — Herkim Group</title>
+  <meta name="description" content="Herkim Group iletişim: adres, telefon, WhatsApp hattı ve teklif formu. Mesai saatlerinde 30 dakikada dönüş.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="wrap">
+      <div class="tb-rates" aria-label="Döviz kurları">
+        <span class="rate">USD/TRY <b id="rate-usd">—</b></span>
+        <span class="rate">EUR/TRY <b id="rate-eur">—</b></span>
+        <span class="tb-note" id="rate-note">indikatif</span>
+      </div>
+      <div class="tb-links">
+        <a class="tb-hide" href="tel:+902120000000">+90 (212) 000 00 00</a>
+        <a class="tb-hide" href="mailto:info@herkimgroup.com">info@herkimgroup.com</a>
+        <span class="tb-lang" title="İngilizce sürüm hazırlanıyor"><span class="on">TR</span><span class="off">EN</span></span>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html" aria-label="Herkim Group ana sayfa">
+        <svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true">
+          <circle cx="160" cy="160" r="148" fill="#FFFFFF" stroke="#A31C3C" stroke-width="10"/>
+          <g fill="#A31C3C">
+            <rect x="76" y="92" width="27" height="136"/>
+            <rect x="103" y="146" width="43" height="28"/>
+            <rect x="126" y="92" width="27" height="136"/>
+            <polygon points="153,152 215,92 253,92 181,164"/>
+            <polygon points="153,166 179,142 255,228 217,228"/>
+          </g>
+        </svg>
+        <span class="brand-name"><b>HERKİM</b><span>GROUP</span></span>
+      </a>
+      <nav aria-label="Ana menü">
+        <ul class="nav">
+          <li><a href="index.html">Ana Sayfa</a></li>
+          <li>
+            <a href="kurumsal.html">Kurumsal <span class="caret"></span></a>
+            <div class="dropdown">
+              <a href="kurumsal.html#biz-kimiz">Biz Kimiz? <span class="mono">01</span></a>
+              <a href="kurumsal.html#misyon">Misyon &amp; Vizyon <span class="mono">02</span></a>
+              <a href="kurumsal.html#prensipler">Çalışma Prensiplerimiz <span class="mono">03</span></a>
+              <a href="kurumsal.html#tarihce">Tarihçe <span class="mono">04</span></a>
+              <a href="kurumsal.html#kalite">Kalite &amp; Sertifikalar <span class="mono">05</span></a>
+            </div>
+          </li>
+          <li>
+            <a href="urunler.html">Ürünler <span class="caret"></span></a>
+            <div class="dropdown">
+              <a href="urunler.html">Ürün Kataloğu <span class="mono">kartlar</span></a>
+              <a href="urun-listesi.html">Ürün Listesi <span class="mono">tablo</span></a>
+              <hr>
+              <a href="urunler.html?kat=temel">Temel Kimyasallar</a>
+              <a href="urunler.html?kat=asit">Asitler</a>
+              <a href="urunler.html?kat=tuz">Tuzlar &amp; Mineraller</a>
+              <a href="urunler.html?kat=yag">Yağlar &amp; Yardımcılar</a>
+              <a href="urunler.html?kat=pigment">Pigment &amp; Dolgu</a>
+              <a href="urunler.html?kat=ozel">Özel Kimyasallar</a>
+            </div>
+          </li>
+          <li><a href="dokumanlar.html">Doküman Merkezi</a></li>
+          <li><a href="duyurular.html">Duyurular</a></li>
+          <li><a href="iletisim.html" class="active">İletişim</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" data-open-search title="Ara (Ctrl+K)" aria-label="Site içi arama">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+        </button>
+        <button class="icon-btn" data-open-basket title="Teklif sepeti" aria-label="Teklif sepeti">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l1 4H8l1-4zM6 7h12l-1.2 12.6a1.5 1.5 0 0 1-1.5 1.4H8.7a1.5 1.5 0 0 1-1.5-1.4L6 7z"/></svg>
+          <span class="count basket-count" style="display:none">0</span>
+        </button>
+        <button class="icon-btn burger" aria-label="Menüyü aç">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-nav" aria-label="Mobil menü">
+    <button class="mn-close">KAPAT ×</button>
+    <a href="index.html">Ana Sayfa</a>
+    <a href="kurumsal.html">Kurumsal</a>
+    <a href="urunler.html">Ürün Kataloğu</a>
+    <a href="urun-listesi.html">Ürün Listesi</a>
+    <a href="dokumanlar.html">Doküman Merkezi</a>
+    <a href="duyurular.html">Duyurular</a>
+    <a href="iletisim.html">İletişim</a>
+  </div>
+
+  <main>
+    <section class="page-hero">
+      <svg class="hexbg" aria-hidden="true"><defs><pattern id="hexpi" width="56" height="98" patternUnits="userSpaceOnUse"><path d="M28 0l28 16v32L28 64 0 48V16z M28 98l28-16M28 98L0 82" fill="none" stroke="#FAF6F1" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#hexpi)"/></svg>
+      <div class="wrap">
+        <p class="crumbs"><a href="index.html">Ana Sayfa</a><span class="sep">/</span>İletişim</p>
+        <h1 class="display">İletişim &amp; Teklif</h1>
+        <p class="lead">Mesai saatleri içinde 30 dakikada dönüş sözümüz var. Formu doldurun, arayın ya da WhatsApp'tan yazın.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap contact-cta" style="align-items:start">
+        <!-- Form -->
+        <div class="reveal">
+          <span class="kicker">Teklif &amp; İletişim Formu</span>
+          <h2 class="display" style="margin:16px 0 24px">Size nasıl yardımcı olalım?</h2>
+          <form id="contact-form" class="form-grid" novalidate>
+            <div class="field">
+              <label for="cf-name">Ad Soyad *</label>
+              <input id="cf-name" name="name" type="text" placeholder="Adınız Soyadınız" required>
+            </div>
+            <div class="field">
+              <label for="cf-firm">Firma</label>
+              <input id="cf-firm" name="firm" type="text" placeholder="Firma unvanınız">
+            </div>
+            <div class="field">
+              <label for="cf-phone">Telefon</label>
+              <input id="cf-phone" name="phone" type="tel" placeholder="+90 ___ ___ __ __">
+            </div>
+            <div class="field">
+              <label for="cf-topic">Konu</label>
+              <select id="cf-topic" name="topic">
+                <option>Fiyat teklifi</option>
+                <option>Ürün tedarik talebi</option>
+                <option>TDS / SDS doküman talebi</option>
+                <option>Numune talebi</option>
+                <option>Diğer</option>
+              </select>
+            </div>
+            <div class="field field--full">
+              <label for="cf-msg">Mesajınız *</label>
+              <textarea id="cf-msg" name="msg" placeholder="Ürün adı, tahmini miktar ve teslimat şehri yazarsanız teklifiniz daha hızlı hazırlanır." required></textarea>
+            </div>
+            <div class="field--full" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+              <button class="btn btn--primary" type="submit">Gönder <span class="arr">→</span></button>
+              <a class="btn" data-wa href="#">WhatsApp'tan Yaz</a>
+              <span class="muted mono" style="font-size:11.5px">* Form, e-posta uygulamanız üzerinden gönderilir.</span>
+            </div>
+          </form>
+        </div>
+
+        <!-- Bilgiler -->
+        <div class="reveal reveal-d2">
+          <div class="contact-info" style="margin-bottom:28px">
+            <div class="ci-row">
+              <svg class="ci-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+              <div><b>Merkez</b><span>Herkim Plaza, OSB 12. Cad. No: 34, Tuzla / İstanbul</span></div>
+            </div>
+            <div class="ci-row">
+              <svg class="ci-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V8l7-4 7 4v13"/><path d="M9 21v-6h6v6"/></svg>
+              <div><b>Depo &amp; Sevkiyat</b><span>Herkim Lojistik, Kimya İhtisas OSB, Yalova</span></div>
+            </div>
+            <div class="ci-row">
+              <svg class="ci-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+              <div><b>Telefon</b><span>+90 (212) 000 00 00</span></div>
+            </div>
+            <div class="ci-row">
+              <svg class="ci-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3 7 9 6 9-6"/></svg>
+              <div><b>Satış</b><span>satis@herkimgroup.com</span></div>
+            </div>
+            <div class="ci-row">
+              <svg class="ci-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3 7 9 6 9-6"/></svg>
+              <div><b>Genel</b><span>info@herkimgroup.com</span></div>
+            </div>
+            <div class="ci-row">
+              <svg class="ci-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+              <div><b>Çalışma Saatleri</b><span>Hafta içi 08:30 – 18:00 · Cumartesi 09:00 – 13:00</span></div>
+            </div>
+          </div>
+
+          <!-- Harita yer tutucusu -->
+          <div style="border:2px solid var(--ink);border-radius:var(--radius);box-shadow:var(--shadow-offset);overflow:hidden;background:var(--white)">
+            <div style="position:relative;height:240px;background:var(--paper-2);display:grid;place-items:center">
+              <svg viewBox="0 0 400 240" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">
+                <g stroke="#43333A" stroke-opacity="0.18" stroke-width="1.4" fill="none">
+                  <path d="M-20 60 C80 40, 160 90, 240 70 S 380 40, 430 70"/>
+                  <path d="M-20 120 C90 100, 170 150, 260 130 S 390 110, 430 130"/>
+                  <path d="M-20 180 C70 160, 180 210, 270 190 S 380 170, 430 190"/>
+                  <path d="M60 -10 C 70 60, 50 140, 80 250"/>
+                  <path d="M160 -10 C 170 70, 150 160, 180 250"/>
+                  <path d="M280 -10 C 290 60, 270 150, 300 250"/>
+                </g>
+                <circle cx="200" cy="118" r="34" fill="#A31C3C" fill-opacity="0.12"/>
+                <circle cx="200" cy="118" r="9" fill="#A31C3C"/>
+                <path d="M200 88 v-14 M200 162 v-14 M170 118 h-14 M244 118 h-14" stroke="#A31C3C" stroke-width="2"/>
+              </svg>
+              <div style="position:relative;text-align:center;background:var(--white);border:1.5px solid var(--ink);border-radius:3px;padding:10px 18px;box-shadow:var(--shadow-offset-sm)">
+                <b class="mono" style="font-size:12px;letter-spacing:.1em">HERKİM PLAZA</b><br>
+                <span class="muted" style="font-size:12.5px">Tuzla / İstanbul</span>
+              </div>
+            </div>
+            <a class="btn btn--dark" style="width:100%;justify-content:center;border-radius:0;box-shadow:none;border:0;border-top:2px solid var(--ink)" href="https://maps.google.com/?q=Tuzla+İstanbul" target="_blank" rel="noopener">Google Haritalar'da Aç <span class="arr">→</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-cta">
+      <div class="wrap">
+        <h2>Sepetinizdeki ürünler için <em>tek tıkla</em> teklif isteyin.</h2>
+        <button class="btn btn--primary" data-open-basket>Teklif Sepetini Aç <span class="arr">→</span></button>
+      </div>
+    </div>
+    <div class="wrap footer-main">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="Herkim Group">
+          <svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true">
+            <circle cx="160" cy="160" r="148" fill="#1B1216" stroke="#C42449" stroke-width="10"/>
+            <g fill="#FAF6F1">
+              <rect x="76" y="92" width="27" height="136"/>
+              <rect x="103" y="146" width="43" height="28"/>
+              <rect x="126" y="92" width="27" height="136"/>
+              <polygon points="153,152 215,92 253,92 181,164"/>
+              <polygon points="153,166 179,142 255,228 217,228"/>
+            </g>
+          </svg>
+          <span class="brand-name"><b style="color:var(--crimson-hot)">HERKİM</b><span style="color:rgba(250,246,241,.6)">GROUP</span></span>
+        </a>
+        <p>Kimyasal hammadde tedarikinde çeyrek asırlık tecrübe. Doğru ürün, doğru fiyat, tam zamanında.</p>
+        <form class="footer-news" id="newsletter-form">
+          <input type="email" placeholder="E-bülten için e-postanız" aria-label="E-posta adresi">
+          <button type="submit">Katıl</button>
+        </form>
+      </div>
+      <div>
+        <h4>Site Haritası</h4>
+        <ul class="footer-links">
+          <li><a href="kurumsal.html">Kurumsal</a></li>
+          <li><a href="kurumsal.html#prensipler">Çalışma Prensiplerimiz</a></li>
+          <li><a href="urunler.html">Ürün Kataloğu</a></li>
+          <li><a href="urun-listesi.html">Ürün Listesi</a></li>
+          <li><a href="dokumanlar.html">Doküman Merkezi</a></li>
+          <li><a href="duyurular.html">Duyurular</a></li>
+          <li><a href="iletisim.html">İletişim</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Ürün Grupları</h4>
+        <ul class="footer-links">
+          <li><a href="urunler.html?kat=temel">Temel Kimyasallar</a></li>
+          <li><a href="urunler.html?kat=asit">Asitler</a></li>
+          <li><a href="urunler.html?kat=tuz">Tuzlar &amp; Mineraller</a></li>
+          <li><a href="urunler.html?kat=yag">Yağlar &amp; Yardımcılar</a></li>
+          <li><a href="urunler.html?kat=pigment">Pigment &amp; Dolgu</a></li>
+          <li><a href="urunler.html?kat=ozel">Özel Kimyasallar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Grup Şirketleri</h4>
+        <div class="footer-ent">
+          <div class="ent"><b>Herkim Kimya San. ve Tic. A.Ş.</b><span>Merkez · İstanbul</span></div>
+          <div class="ent"><b>Herkim Dış Ticaret Ltd. Şti.</b><span>İthalat &amp; İhracat</span></div>
+          <div class="ent"><b>Herkim Lojistik ve Depoculuk</b><span>ADR Filo · Lisanslı Depo</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="wrap">
+        <p>© 2026 Herkim Group — Tüm hakları saklıdır.</p>
+        <nav>
+          <a href="kvkk.html">KVKK Aydınlatma</a>
+          <a href="kvkk.html#cerez">Çerez Politikası</a>
+          <a href="dokumanlar.html#marka">Marka Kiti</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <div class="drawer-overlay"></div>
+  <aside class="basket-drawer" aria-label="Teklif sepeti">
+    <div class="bd-head">
+      <div><h3>Teklif Sepeti</h3><span class="mono">Fiyatlar teklifle netleşir</span></div>
+      <button class="bd-close">KAPAT ×</button>
+    </div>
+    <div class="bd-body" id="basket-body"></div>
+    <div class="bd-foot">
+      <button class="btn btn--primary" id="basket-wa">WhatsApp ile Teklif İste</button>
+      <button class="btn" id="basket-mail">E-posta ile Teklif İste</button>
+      <button class="btn btn--ghost btn--sm" id="basket-clear">Sepeti Temizle</button>
+      <p class="bd-note">Talebiniz satış ekibimize iletilir; mesai saatlerinde 30 dk içinde dönüş yapılır.</p>
+    </div>
+  </aside>
+
+  <div class="search-overlay">
+    <div class="search-panel">
+      <input type="text" id="site-search" placeholder="Ürün adı, CAS numarası veya sayfa arayın…" aria-label="Site içi arama">
+      <div class="search-results" id="search-results"></div>
+      <div class="search-hint">İPUCU: Klavyeden <b>Ctrl + K</b> ile aramayı her sayfada açabilirsiniz · ESC ile kapatın</div>
+    </div>
+  </div>
+
+  <a class="float-wa" data-wa href="#" title="WhatsApp ile yazın" aria-label="WhatsApp ile yazın">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 0 1-13.4 7.8L3 21l1.3-4.5A9 9 0 1 1 21 12z"/><path d="M8.5 9.5c0 4 2.5 6 5.5 6.5l1.5-1.5-2-1.5-1 .5c-1-.5-2-1.5-2.5-2.5l.5-1-1.5-2-1.5 1.5z" stroke-width="1.4"/></svg>
+  </a>
+  <button class="to-top" title="Yukarı dön" aria-label="Yukarı dön">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

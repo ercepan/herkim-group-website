@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Herkim Group logosu">
+  <!-- Dış halka -->
+  <circle cx="160" cy="160" r="152" fill="#FFFFFF"/>
+  <circle cx="160" cy="160" r="148" fill="none" stroke="#A31C3C" stroke-width="7"/>
+  <!-- HK monogram -->
+  <g fill="#A31C3C">
+    <!-- H sol dikme -->
+    <rect x="76" y="84" width="26" height="118"/>
+    <!-- H yatay çubuk -->
+    <rect x="102" y="130" width="44" height="26"/>
+    <!-- Ortak dikme (H'nin sağı = K'nin gövdesi) -->
+    <rect x="128" y="84" width="26" height="118"/>
+    <!-- K üst diyagonal -->
+    <polygon points="154,138 208,84 244,84 178,150"/>
+    <!-- K alt diyagonal -->
+    <polygon points="154,150 178,128 248,202 212,202"/>
+  </g>
+  <!-- Kelime markası -->
+  <text x="160" y="248" text-anchor="middle" font-family="Archivo, 'Arial Black', Arial, sans-serif" font-weight="800" font-size="34" letter-spacing="1" fill="#A31C3C">HERKİM GROUP</text>
+</svg>
