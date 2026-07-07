@@ -145,9 +145,19 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .tb-links { display: flex; gap: 18px; align-items: center; white-space: nowrap; }
 .tb-links a:hover { color: var(--crimson-hot); }
 .tb-lang { display: inline-flex; border: 1px solid rgba(250,246,241,0.25); border-radius: 2px; overflow: hidden; }
-.tb-lang span { padding: 2px 8px; }
-.tb-lang .on { background: var(--crimson); color: var(--white); }
-.tb-lang .off { color: rgba(250,246,241,0.5); cursor: help; }
+.tb-lang button { padding: 3px 9px; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; color: rgba(250,246,241,0.55); border-left: 1px solid rgba(250,246,241,0.16); transition: background 0.15s, color 0.15s; }
+.tb-lang button:first-child { border-left: 0; }
+.tb-lang button:hover { color: var(--paper); }
+.tb-lang button.on { background: var(--crimson); color: var(--white); }
+.tb-group { color: rgba(250,246,241,0.55); }
+.tb-group:hover { color: var(--crimson-hot); }
+
+/* İş ortağı markaları şeridi */
+.brands-strip { background: var(--white); border-bottom: 1px solid var(--line); }
+.brands-strip .wrap { display: flex; align-items: center; justify-content: center; gap: clamp(24px, 6vw, 72px); flex-wrap: wrap; padding: 22px var(--gutter); }
+.brands-strip .bs-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
+.brands-strip .bs-brand { font-family: var(--font-display); font-weight: 800; font-stretch: 108%; font-size: clamp(1.1rem, 2.2vw, 1.5rem); color: var(--ink-2); letter-spacing: -0.01em; opacity: 0.85; transition: color 0.2s, opacity 0.2s; }
+.brands-strip .bs-brand:hover { color: var(--crimson); opacity: 1; }
 
 /* ---------- Site başlığı ---------- */
 .site-header {

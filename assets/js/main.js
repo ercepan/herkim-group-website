@@ -1,8 +1,7 @@
 /* ============================================================
-   HERKİM GROUP — Etkileşim Katmanı
-   Döviz kuru, teklif sepeti, arama, filtreler, animasyonlar.
-   Not: Tüm dinamik içerik XSS'e karşı güvenli DOM API'leri ile
-   (createElement / textContent) üretilir.
+   HERKİM KİMYA — Etkileşim Katmanı
+   Döviz kuru, dil (TR/EN/RU), teklif sepeti, arama, filtreler.
+   Dinamik içerik güvenli DOM API'leri (createElement/textContent) ile üretilir.
    ============================================================ */
 (function () {
   "use strict";
@@ -10,32 +9,25 @@
   const $  = (s, c) => (c || document).querySelector(s);
   const $$ = (s, c) => Array.from((c || document).querySelectorAll(s));
   const trLower = (s) => (s || "").toLocaleLowerCase("tr");
+  const L = () => window.HK_LANG || "tr";
+  const pick = (obj) => (obj && (obj[L()] || obj.tr)) || "";
+  const T = (k) => (typeof window.hkT === "function" ? window.hkT(k) : k);
 
-  /* Küçük DOM yardımcıları — innerHTML kullanılmaz */
   function el(tag, cls, text) {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
     if (text != null) n.textContent = text;
     return n;
   }
-  /* Kimyasal formül: rakam dizileri <sub> olarak eklenir (örn. Na2S → Na₂S) */
-  function formulaNode(str, cls) {
-    const wrap = el("div", cls);
-    (str || "").split(/(\d+)/).forEach(part => {
-      if (!part) return;
-      if (/^\d+$/.test(part)) wrap.appendChild(el("sub", null, part));
-      else wrap.appendChild(document.createTextNode(part));
-    });
-    return wrap;
-  }
 
-  /* -------- Ayarlar (kolayca düzenlenebilir) -------- */
-  const HK = {
-    phone: "+90 (212) 000 00 00",
-    whatsapp: "905320000000",           // wa.me numarası — kendi numaranızla değiştirin
-    mail: "satis@herkimgroup.com"
-  };
+  const HK = window.HK_COMPANY || {};
   window.HK_CONFIG = HK;
+
+  const CAT_OF = (sub) => (HK_SUBS[sub] ? HK_SUBS[sub].cat : "");
+  const CAT_LABEL = (catKey) => (HK_CATS[catKey] ? pick(HK_CATS[catKey]) : catKey);
+  const SUB_LABEL = (sub) => (HK_SUBS[sub] ? pick(HK_SUBS[sub]) : sub);
+  const SUB_CODE = (sub) => (HK_SUBS[sub] ? HK_SUBS[sub].code : "•");
+  const PNAME = (p) => pick(p.n);
 
   /* ============ 1) Başlık davranışı ============ */
   const header = $(".site-header");
@@ -47,16 +39,22 @@
   }, { passive: true });
   if (toTop) toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
-  /* Mobil menü */
   const mnav = $(".mobile-nav");
   const burger = $(".burger");
   if (burger && mnav) {
     burger.addEventListener("click", () => mnav.classList.add("open"));
-    $(".mn-close", mnav).addEventListener("click", () => mnav.classList.remove("open"));
+    const mc = $(".mn-close", mnav);
+    if (mc) mc.addEventListener("click", () => mnav.classList.remove("open"));
     $$("a", mnav).forEach(a => a.addEventListener("click", () => mnav.classList.remove("open")));
   }
 
-  /* ============ 2) Döviz kuru bandı ============ */
+  /* ============ 2) Dil değiştirici ============ */
+  $$("[data-lang]").forEach(btn => btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (typeof window.hkSetLang === "function") window.hkSetLang(btn.getAttribute("data-lang"));
+  }));
+
+  /* ============ 3) Döviz kuru ============ */
   async function loadRates() {
     const usdEl = $("#rate-usd"), eurEl = $("#rate-eur"), noteEl = $("#rate-note");
     if (!usdEl) return;
@@ -65,7 +63,7 @@
       eurEl.textContent = eur.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       if (noteEl) noteEl.textContent = live
         ? "canlı · " + new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })
-        : "indikatif";
+        : T("top.rateNote");
     };
     render(HK_RATES_FALLBACK.usd, HK_RATES_FALLBACK.eur, false);
     try {
@@ -76,17 +74,17 @@
         const eurTry = j.rates.EUR ? usdTry / j.rates.EUR : HK_RATES_FALLBACK.eur;
         render(usdTry, eurTry, true);
       }
-    } catch (_) { /* çevrimdışı: yedek değerler kalır */ }
+    } catch (_) { /* çevrimdışı: yedek değerler */ }
   }
   loadRates();
 
-  /* ============ 3) Görünürlük animasyonları ============ */
+  /* ============ 4) Görünürlük animasyonları ============ */
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
   }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
-  $$(".reveal").forEach(node => io.observe(node));
+  const observeReveal = (root) => $$(".reveal", root).forEach(n => { if (!n.classList.contains("in")) io.observe(n); });
+  observeReveal(document);
 
-  /* Sayaçlar */
   const cio = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
@@ -104,7 +102,7 @@
   }, { threshold: 0.4 });
   $$("[data-count]").forEach(node => cio.observe(node));
 
-  /* ============ 4) Bildirim (toast) ============ */
+  /* ============ 5) Toast ============ */
   let toastTimer;
   function toast(msg) {
     let t = $(".toast");
@@ -116,8 +114,8 @@
   }
   window.hkToast = toast;
 
-  /* ============ 5) Teklif sepeti ============ */
-  const BASKET_KEY = "hk_basket_v1";
+  /* ============ 6) Teklif sepeti ============ */
+  const BASKET_KEY = "hk_basket_v2";
   const getBasket = () => { try { return JSON.parse(localStorage.getItem(BASKET_KEY)) || []; } catch (_) { return []; } };
   const setBasket = (b) => { localStorage.setItem(BASKET_KEY, JSON.stringify(b)); renderBasket(); };
 
@@ -125,10 +123,10 @@
     const p = HK_PRODUCTS.find(x => x.id === id);
     if (!p) return;
     const b = getBasket();
-    if (b.includes(id)) { toast("“" + p.name + "” zaten teklif sepetinizde."); openBasket(); return; }
+    if (b.includes(id)) { toast("“" + PNAME(p) + "” " + T("basket.exists")); openBasket(); return; }
     b.push(id);
     setBasket(b);
-    toast("“" + p.name + "” teklif sepetine eklendi.");
+    toast("“" + PNAME(p) + "” " + T("basket.added"));
   }
   window.hkAdd = addToBasket;
 
@@ -144,21 +142,17 @@
     if (!b.length) {
       const empty = el("div", "bd-empty");
       const ico = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      ico.setAttribute("viewBox", "0 0 24 24");
-      ico.setAttribute("fill", "none");
-      ico.setAttribute("stroke", "currentColor");
-      ico.setAttribute("stroke-width", "1.5");
+      ico.setAttribute("viewBox", "0 0 24 24"); ico.setAttribute("fill", "none");
+      ico.setAttribute("stroke", "currentColor"); ico.setAttribute("stroke-width", "1.5");
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("d", "M9 3h6l1 4H8l1-4zM6 7h12l-1.2 12.6a1.5 1.5 0 0 1-1.5 1.4H8.7a1.5 1.5 0 0 1-1.5-1.4L6 7z");
-      ico.appendChild(path);
-      empty.appendChild(ico);
-      const p1 = el("p", null, "Teklif sepetiniz boş.");
+      ico.appendChild(path); empty.appendChild(ico);
+      const p1 = el("p", null, T("basket.empty1"));
       p1.appendChild(el("br"));
-      p1.appendChild(document.createTextNode("Ürünlerin yanındaki "));
+      p1.appendChild(document.createTextNode(T("basket.empty2a")));
       p1.appendChild(el("b", null, "+"));
-      p1.appendChild(document.createTextNode(" ile ekleyin."));
-      empty.appendChild(p1);
-      body.appendChild(empty);
+      p1.appendChild(document.createTextNode(T("basket.empty2b")));
+      empty.appendChild(p1); body.appendChild(empty);
       return;
     }
     b.forEach(id => {
@@ -166,13 +160,12 @@
       if (!p) return;
       const item = el("div", "bd-item");
       const info = el("div");
-      info.appendChild(el("b", null, p.name));
-      info.appendChild(el("span", "mono", "CAS " + p.cas + " · " + p.pack));
+      info.appendChild(el("b", null, PNAME(p)));
+      info.appendChild(el("span", "mono", p.brand + " · " + p.pack));
       const rm = el("button", "bd-remove", "×");
-      rm.setAttribute("aria-label", "Kaldır");
+      rm.setAttribute("aria-label", "×");
       rm.addEventListener("click", () => setBasket(getBasket().filter(x => x !== id)));
-      item.appendChild(info);
-      item.appendChild(rm);
+      item.appendChild(info); item.appendChild(rm);
       body.appendChild(item);
     });
   }
@@ -190,259 +183,242 @@
     const b = getBasket();
     const lines = b.map(id => {
       const p = HK_PRODUCTS.find(x => x.id === id);
-      return p ? "• " + p.name + " (CAS " + p.cas + ", " + p.pack + ")" : "";
+      return p ? "• " + PNAME(p) + " (" + p.brand + ", " + p.pack + ")" : "";
     }).filter(Boolean);
-    return encodeURIComponent(
-      "Merhaba, aşağıdaki ürünler için fiyat teklifi rica ederim:\n\n" +
-      lines.join("\n") +
-      "\n\nFirma: \nİlgili kişi: \nTahmini miktar: "
-    );
+    const intro = { tr: "Merhaba, aşağıdaki ürünler için fiyat teklifi rica ederim:", en: "Hello, I would like a quote for the following products:", ru: "Здравствуйте, прошу цену на следующие продукты:" }[L()];
+    const foot = { tr: "\n\nFirma: \nİlgili kişi: \nTahmini miktar: ", en: "\n\nCompany: \nContact: \nEstimated quantity: ", ru: "\n\nКомпания: \nКонтакт: \nОриент. объём: " }[L()];
+    return encodeURIComponent(intro + "\n\n" + lines.join("\n") + foot);
   }
   const waBtn = $("#basket-wa");
   if (waBtn) waBtn.addEventListener("click", () => {
-    if (!getBasket().length) { toast("Önce sepete ürün ekleyin."); return; }
+    if (!getBasket().length) { toast(T("basket.addFirst")); return; }
     window.open("https://wa.me/" + HK.whatsapp + "?text=" + basketMessage(), "_blank", "noopener");
   });
   const mailBtn = $("#basket-mail");
   if (mailBtn) mailBtn.addEventListener("click", () => {
-    if (!getBasket().length) { toast("Önce sepete ürün ekleyin."); return; }
-    location.href = "mailto:" + HK.mail + "?subject=" + encodeURIComponent("Fiyat Teklifi Talebi — Herkim Group") + "&body=" + basketMessage();
+    if (!getBasket().length) { toast(T("basket.addFirst")); return; }
+    const subj = { tr: "Fiyat Teklifi Talebi — Herkim Kimya", en: "Quote Request — Herkim Kimya", ru: "Запрос цены — Herkim Kimya" }[L()];
+    location.href = "mailto:" + HK.mailQuote + "?subject=" + encodeURIComponent(subj) + "&body=" + basketMessage();
   });
   const clearBtn = $("#basket-clear");
-  if (clearBtn) clearBtn.addEventListener("click", () => { setBasket([]); toast("Teklif sepeti temizlendi."); });
+  if (clearBtn) clearBtn.addEventListener("click", () => { setBasket([]); toast(T("basket.cleared")); });
 
-  renderBasket();
-
-  /* ============ 6) Ürün kartı üretimi ============ */
-  const CAT_LABEL = (k) => HK_CATS[k] || k;
+  /* ============ 7) Ürün kartı ============ */
   function productCard(p) {
     const card = el("article", "element-card");
-    card.dataset.cat = p.cat;
-    card.dataset.sec = p.sec.join(" ");
+    card.dataset.cat = CAT_OF(p.sub);
+    card.dataset.sub = p.sub;
 
     const top = el("div", "ec-top");
-    top.appendChild(el("span", "ec-cas", "CAS " + p.cas));
-    if (p.tag === "yeni") top.appendChild(el("span", "ec-tag ec-tag--new", "Yeni"));
-    else if (p.tag === "haftanin") top.appendChild(el("span", "ec-tag", "Haftanın Ürünü"));
+    top.appendChild(el("span", "ec-cas", p.brand));
+    if (p.tag === "yeni") top.appendChild(el("span", "ec-tag ec-tag--new", { tr: "Yeni", en: "New", ru: "Новинка" }[L()]));
+    else if (p.tag === "one") top.appendChild(el("span", "ec-tag", { tr: "Öne Çıkan", en: "Featured", ru: "Хит" }[L()]));
     card.appendChild(top);
 
-    card.appendChild(formulaNode(p.f, "ec-formula"));
-    card.appendChild(el("div", "ec-name", p.name));
+    card.appendChild(el("div", "ec-formula", SUB_CODE(p.sub)));
+    card.appendChild(el("div", "ec-name", PNAME(p)));
 
     const meta = el("div", "ec-meta");
-    meta.appendChild(el("span", null, CAT_LABEL(p.cat)));
-    meta.appendChild(el("span", null, p.pack + " · " + p.org));
+    meta.appendChild(el("span", null, SUB_LABEL(p.sub)));
+    meta.appendChild(el("span", null, CAT_LABEL(CAT_OF(p.sub)) + " · " + p.pack));
     card.appendChild(meta);
 
     const add = el("button", "ec-add", "+");
-    add.title = "Teklif sepetine ekle";
-    add.setAttribute("aria-label", "Teklif sepetine ekle");
+    add.setAttribute("aria-label", T("basket.addAria"));
+    add.setAttribute("title", T("basket.addAria"));
     add.addEventListener("click", () => addToBasket(p.id));
     card.appendChild(add);
     return card;
   }
 
-  /* Ana sayfa: öne çıkanlar */
-  const featWrap = $("#featured-products");
-  if (featWrap) {
+  /* ============ 8) Dinamik içerik (dil değişince yeniden çizilir) ============ */
+  const catState = { cat: "all", sub: "all", q: "" };
+  const tableState = { q: "", cat: "all" };
+  let tableSortKey = "id", tableSortDir = 1;
+
+  function renderFeatured() {
+    const wrap = $("#featured-products");
+    if (!wrap) return;
     const featured = HK_PRODUCTS.filter(p => p.tag).concat(HK_PRODUCTS.filter(p => !p.tag)).slice(0, 8);
-    featWrap.replaceChildren(...featured.map(productCard));
+    wrap.replaceChildren(...featured.map(productCard));
   }
 
-  /* Katalog sayfası: filtreli ızgara */
-  const gridWrap = $("#product-grid");
-  if (gridWrap) {
-    const state = { cat: "all", sec: "all", q: "" };
-    /* URL'den kategori seçimi: urunler.html?kat=asit */
-    const urlCat = new URLSearchParams(location.search).get("kat");
-    if (urlCat && HK_CATS[urlCat]) {
-      state.cat = urlCat;
-      $$("#cat-chips .chip").forEach(c => c.classList.toggle("on", c.dataset.cat === urlCat));
-    }
-    function renderGrid() {
-      const list = HK_PRODUCTS.filter(p => {
-        if (state.cat !== "all" && p.cat !== state.cat) return false;
-        if (state.sec !== "all" && !p.sec.includes(state.sec)) return false;
-        if (state.q) {
-          const hay = trLower(p.name + " " + p.cas + " " + CAT_LABEL(p.cat) + " " + p.org);
-          if (!hay.includes(trLower(state.q))) return false;
-        }
-        return true;
-      });
-      if (list.length) {
-        gridWrap.replaceChildren(...list.map(productCard));
-      } else {
-        const msg = el("p", "muted");
-        msg.style.cssText = "grid-column:1/-1;padding:40px 0;text-align:center";
-        msg.appendChild(document.createTextNode("Aramanızla eşleşen ürün bulunamadı. Portföyümüzde olmayan ürünler için de "));
-        const a = el("a", "accent");
-        a.href = "iletisim.html";
-        a.appendChild(el("b", null, "bize ulaşın"));
-        msg.appendChild(a);
-        msg.appendChild(document.createTextNode(" — tedarik edebiliriz."));
-        gridWrap.replaceChildren(msg);
+  function renderGrid() {
+    const wrap = $("#product-grid");
+    if (!wrap) return;
+    const list = HK_PRODUCTS.filter(p => {
+      if (catState.cat !== "all" && CAT_OF(p.sub) !== catState.cat) return false;
+      if (catState.sub !== "all" && p.sub !== catState.sub) return false;
+      if (catState.q) {
+        const hay = trLower([p.n.tr, p.n.en, p.n.ru, p.brand, SUB_LABEL(p.sub), CAT_LABEL(CAT_OF(p.sub))].join(" "));
+        if (!hay.includes(trLower(catState.q))) return false;
       }
-      const rc = $("#grid-count");
-      if (rc) rc.textContent = list.length + " / " + HK_PRODUCTS.length + " ürün";
+      return true;
+    });
+    if (list.length) wrap.replaceChildren(...list.map(productCard));
+    else {
+      const msg = el("p", "muted");
+      msg.style.cssText = "grid-column:1/-1;padding:40px 0;text-align:center";
+      msg.appendChild(document.createTextNode(T("search.noResult") + " — "));
+      const a = el("a", "accent"); a.href = "iletisim.html"; a.appendChild(el("b", null, T("btn.contactUs")));
+      msg.appendChild(a);
+      wrap.replaceChildren(msg);
     }
-    $$("#cat-chips .chip").forEach(ch => ch.addEventListener("click", () => {
-      $$("#cat-chips .chip").forEach(c => c.classList.remove("on"));
-      ch.classList.add("on");
-      state.cat = ch.dataset.cat;
-      renderGrid();
-    }));
-    const secSel = $("#sec-select");
-    if (secSel) secSel.addEventListener("change", () => { state.sec = secSel.value; renderGrid(); });
-    const gq = $("#grid-search");
-    if (gq) gq.addEventListener("input", () => { state.q = gq.value; renderGrid(); });
-    renderGrid();
+    const rc = $("#grid-count");
+    if (rc) rc.textContent = list.length + " / " + HK_PRODUCTS.length;
   }
 
-  /* ============ 7) Ürün listesi tablosu ============ */
-  const tbody = $("#ptable-body");
-  if (tbody) {
-    let sortKey = "id", sortDir = 1;
-    const state = { q: "", cat: "all" };
-    function rows() {
-      let list = HK_PRODUCTS.slice();
-      if (state.cat !== "all") list = list.filter(p => p.cat === state.cat);
-      if (state.q) {
-        const q = trLower(state.q);
-        list = list.filter(p => trLower(p.name + " " + p.cas + " " + CAT_LABEL(p.cat) + " " + p.org + " " + p.pack).includes(q));
-      }
-      list.sort((a, b) => {
-        let va = a[sortKey], vb = b[sortKey];
-        if (sortKey === "cat") { va = CAT_LABEL(a.cat); vb = CAT_LABEL(b.cat); }
-        if (typeof va === "string") return va.localeCompare(vb, "tr") * sortDir;
-        return (va - vb) * sortDir;
-      });
-      return list;
+  function renderTable() {
+    const tbody = $("#ptable-body");
+    if (!tbody) return;
+    let list = HK_PRODUCTS.slice();
+    if (tableState.cat !== "all") list = list.filter(p => CAT_OF(p.sub) === tableState.cat);
+    if (tableState.q) {
+      const q = trLower(tableState.q);
+      list = list.filter(p => trLower([p.n.tr, p.n.en, p.n.ru, p.brand, SUB_LABEL(p.sub), CAT_LABEL(CAT_OF(p.sub)), p.pack].join(" ")).includes(q));
     }
-    function renderTable() {
-      const list = rows();
-      tbody.replaceChildren(...list.map((p, i) => {
-        const tr = el("tr");
-
-        tr.appendChild(Object.assign(el("td", "td-no", String(i + 1).padStart(2, "0"))));
-
-        const tdName = el("td", "td-name");
-        tdName.appendChild(el("b", null, p.name));
-        const fSpan = formulaNode(p.f);
-        const spanWrap = el("span");
-        while (fSpan.firstChild) spanWrap.appendChild(fSpan.firstChild);
-        tdName.appendChild(spanWrap);
-        tr.appendChild(tdName);
-
-        tr.appendChild(el("td", "td-cas", p.cas));
-
-        const tdCat = el("td");
-        tdCat.appendChild(el("span", "cat-pill", CAT_LABEL(p.cat)));
-        tr.appendChild(tdCat);
-
-        tr.appendChild(el("td", "td-pack", p.pack));
-        tr.appendChild(el("td", "td-origin", p.org));
-
-        const tdDocs = el("td");
-        const docs = el("div", "doc-btns");
-        const tds = el("a", null, "TDS"); tds.href = "dokumanlar.html"; tds.title = "Teknik veri sayfası";
-        const sds = el("a", null, "SDS"); sds.href = "dokumanlar.html"; sds.title = "Güvenlik bilgi formu";
-        docs.appendChild(tds); docs.appendChild(sds);
-        tdDocs.appendChild(docs);
-        tr.appendChild(tdDocs);
-
-        const tdAdd = el("td");
-        const btn = el("button", "add-quote", "+ Teklif");
-        btn.addEventListener("click", () => addToBasket(p.id));
-        tdAdd.appendChild(btn);
-        tr.appendChild(tdAdd);
-
-        return tr;
-      }));
-      const rc = $("#table-count");
-      if (rc) rc.textContent = list.length + " ürün listeleniyor";
-    }
-    const tq = $("#table-search");
-    if (tq) tq.addEventListener("input", () => { state.q = tq.value; renderTable(); });
-    const tc = $("#table-cat");
-    if (tc) tc.addEventListener("change", () => { state.cat = tc.value; renderTable(); });
-    $$(".ptable thead th[data-sort]").forEach(th => th.addEventListener("click", () => {
-      const k = th.dataset.sort;
-      if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = 1; }
-      $$(".ptable thead th .sort").forEach(s => s.remove());
-      const ind = el("span", "sort", sortDir === 1 ? "▲" : "▼");
-      th.appendChild(ind);
-      renderTable();
+    list.sort((a, b) => {
+      let va, vb;
+      if (tableSortKey === "name") { va = PNAME(a); vb = PNAME(b); }
+      else if (tableSortKey === "cat") { va = CAT_LABEL(CAT_OF(a.sub)); vb = CAT_LABEL(CAT_OF(b.sub)); }
+      else if (tableSortKey === "sub") { va = SUB_LABEL(a.sub); vb = SUB_LABEL(b.sub); }
+      else if (tableSortKey === "brand") { va = a.brand; vb = b.brand; }
+      else if (tableSortKey === "pack") { va = a.pack; vb = b.pack; }
+      else { va = a.id; vb = b.id; }
+      if (typeof va === "string") return va.localeCompare(vb, "tr") * tableSortDir;
+      return (va - vb) * tableSortDir;
+    });
+    tbody.replaceChildren(...list.map((p, i) => {
+      const tr = el("tr");
+      tr.appendChild(el("td", "td-no", String(i + 1).padStart(2, "0")));
+      const tdName = el("td", "td-name");
+      tdName.appendChild(el("b", null, PNAME(p)));
+      tdName.appendChild(el("span", null, SUB_LABEL(p.sub)));
+      tr.appendChild(tdName);
+      const tdCat = el("td");
+      tdCat.appendChild(el("span", "cat-pill", CAT_LABEL(CAT_OF(p.sub))));
+      tr.appendChild(tdCat);
+      tr.appendChild(el("td", "td-cas", p.brand));
+      tr.appendChild(el("td", "td-pack", p.pack));
+      const tdDocs = el("td");
+      const docs = el("div", "doc-btns");
+      const tds = el("a", null, "TDS"); tds.href = "dokumanlar.html"; tds.title = "TDS";
+      const sds = el("a", null, "SDS"); sds.href = "dokumanlar.html"; sds.title = "SDS";
+      docs.appendChild(tds); docs.appendChild(sds);
+      tdDocs.appendChild(docs); tr.appendChild(tdDocs);
+      const tdAdd = el("td");
+      const btn = el("button", "add-quote", "+ " + T("basket.quoteWord"));
+      btn.addEventListener("click", () => addToBasket(p.id));
+      tdAdd.appendChild(btn); tr.appendChild(tdAdd);
+      return tr;
     }));
-    renderTable();
+    const rc = $("#table-count");
+    if (rc) rc.textContent = list.length + " ürün / product / продукт";
   }
 
-  /* ============ 8) Duyurular ============ */
-  const newsWrap = $("#news-grid");
-  if (newsWrap) {
-    const limit = +newsWrap.dataset.limit || HK_NEWS.length;
-    const fmt = (d) => new Date(d + "T00:00:00").toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" });
-    newsWrap.replaceChildren(...HK_NEWS.slice(0, limit).map(n => {
-      const a = el("a", "news-card reveal");
-      a.href = n.href;
-      a.appendChild(el("span", "nc-tag", n.tag));
-      const t = el("time", null, fmt(n.date));
-      t.setAttribute("datetime", n.date);
+  function renderNews() {
+    const wrap = $("#news-grid");
+    if (!wrap) return;
+    const limit = +wrap.dataset.limit || HK_NEWS.length;
+    const loc = { tr: "tr-TR", en: "en-GB", ru: "ru-RU" }[L()];
+    const fmt = (d) => new Date(d + "T00:00:00").toLocaleDateString(loc, { day: "2-digit", month: "long", year: "numeric" });
+    wrap.replaceChildren(...HK_NEWS.slice(0, limit).map(n => {
+      const a = el("a", "news-card reveal in"); a.href = n.href;
+      a.appendChild(el("span", "nc-tag", pick(n.tag)));
+      const t = el("time", null, fmt(n.date)); t.setAttribute("datetime", n.date);
       a.appendChild(t);
-      a.appendChild(el("h3", null, n.title));
-      a.appendChild(el("p", null, n.body));
+      a.appendChild(el("h3", null, pick(n.title)));
+      a.appendChild(el("p", null, pick(n.body)));
       return a;
     }));
-    $$(".reveal", newsWrap).forEach(node => io.observe(node));
   }
 
-  /* ============ 9) Doküman merkezi ============ */
-  const docWrap = $("#doc-grid");
-  if (docWrap) {
-    const state = { cat: "all" };
-    function renderDocs() {
-      const list = HK_DOCS.filter(d => state.cat === "all" || d.cat === state.cat);
-      docWrap.replaceChildren(...list.map(d => {
-        const card = el("article", "doc-card");
-        card.appendChild(el("span", "dc-ext", d.ext));
-        card.appendChild(el("h3", null, d.title));
-        card.appendChild(el("p", null, d.desc));
-        const meta = el("div", "dc-meta");
-        meta.appendChild(el("span", null, d.meta));
-        const link = el("a", "dc-link", "Talep et →");
-        link.href = "iletisim.html";
-        meta.appendChild(link);
-        card.appendChild(meta);
-        return card;
-      }));
-    }
-    $$("#doc-chips .chip").forEach(ch => ch.addEventListener("click", () => {
-      $$("#doc-chips .chip").forEach(c => c.classList.remove("on"));
-      ch.classList.add("on");
-      state.cat = ch.dataset.cat;
-      renderDocs();
+  const docState = { cat: "all" };
+  function renderDocs() {
+    const wrap = $("#doc-grid");
+    if (!wrap) return;
+    let list = HK_DOCS.filter(d => docState.cat === "all" || d.cat === docState.cat);
+    if (wrap.dataset.home) list = list.slice(0, 3);
+    wrap.replaceChildren(...list.map(d => {
+      const card = el("article", "doc-card");
+      card.appendChild(el("span", "dc-ext", d.ext));
+      card.appendChild(el("h3", null, pick(d.title)));
+      card.appendChild(el("p", null, pick(d.desc)));
+      const meta = el("div", "dc-meta");
+      meta.appendChild(el("span", null, pick(d.meta)));
+      const link = el("a", "dc-link", { tr: "Talep et →", en: "Request →", ru: "Запросить →" }[L()]);
+      link.href = "iletisim.html";
+      meta.appendChild(link); card.appendChild(meta);
+      return card;
     }));
-    renderDocs();
   }
 
-  /* ============ 10) Site içi arama ============ */
+  window.hkRenderDynamic = function () {
+    renderFeatured(); renderGrid(); renderTable(); renderNews(); renderDocs();
+  };
+
+  /* Filtre olayları */
+  $$("#cat-chips .chip").forEach(ch => ch.addEventListener("click", () => {
+    $$("#cat-chips .chip").forEach(c => c.classList.remove("on"));
+    ch.classList.add("on"); catState.cat = ch.dataset.cat; catState.sub = "all";
+    const secSel = $("#sec-select"); if (secSel) secSel.value = "all";
+    renderGrid();
+  }));
+  const secSel = $("#sec-select");
+  if (secSel) secSel.addEventListener("change", () => { catState.sub = secSel.value; renderGrid(); });
+  const gq = $("#grid-search");
+  if (gq) gq.addEventListener("input", () => { catState.q = gq.value; renderGrid(); });
+
+  const tq = $("#table-search");
+  if (tq) tq.addEventListener("input", () => { tableState.q = tq.value; renderTable(); });
+  const tc = $("#table-cat");
+  if (tc) tc.addEventListener("change", () => { tableState.cat = tc.value; renderTable(); });
+  $$(".ptable thead th[data-sort]").forEach(th => th.addEventListener("click", () => {
+    const k = th.dataset.sort;
+    if (tableSortKey === k) tableSortDir *= -1; else { tableSortKey = k; tableSortDir = 1; }
+    $$(".ptable thead th .sort").forEach(s => s.remove());
+    th.appendChild(el("span", "sort", tableSortDir === 1 ? "▲" : "▼"));
+    renderTable();
+  }));
+
+  /* URL'den kategori seçimi: urunler.html?kat=deri */
+  const gridWrap = $("#product-grid");
+  if (gridWrap) {
+    const urlCat = new URLSearchParams(location.search).get("kat");
+    if (urlCat && HK_CATS[urlCat]) {
+      catState.cat = urlCat;
+      $$("#cat-chips .chip").forEach(c => c.classList.toggle("on", c.dataset.cat === urlCat));
+    }
+  }
+  const docChips = $("#doc-chips");
+  if (docChips) $$(".chip", docChips).forEach(ch => ch.addEventListener("click", () => {
+    $$(".chip", docChips).forEach(c => c.classList.remove("on"));
+    ch.classList.add("on"); docState.cat = ch.dataset.cat; renderDocs();
+  }));
+
+  /* İlk çizim + dil değişiminde re-observe */
+  window.hkRenderDynamic();
+  document.addEventListener("hk:langchange", () => observeReveal(document));
+
+  /* ============ 9) Site içi arama ============ */
   const so = $(".search-overlay");
   if (so) {
     const input = $("#site-search");
     const results = $("#search-results");
-    const PAGES = [
-      { t: "Kurumsal — Biz Kimiz?", m: "sayfa", h: "kurumsal.html" },
-      { t: "Çalışma Prensiplerimiz", m: "sayfa", h: "kurumsal.html#prensipler" },
-      { t: "Ürün Kataloğu", m: "sayfa", h: "urunler.html" },
-      { t: "Ürün Listesi (Tablo)", m: "sayfa", h: "urun-listesi.html" },
-      { t: "Doküman Merkezi", m: "sayfa", h: "dokumanlar.html" },
-      { t: "Duyurular", m: "sayfa", h: "duyurular.html" },
-      { t: "İletişim & Teklif", m: "sayfa", h: "iletisim.html" }
+    const PAGES = () => [
+      { t: T("nav.about"), h: "hakkimizda.html" },
+      { t: T("nav.principles"), h: "kurumsal.html#prensipler" },
+      { t: T("nav.catalog"), h: "urunler.html" },
+      { t: T("nav.productList"), h: "urun-listesi.html" },
+      { t: T("nav.services"), h: "hizmetler.html" },
+      { t: T("nav.docs"), h: "dokumanlar.html" },
+      { t: T("nav.news"), h: "duyurular.html" },
+      { t: T("nav.contact"), h: "iletisim.html" }
     ];
-    const resultRow = (title, metaText, href) => {
-      const a = el("a");
-      a.href = href;
+    const row = (title, meta, href) => {
+      const a = el("a"); a.href = href;
       a.appendChild(el("span", null, title));
-      a.appendChild(el("span", "mono", metaText));
+      a.appendChild(el("span", "mono", meta));
       return a;
     };
     function openSearch() { so.classList.add("open"); setTimeout(() => input.focus(), 60); }
@@ -455,24 +431,21 @@
     });
     function renderResults(q) {
       const qq = trLower(q.trim());
-      if (!qq) {
-        results.replaceChildren(...PAGES.map(p => resultRow(p.t, p.m, p.h)));
-        return;
-      }
+      if (!qq) { results.replaceChildren(...PAGES().map(p => row(p.t, T("nav.corporate"), p.h))); return; }
       const prods = HK_PRODUCTS
-        .filter(p => trLower(p.name + " " + p.cas + " " + CAT_LABEL(p.cat)).includes(qq))
+        .filter(p => trLower([p.n.tr, p.n.en, p.n.ru, p.brand].join(" ")).includes(qq))
         .slice(0, 7)
-        .map(p => resultRow(p.name, "CAS " + p.cas, "urun-listesi.html"));
-      const pages = PAGES.filter(p => trLower(p.t).includes(qq)).map(p => resultRow(p.t, p.m, p.h));
+        .map(p => row(PNAME(p), p.brand, "urun-listesi.html"));
+      const pages = PAGES().filter(p => trLower(p.t).includes(qq)).map(p => row(p.t, T("nav.corporate"), p.h));
       const merged = prods.concat(pages);
-      results.replaceChildren(...(merged.length ? merged
-        : [resultRow("Sonuç yok — bu ürünü sizin için tedarik edelim", "iletişim", "iletisim.html")]));
+      results.replaceChildren(...(merged.length ? merged : [row(T("search.noResult"), T("nav.contact"), "iletisim.html")]));
     }
     input.addEventListener("input", () => renderResults(input.value));
+    document.addEventListener("hk:langchange", () => { if (so.classList.contains("open")) renderResults(input.value); else renderResults(""); });
     renderResults("");
   }
 
-  /* ============ 11) Çerez bildirimi ============ */
+  /* ============ 10) Çerez bildirimi ============ */
   const cb = $(".cookie-bar");
   if (cb && !localStorage.getItem("hk_cookie_ok")) {
     setTimeout(() => cb.classList.add("show"), 1600);
@@ -480,7 +453,7 @@
     if (ok) ok.addEventListener("click", () => { localStorage.setItem("hk_cookie_ok", "1"); cb.classList.remove("show"); });
   }
 
-  /* ============ 12) Formlar (ön yüz doğrulama) ============ */
+  /* ============ 11) Formlar ============ */
   const cform = $("#contact-form");
   if (cform) cform.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -488,27 +461,28 @@
     const name = (data.get("name") || "").toString().trim();
     const firm = (data.get("firm") || "").toString().trim();
     const msg = (data.get("msg") || "").toString().trim();
-    if (!name || !msg) { toast("Lütfen ad ve mesaj alanlarını doldurun."); return; }
-    const body = "Ad Soyad: " + name + "\nFirma: " + firm +
-      "\nTelefon: " + (data.get("phone") || "") + "\nKonu: " + (data.get("topic") || "") +
-      "\n\n" + msg;
-    location.href = "mailto:" + HK.mail + "?subject=" + encodeURIComponent("Web Sitesi İletişim — " + (firm || name)) + "&body=" + encodeURIComponent(body);
-    toast("E-posta uygulamanız açılıyor…");
+    if (!name || !msg) { toast(T("toast.formErr")); return; }
+    const body = "Ad/Name: " + name + "\nFirma/Company: " + firm +
+      "\nTel: " + (data.get("phone") || "") + "\nKonu/Subject: " + (data.get("topic") || "") + "\n\n" + msg;
+    location.href = "mailto:" + HK.email + "?subject=" + encodeURIComponent("Web — " + (firm || name)) + "&body=" + encodeURIComponent(body);
+    toast(T("toast.mailOpening"));
   });
 
-  const nform = $("#newsletter-form");
-  if (nform) nform.addEventListener("submit", (e) => {
+  $$("[id^='newsletter-form']").forEach(nf => nf.addEventListener("submit", (e) => {
     e.preventDefault();
-    const em = $("input", nform).value.trim();
-    if (!em || !em.includes("@")) { toast("Geçerli bir e-posta adresi girin."); return; }
+    const inp = $("input", nf);
+    const em = (inp.value || "").trim();
+    if (!em || !em.includes("@")) { toast(T("toast.mailErr")); return; }
     localStorage.setItem("hk_newsletter", em);
-    $("input", nform).value = "";
-    toast("E-bülten kaydınız alındı. Teşekkürler!");
-  });
+    inp.value = "";
+    toast(T("toast.newsOk"));
+  }));
 
-  /* WhatsApp bağlantılarını ayarla */
-  $$("[data-wa]").forEach(a => {
-    a.href = "https://wa.me/" + HK.whatsapp + "?text=" + encodeURIComponent("Merhaba, ürünleriniz hakkında bilgi almak istiyorum.");
+  /* WhatsApp bağlantıları */
+  const setWa = () => $$("[data-wa]").forEach(a => {
+    a.href = "https://wa.me/" + HK.whatsapp + "?text=" + encodeURIComponent(T("wa.msg"));
     a.target = "_blank"; a.rel = "noopener";
   });
+  setWa();
+  document.addEventListener("hk:langchange", setWa);
 })();

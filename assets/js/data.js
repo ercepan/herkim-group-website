@@ -1,132 +1,197 @@
 /* ============================================================
-   HERKİM GROUP — Veri Katmanı
-   Ürünler, kategoriler, duyurular, dokümanlar.
-   NOT: Ürün listesi örnek/başlangıç veridir; kendi portföyünüze
-   göre bu dosyayı düzenlemeniz yeterlidir — site otomatik güncellenir.
-   Formül alanında rakamlar otomatik olarak alt simge (subscript) yazılır.
+   HERKİM KİMYA — Veri Katmanı (gerçek şirket bilgileri)
+   Kaynak: herkim.com.tr — 1975 kuruluşlu deri & tekstil kimyasalları
+   Distribütör: Türk Henkel · Camsar · BASF Türk
+   Ürün adları / kategoriler üç dillidir (tr/en/ru).
+   NOT: Bireysel ürünler temsilîdir; gerçek SKU listesi talep/giriş
+   ile paylaşılır (tıpkı herkim.com.tr'deki gibi). Kendi portföyünüze
+   göre HK_PRODUCTS dizisini düzenlemeniz yeterlidir.
    ============================================================ */
 
+/* Şirket bilgileri — tek kaynaktan düzenleyin */
+const HK_COMPANY = {
+  name: "Herkim Kimya",
+  legal: "Herkim Kimya San. ve Tic.",
+  founded: 1975,
+  experience: 54,
+  salesPoints: 12,
+  address: "Organize Deri San. Böl. 19. Yol 12/6 Parsel, Tuzla — İstanbul / Türkiye",
+  phone: "+90 216 394 11 25",
+  phoneTel: "+902163941125",
+  fax: "+90 216 394 10 04",
+  email: "info@herkim.com.tr",
+  mailQuote: "info@herkim.com.tr",
+  whatsapp: "902163941125",   // wa.me — WhatsApp Business hattınızla değiştirin
+  group: "https://www.herkimgroup.com",
+  brands: ["Türk Henkel", "Camsar", "BASF Türk"]
+};
+
+/* Ana kategoriler (üç dilli) */
 const HK_CATS = {
-  temel:   "Temel Kimyasallar",
-  asit:    "Asitler",
-  tuz:     "Tuzlar & Mineraller",
-  yag:     "Yağlar & Yardımcılar",
-  pigment: "Pigment & Dolgu",
-  ozel:    "Özel Kimyasallar"
+  deri:    { tr: "Deri Kimyasalları",    en: "Leather Chemicals", ru: "Кожевенная химия" },
+  tekstil: { tr: "Tekstil Kimyasalları", en: "Textile Chemicals", ru: "Текстильная химия" },
+  binder:  { tr: "Binderler",            en: "Binders",           ru: "Биндеры" }
 };
 
-const HK_SECTORS = {
-  deri:    "Deri & Tabaklama",
-  tekstil: "Tekstil",
-  su:      "Su Arıtma",
-  gida:    "Gıda & Yem",
-  tarim:   "Tarım & Gübre",
-  insaat:  "İnşaat & Yapı",
-  boya:    "Boya & Kaplama",
-  kozmetik:"Kozmetik & Temizlik"
+/* Alt kategoriler (üç dilli) — cat: ana kategori anahtarı */
+const HK_SUBS = {
+  altkat:  { cat: "deri",    code: "ALT", tr: "Altkat Kimyasalları",    en: "Base-Coat Chemicals",   ru: "Грунтовая химия" },
+  finisaj: { cat: "deri",    code: "FIN", tr: "Finisaj Kimyasalları",   en: "Finishing Chemicals",   ru: "Финишная химия" },
+  dolap:   { cat: "deri",    code: "DLP", tr: "Dolap Boyaları",         en: "Drum Dyes",             ru: "Барабанные красители" },
+  proses:  { cat: "tekstil", code: "PRS", tr: "Proses Kimyasalları",    en: "Process Chemicals",     ru: "Химия процессов" },
+  tekboya: { cat: "tekstil", code: "BOY", tr: "Tekstil Boyaları",       en: "Textile Dyes",          ru: "Текстильные красители" },
+  insaatB: { cat: "binder",  code: "İNŞ", tr: "İnşaat Boya Binderleri", en: "Construction Binders",  ru: "Строительные биндеры" },
+  matbaaB: { cat: "binder",  code: "MTB", tr: "Matbaa Binderleri",      en: "Printing Binders",      ru: "Печатные биндеры" },
+  tekstilB:{ cat: "binder",  code: "TKS", tr: "Tekstil Binderleri",     en: "Textile Binders",       ru: "Текстильные биндеры" }
 };
 
-/* alan açıklaması:
-   f: kısa formül (rakamlar alt simgeye çevrilir), cas: CAS numarası,
-   cat: kategori anahtarı, sec: sektörler, pack: ambalaj, org: menşei,
-   tag: "yeni" | "haftanin" | null */
+/* Ürünler — cat, sub anahtarları HK_SUBS'tan türetilir.
+   n: ad (tr/en/ru), brand: marka, pack: ambalaj, tag: "yeni"|"one"|null */
 const HK_PRODUCTS = [
-  { id: 1,  name: "Sodyum Sülfür (Payet)",       f: "Na2S",        cas: "1313-82-2",  cat: "temel",   sec: ["deri","tekstil"],          pack: "25 kg torba",  org: "Türkiye",      tag: "haftanin" },
-  { id: 2,  name: "Sodyum Sülfhidrat",           f: "NaHS",        cas: "16721-80-5", cat: "temel",   sec: ["deri"],                    pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 3,  name: "Boraks Dekahidrat",           f: "Na2B4O7",     cas: "1303-96-4",  cat: "tuz",     sec: ["insaat","tarim"],          pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 4,  name: "Borik Asit",                  f: "H3BO3",       cas: "10043-35-3", cat: "asit",    sec: ["insaat","tarim"],          pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 5,  name: "Formik Asit %85",             f: "HCOOH",       cas: "64-18-6",    cat: "asit",    sec: ["deri","tekstil"],          pack: "35 kg bidon",  org: "Almanya",      tag: "yeni" },
-  { id: 6,  name: "Asetik Asit %80",             f: "CH3COOH",     cas: "64-19-7",    cat: "asit",    sec: ["deri","gida"],             pack: "30 kg bidon",  org: "Türkiye",      tag: null },
-  { id: 7,  name: "Fosforik Asit %85",           f: "H3PO4",       cas: "7664-38-2",  cat: "asit",    sec: ["gida","tarim"],            pack: "35 kg bidon",  org: "Çin",          tag: null },
-  { id: 8,  name: "Sülfürik Asit %98",           f: "H2SO4",       cas: "7664-93-9",  cat: "asit",    sec: ["su","tekstil"],            pack: "IBC / dökme",  org: "Türkiye",      tag: null },
-  { id: 9,  name: "Oksalik Asit",                f: "C2H2O4",      cas: "144-62-7",   cat: "asit",    sec: ["deri","tekstil"],          pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 10, name: "Sitrik Asit Monohidrat",      f: "C6H8O7",      cas: "5949-29-1",  cat: "asit",    sec: ["gida","kozmetik"],         pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 11, name: "Amonyum Bikarbonat",          f: "NH4HCO3",     cas: "1066-33-7",  cat: "tuz",     sec: ["gida","deri"],             pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 12, name: "Amonyum Sülfat",              f: "(NH4)2SO4",   cas: "7783-20-2",  cat: "tuz",     sec: ["tarim","deri"],            pack: "50 kg torba",  org: "Türkiye",      tag: null },
-  { id: 13, name: "Amonyum Klorür",              f: "NH4Cl",       cas: "12125-02-9", cat: "tuz",     sec: ["tekstil","tarim"],         pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 14, name: "Sodyum Format",               f: "HCOONa",      cas: "141-53-7",   cat: "tuz",     sec: ["deri","insaat"],           pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 15, name: "Sodyum Asetat",               f: "CH3COONa",    cas: "127-09-3",   cat: "tuz",     sec: ["deri","tekstil"],          pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 16, name: "Sodyum Metabisülfit",         f: "Na2S2O5",     cas: "7681-57-4",  cat: "tuz",     sec: ["deri","su"],               pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 17, name: "Sodyum Bikarbonat",           f: "NaHCO3",      cas: "144-55-8",   cat: "tuz",     sec: ["gida","kozmetik"],         pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 18, name: "Soda Külü (Hafif)",           f: "Na2CO3",      cas: "497-19-8",   cat: "temel",   sec: ["tekstil","su"],            pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 19, name: "Kostik Soda (Payet)",         f: "NaOH",        cas: "1310-73-2",  cat: "temel",   sec: ["tekstil","su","kozmetik"], pack: "25 kg torba",  org: "Türkiye",      tag: "haftanin" },
-  { id: 20, name: "Potasyum Hidroksit",          f: "KOH",         cas: "1310-58-3",  cat: "temel",   sec: ["kozmetik","tarim"],        pack: "25 kg torba",  org: "Güney Kore",   tag: null },
-  { id: 21, name: "Kalsiyum Klorür %94",         f: "CaCl2",       cas: "10043-52-4", cat: "tuz",     sec: ["insaat","su"],             pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 22, name: "Magnezyum Sülfat",            f: "MgSO4",       cas: "10034-99-8", cat: "tuz",     sec: ["tarim","gida"],            pack: "25 kg torba",  org: "Almanya",      tag: null },
-  { id: 23, name: "Bazik Krom Sülfat",           f: "Cr(OH)SO4",   cas: "12336-95-7", cat: "temel",   sec: ["deri"],                    pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 24, name: "Sodyum Hidrosülfit",          f: "Na2S2O4",     cas: "7775-14-6",  cat: "temel",   sec: ["tekstil"],                 pack: "50 kg varil",  org: "Çin",          tag: null },
-  { id: 25, name: "Hidrojen Peroksit %50",       f: "H2O2",        cas: "7722-84-1",  cat: "temel",   sec: ["tekstil","su"],            pack: "30 kg bidon",  org: "Türkiye",      tag: null },
-  { id: 26, name: "Titanyum Dioksit (Rutil)",    f: "TiO2",        cas: "13463-67-7", cat: "pigment", sec: ["boya","kozmetik"],         pack: "25 kg torba",  org: "Çin",          tag: "yeni" },
-  { id: 27, name: "Kaolin (Mikronize)",          f: "Al2Si2O5",    cas: "1332-58-7",  cat: "pigment", sec: ["boya","insaat"],           pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 28, name: "Kalsit (Mikronize)",          f: "CaCO3",       cas: "471-34-1",   cat: "pigment", sec: ["boya","insaat"],           pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 29, name: "Talk",                        f: "Mg3Si4O10",   cas: "14807-96-6", cat: "pigment", sec: ["boya","kozmetik"],         pack: "25 kg torba",  org: "Hindistan",    tag: null },
-  { id: 30, name: "Çinko Oksit",                 f: "ZnO",         cas: "1314-13-2",  cat: "pigment", sec: ["boya","kozmetik","tarim"], pack: "25 kg torba",  org: "Türkiye",      tag: null },
-  { id: 31, name: "Demir Oksit (Kırmızı)",       f: "Fe2O3",       cas: "1309-37-1",  cat: "pigment", sec: ["boya","insaat"],           pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 32, name: "Sülfite Balık Yağı",          f: "Yağ",         cas: "—",          cat: "yag",     sec: ["deri"],                    pack: "200 kg varil", org: "İtalya",       tag: null },
-  { id: 33, name: "Sentetik Yağlama Yağı",       f: "Yağ",         cas: "—",          cat: "yag",     sec: ["deri","tekstil"],          pack: "200 kg varil", org: "İspanya",      tag: null },
-  { id: 34, name: "Lanolin (Susuz)",             f: "Yağ",         cas: "8006-54-0",  cat: "yag",     sec: ["kozmetik","deri"],         pack: "50 kg varil",  org: "Yeni Zelanda", tag: null },
-  { id: 35, name: "Parafin Likit",               f: "Yağ",         cas: "8012-95-1",  cat: "yag",     sec: ["kozmetik","tekstil"],      pack: "175 kg varil", org: "Türkiye",      tag: null },
-  { id: 36, name: "Gliserin (USP %99,5)",        f: "C3H8O3",      cas: "56-81-5",    cat: "yag",     sec: ["kozmetik","gida"],         pack: "250 kg varil", org: "Malezya",      tag: "yeni" },
-  { id: 37, name: "Propilen Glikol (USP)",       f: "C3H8O2",      cas: "57-55-6",    cat: "yag",     sec: ["kozmetik","gida"],         pack: "215 kg varil", org: "Almanya",      tag: null },
-  { id: 38, name: "Mimoza Ekstraktı",            f: "Tanen",       cas: "1401-55-4",  cat: "ozel",    sec: ["deri"],                    pack: "25 kg torba",  org: "Brezilya",     tag: null },
-  { id: 39, name: "Kebrako Ekstraktı",           f: "Tanen",       cas: "—",          cat: "ozel",    sec: ["deri"],                    pack: "25 kg torba",  org: "Arjantin",     tag: null },
-  { id: 40, name: "Yağ Alma Ajanı (Degreaser)",  f: "Karışım",     cas: "—",          cat: "ozel",    sec: ["deri","tekstil"],          pack: "120 kg varil", org: "Türkiye",      tag: null },
-  { id: 41, name: "Sodyum Perkarbonat",          f: "Na2CO3·H2O2", cas: "15630-89-4", cat: "temel",   sec: ["kozmetik","tekstil"],      pack: "25 kg torba",  org: "Çin",          tag: null },
-  { id: 42, name: "Üre (Teknik)",                f: "CH4N2O",      cas: "57-13-6",    cat: "tuz",     sec: ["tarim","insaat"],          pack: "50 kg torba",  org: "Türkiye",      tag: null },
-  { id: 43, name: "Polialüminyum Klorür",        f: "PAC",         cas: "1327-41-9",  cat: "ozel",    sec: ["su"],                      pack: "30 kg bidon",  org: "Türkiye",      tag: "yeni" },
-  { id: 44, name: "Demir (III) Klorür %40",      f: "FeCl3",       cas: "7705-08-0",  cat: "ozel",    sec: ["su"],                      pack: "IBC / dökme",  org: "Türkiye",      tag: null }
+  // ---- Deri · Altkat ----
+  { id: 1,  sub: "altkat",  n: { tr: "Altkat Penetratörü",        en: "Base-Coat Penetrator",       ru: "Пенетратор грунта" },        brand: "Türk Henkel", pack: "120 kg varil", tag: "one" },
+  { id: 2,  sub: "altkat",  n: { tr: "İmpregnasyon Reçinesi",     en: "Impregnation Resin",         ru: "Пропиточная смола" },        brand: "BASF Türk",   pack: "120 kg varil", tag: null },
+  { id: 3,  sub: "altkat",  n: { tr: "Altkat Pigment Pastası",    en: "Base-Coat Pigment Paste",    ru: "Пигментная паста грунта" },  brand: "Camsar",      pack: "25 kg bidon",  tag: null },
+  { id: 4,  sub: "altkat",  n: { tr: "Alpine Altkat Binderi",     en: "Alpine Base-Coat Binder",    ru: "Грунтовый биндер Alpine" },  brand: "Herkim",      pack: "120 kg varil", tag: "one" },
+  { id: 5,  sub: "altkat",  n: { tr: "Dolgu Altkat Sistemi",      en: "Filler Base-Coat System",    ru: "Наполняющий грунт" },        brand: "Türk Henkel", pack: "120 kg varil", tag: null },
+
+  // ---- Deri · Finisaj ----
+  { id: 6,  sub: "finisaj", n: { tr: "Nitroselülozik Lak",        en: "Nitrocellulose Lacquer",     ru: "Нитроцеллюлозный лак" },     brand: "BASF Türk",   pack: "25 kg bidon",  tag: null },
+  { id: 7,  sub: "finisaj", n: { tr: "Su Bazlı Top Coat",         en: "Water-Based Top Coat",       ru: "Водный топ-кот" },           brand: "Türk Henkel", pack: "120 kg varil", tag: "yeni" },
+  { id: 8,  sub: "finisaj", n: { tr: "Tutuş (Handle) Ajanı",      en: "Handle Agent",               ru: "Агент грифа" },              brand: "Camsar",      pack: "25 kg bidon",  tag: null },
+  { id: 9,  sub: "finisaj", n: { tr: "Matlaştırıcı Ajan",         en: "Matting Agent",              ru: "Матирующий агент" },         brand: "BASF Türk",   pack: "25 kg bidon",  tag: null },
+  { id: 10, sub: "finisaj", n: { tr: "Kaymazlık Ajanı",           en: "Anti-Slip Agent",            ru: "Антискользящий агент" },     brand: "Türk Henkel", pack: "25 kg bidon",  tag: null },
+  { id: 11, sub: "finisaj", n: { tr: "Parlaklık (Gloss) Ajanı",   en: "Gloss Agent",                ru: "Агент блеска" },             brand: "Camsar",      pack: "25 kg bidon",  tag: null },
+
+  // ---- Deri · Dolap Boyaları ----
+  { id: 12, sub: "dolap",   n: { tr: "Anilin Deri Boyası",        en: "Aniline Leather Dye",        ru: "Анилиновый краситель" },     brand: "BASF Türk",   pack: "25 kg torba",  tag: null },
+  { id: 13, sub: "dolap",   n: { tr: "Asit Deri Boyası",          en: "Acid Leather Dye",           ru: "Кислотный краситель" },      brand: "BASF Türk",   pack: "25 kg torba",  tag: null },
+  { id: 14, sub: "dolap",   n: { tr: "Direkt Deri Boyası",        en: "Direct Leather Dye",         ru: "Прямой краситель кожи" },    brand: "Camsar",      pack: "25 kg torba",  tag: null },
+
+  // ---- Tekstil · Proses ----
+  { id: 15, sub: "proses",  n: { tr: "Islatıcı Ajan",             en: "Wetting Agent",              ru: "Смачиватель" },              brand: "Türk Henkel", pack: "60 kg bidon",  tag: null },
+  { id: 16, sub: "proses",  n: { tr: "Yıkama / Sabunlama Ajanı",  en: "Scouring / Soaping Agent",   ru: "Моющий агент" },             brand: "BASF Türk",   pack: "60 kg bidon",  tag: null },
+  { id: 17, sub: "proses",  n: { tr: "Düzgünleştirici (Leveling)",en: "Leveling Agent",             ru: "Выравниватель" },            brand: "BASF Türk",   pack: "60 kg bidon",  tag: null },
+  { id: 18, sub: "proses",  n: { tr: "Silikon Yumuşatıcı",        en: "Silicone Softener",          ru: "Силиконовый смягчитель" },   brand: "Camsar",      pack: "120 kg varil", tag: "yeni" },
+  { id: 19, sub: "proses",  n: { tr: "Fikse Ajanı",               en: "Fixing Agent",               ru: "Фиксирующий агент" },        brand: "Türk Henkel", pack: "60 kg bidon",  tag: null },
+
+  // ---- Tekstil · Boyalar ----
+  { id: 20, sub: "tekboya", n: { tr: "Reaktif Boya",              en: "Reactive Dye",               ru: "Активный краситель" },       brand: "BASF Türk",   pack: "25 kg torba",  tag: null },
+  { id: 21, sub: "tekboya", n: { tr: "Dispers Boya",              en: "Disperse Dye",               ru: "Дисперсный краситель" },     brand: "BASF Türk",   pack: "25 kg torba",  tag: null },
+  { id: 22, sub: "tekboya", n: { tr: "Asit Boya (Tekstil)",       en: "Acid Dye (Textile)",         ru: "Кислотный краситель" },      brand: "Camsar",      pack: "25 kg torba",  tag: null },
+
+  // ---- Binder · İnşaat Boya ----
+  { id: 23, sub: "insaatB", n: { tr: "Akrilik İnşaat Binderi",    en: "Acrylic Construction Binder",ru: "Акриловый биндер" },         brand: "Herkim",      pack: "1000 kg IBC",  tag: "one" },
+  { id: 24, sub: "insaatB", n: { tr: "Stiren-Akrilik Binder",     en: "Styrene-Acrylic Binder",     ru: "Стирол-акриловый биндер" },  brand: "Herkim",      pack: "1000 kg IBC",  tag: null },
+  { id: 25, sub: "insaatB", n: { tr: "Saf Akrilik Emülsiyon",     en: "Pure Acrylic Emulsion",      ru: "Чистая акриловая эмульсия" },brand: "Herkim",      pack: "1000 kg IBC",  tag: null },
+
+  // ---- Binder · Matbaa ----
+  { id: 26, sub: "matbaaB", n: { tr: "Su Bazlı Baskı Binderi",    en: "Water-Based Printing Binder",ru: "Водный печатный биндер" },   brand: "Herkim",      pack: "120 kg varil", tag: null },
+  { id: 27, sub: "matbaaB", n: { tr: "Laminasyon Binderi",        en: "Lamination Binder",          ru: "Ламинирующий биндер" },      brand: "Herkim",      pack: "120 kg varil", tag: null },
+
+  // ---- Binder · Tekstil ----
+  { id: 28, sub: "tekstilB",n: { tr: "Pigment Baskı Binderi",     en: "Pigment Printing Binder",    ru: "Пигментный печатный биндер" },brand: "Herkim",     pack: "120 kg varil", tag: "yeni" },
+  { id: 29, sub: "tekstilB",n: { tr: "Fikse Binderi",             en: "Fixing Binder",              ru: "Фиксирующий биндер" },       brand: "Herkim",      pack: "120 kg varil", tag: null }
 ];
 
+/* Duyurular (üç dilli) */
 const HK_NEWS = [
   {
-    date: "2026-07-01", tag: "Ürün",
-    title: "Su arıtma kimyasalları ürün grubumuz yayında",
-    body: "PAC, demir (III) klorür ve yardımcı koagülantlardan oluşan yeni ürün grubumuz stoklarımızda. Belediye ve OSB arıtma tesisleri için özel tedarik programı sunuyoruz.",
-    href: "urunler.html"
-  },
-  {
-    date: "2026-06-15", tag: "Duyuru",
-    title: "Temmuz 2026 fiyat listesi güncellendi",
-    body: "Döviz kurları ve navlun maliyetlerindeki değişimler doğrultusunda güncellenen fiyat listemizi satış ekibimizden talep edebilirsiniz.",
+    date: "2026-06-20", tag: { tr: "Fuar", en: "Expo", ru: "Выставка" },
+    title: {
+      tr: "APLF / Deri Fuarı'nda standımıza bekleriz",
+      en: "Visit our stand at the APLF Leather Fair",
+      ru: "Ждём вас на нашем стенде на выставке кожи APLF"
+    },
+    body: {
+      tr: "Uluslararası deri fuarında yeni finisaj ve altkat serilerimizi tanıtıyoruz. Randevu için satış ekibimizle iletişime geçin.",
+      en: "We are presenting our new finishing and base-coat series at the international leather fair. Contact our sales team for an appointment.",
+      ru: "Представляем новые серии финиша и грунта на международной выставке кожи. Свяжитесь с отделом продаж для встречи."
+    },
     href: "iletisim.html"
   },
   {
-    date: "2026-05-28", tag: "Kurumsal",
-    title: "KKDİK kayıt süreçlerimiz tamamlandı",
-    body: "Portföyümüzdeki tüm kayıt kapsamı ürünler için KKDİK yükümlülüklerimizi tamamladık. Güncel kayıt belgelerine Doküman Merkezi'nden ulaşabilirsiniz.",
-    href: "dokumanlar.html"
-  },
-  {
-    date: "2026-04-10", tag: "Operasyon",
-    title: "Yeni depo ve dolum tesisimiz devrede",
-    body: "Artan hacmimize paralel olarak devreye aldığımız ek depomuz ile sevkiyat sürelerimiz kısaldı; Marmara bölgesinde 24 saat içinde teslimat hedefliyoruz.",
-    href: "duyurular.html"
-  },
-  {
-    date: "2026-03-02", tag: "Duyuru",
-    title: "Ramazan Bayramı çalışma takvimi",
-    body: "Bayram süresince sipariş ve sevkiyat planlaması için satış temsilcinizle önceden iletişime geçmenizi rica ederiz. Acil talepler için WhatsApp hattımız açık kalacaktır.",
-    href: "duyurular.html"
-  },
-  {
-    date: "2026-02-11", tag: "Ürün",
-    title: "Gıda ve kozmetik sınıfı gliserin stoklarda",
-    body: "USP kalitesinde %99,5 gliserin ve propilen glikol düzenli stok programımıza alınmıştır. Analiz sertifikaları ürün sayfasından talep edilebilir.",
+    date: "2026-05-15", tag: { tr: "Ürün", en: "Product", ru: "Продукт" },
+    title: {
+      tr: "Su bazlı finisaj ürün grubumuz genişledi",
+      en: "Our water-based finishing range has expanded",
+      ru: "Расширена линейка водного финиша"
+    },
+    body: {
+      tr: "Çevre dostu, düşük VOC'lu su bazlı top coat ve tutuş ajanları stoklarımıza eklendi. Numune talep edebilirsiniz.",
+      en: "Eco-friendly, low-VOC water-based top coats and handle agents are now in stock. Samples available on request.",
+      ru: "Экологичные водные топ-коты и агенты грифа с низким VOC уже на складе. Доступны образцы."
+    },
     href: "urunler.html"
+  },
+  {
+    date: "2026-04-02", tag: { tr: "Duyuru", en: "Notice", ru: "Объявление" },
+    title: {
+      tr: "2026 fiyat listesi güncellendi",
+      en: "2026 price list updated",
+      ru: "Обновлён прайс-лист 2026"
+    },
+    body: {
+      tr: "Kur ve navlun koşullarına göre güncellenen fiyat listemizi satış temsilcinizden talep edebilirsiniz.",
+      en: "You can request our updated price list — revised for exchange rates and freight — from your sales representative.",
+      ru: "Обновлённый прайс-лист (с учётом курса и фрахта) можно запросить у вашего менеджера."
+    },
+    href: "iletisim.html"
+  },
+  {
+    date: "2026-02-10", tag: { tr: "Kurumsal", en: "Corporate", ru: "Компания" },
+    title: {
+      tr: "12. satış noktamız hizmete girdi",
+      en: "Our 12th sales point is now open",
+      ru: "Открыта 12-я точка продаж"
+    },
+    body: {
+      tr: "Büyüyen talebe paralel olarak yeni bölge satış noktamızı açtık; sevkiyat sürelerimiz daha da kısaldı.",
+      en: "In line with growing demand, we opened a new regional sales point; our delivery times are now even shorter.",
+      ru: "В ответ на рост спроса мы открыли новую региональную точку; сроки доставки стали ещё короче."
+    },
+    href: "kurumsal.html#biz-kimiz"
+  },
+  {
+    date: "2025-11-18", tag: { tr: "Ürün", en: "Product", ru: "Продукт" },
+    title: {
+      tr: "İnşaat boya binderleri üretim kapasitemiz arttı",
+      en: "Increased capacity for construction paint binders",
+      ru: "Увеличены мощности по строительным биндерам"
+    },
+    body: {
+      tr: "Kendi üretimimiz olan akrilik ve stiren-akrilik binder kapasitemizi artırdık; büyük hacimli talepleri IBC ile karşılıyoruz.",
+      en: "We increased our in-house acrylic and styrene-acrylic binder capacity; we serve high-volume demand in IBCs.",
+      ru: "Мы увеличили собственные мощности по акриловым и стирол-акриловым биндерам; крупные объёмы — в IBC."
+    },
+    href: "urunler.html"
+  },
+  {
+    date: "2025-09-05", tag: { tr: "Duyuru", en: "Notice", ru: "Объявление" },
+    title: {
+      tr: "Teknik servis ekibimiz sahada",
+      en: "Our technical service team is in the field",
+      ru: "Наша техническая служба — на местах"
+    },
+    body: {
+      tr: "AR-GE ve teknik servis ekibimiz, tabakhanelerde reçete optimizasyonu ve uygulama desteği için ücretsiz ziyaret sunuyor.",
+      en: "Our R&D and technical service team offers free visits for recipe optimization and application support at tanneries.",
+      ru: "Наша команда НИОКР и техподдержки предлагает бесплатные визиты для оптимизации рецептур на заводах."
+    },
+    href: "hizmetler.html"
   }
 ];
 
+/* Dokümanlar (üç dilli) */
 const HK_DOCS = [
-  { ext: "PDF", title: "Ürün Kataloğu 2026",            desc: "Tüm ürün gruplarımız, ambalaj seçenekleri ve sektör uygulamaları ile birlikte.",                    meta: "v2026.2 · 8,4 MB",     cat: "katalog" },
-  { ext: "PDF", title: "Genel Fiyat Listesi",           desc: "Güncel fiyat listemiz kayıtlı müşterilerimizle paylaşılır; talep formu ile isteyebilirsiniz.",      meta: "Aylık güncellenir",    cat: "katalog" },
-  { ext: "PDF", title: "TDS — Teknik Veri Sayfaları",   desc: "Ürün bazlı teknik özellikler, analiz değerleri ve uygulama önerileri.",                             meta: "Ürün başına · TR/EN",  cat: "teknik" },
-  { ext: "PDF", title: "SDS — Güvenlik Bilgi Formları", desc: "GHS/CLP uyumlu güvenlik bilgi formları; taşıma, depolama ve acil durum bilgileri.",                 meta: "Ürün başına · TR/EN",  cat: "teknik" },
-  { ext: "PDF", title: "ISO 9001:2015 Sertifikası",     desc: "Kalite yönetim sistemi sertifikamızın güncel kopyası.",                                             meta: "Geçerlilik: 2027",     cat: "sertifika" },
-  { ext: "PDF", title: "KKDİK Kayıt Belgeleri",         desc: "Kayıt kapsamındaki ürünlerimize ait KKDİK ön-kayıt ve kayıt belgeleri.",                            meta: "Ürün bazlı",           cat: "sertifika" },
-  { ext: "ZIP", title: "Kurumsal Kimlik Kiti",          desc: "Logo (SVG/PNG), renk paleti, tipografi ve kullanım kuralları — basılı ve dijital işler için.",      meta: "Logo + kılavuz",       cat: "marka" },
-  { ext: "PDF", title: "Şirket Tanıtım Sunumu",         desc: "Herkim Group'u tanıtan kurumsal sunum; tedarikçi değerlendirme dosyalarınız için.",                 meta: "16 sayfa · TR",        cat: "marka" },
-  { ext: "PDF", title: "KVKK Aydınlatma Metni",         desc: "Kişisel verilerin korunmasına ilişkin aydınlatma metnimiz.",                                        meta: "Hukuki",               cat: "hukuki" }
+  { ext: "PDF", cat: "katalog",   title: { tr: "Ürün Kataloğu 2026", en: "Product Catalog 2026", ru: "Каталог продукции 2026" }, desc: { tr: "Deri, tekstil ve binder ürün gruplarımız uygulama alanlarıyla.", en: "Our leather, textile and binder product groups with application areas.", ru: "Наши группы: кожа, текстиль и биндеры с областями применения." }, meta: { tr: "v2026 · TR/EN", en: "v2026 · TR/EN", ru: "v2026 · TR/EN" } },
+  { ext: "PDF", cat: "katalog",   title: { tr: "Genel Fiyat Listesi", en: "General Price List", ru: "Общий прайс-лист" }, desc: { tr: "Güncel fiyat listemiz talep üzerine paylaşılır.", en: "Our current price list is shared on request.", ru: "Актуальный прайс-лист предоставляется по запросу." }, meta: { tr: "Aylık", en: "Monthly", ru: "Ежемесячно" } },
+  { ext: "PDF", cat: "teknik",    title: { tr: "TDS — Teknik Veri Sayfaları", en: "TDS — Technical Data Sheets", ru: "TDS — Технические паспорта" }, desc: { tr: "Ürün bazlı teknik özellikler ve uygulama önerileri.", en: "Product-based technical specs and application advice.", ru: "Технические данные по продуктам и рекомендации." }, meta: { tr: "Ürün başına", en: "Per product", ru: "На продукт" } },
+  { ext: "PDF", cat: "teknik",    title: { tr: "SDS — Güvenlik Bilgi Formları", en: "SDS — Safety Data Sheets", ru: "SDS — Паспорта безопасности" }, desc: { tr: "GHS/CLP uyumlu güvenlik bilgi formları.", en: "GHS/CLP-compliant safety data sheets.", ru: "Паспорта безопасности по GHS/CLP." }, meta: { tr: "TR/EN", en: "TR/EN", ru: "TR/EN" } },
+  { ext: "PDF", cat: "sertifika", title: { tr: "ISO 9001 Kalite Belgesi", en: "ISO 9001 Quality Certificate", ru: "Сертификат качества ISO 9001" }, desc: { tr: "Kalite yönetim sistemi sertifikamız.", en: "Our quality management system certificate.", ru: "Сертификат системы менеджмента качества." }, meta: { tr: "Güncel", en: "Current", ru: "Актуальный" } },
+  { ext: "ZIP", cat: "marka",     title: { tr: "Kurumsal Kimlik Kiti", en: "Brand Identity Kit", ru: "Комплект фирменного стиля" }, desc: { tr: "Logo, renk paleti, tipografi ve kullanım kuralları.", en: "Logo, color palette, typography and usage rules.", ru: "Логотип, палитра, типографика и правила." }, meta: { tr: "Logo + kılavuz", en: "Logo + guide", ru: "Лого + гайд" } },
+  { ext: "PDF", cat: "marka",     title: { tr: "Şirket Tanıtım Sunumu", en: "Company Profile", ru: "Презентация компании" }, desc: { tr: "Herkim Kimya'yı tanıtan kurumsal sunum.", en: "Corporate presentation introducing Herkim Kimya.", ru: "Корпоративная презентация Herkim Kimya." }, meta: { tr: "TR/EN/RU", en: "TR/EN/RU", ru: "TR/EN/RU" } },
+  { ext: "PDF", cat: "hukuki",    title: { tr: "KVKK Aydınlatma Metni", en: "Privacy Notice (KVKK)", ru: "Уведомление о конфиденциальности" }, desc: { tr: "Kişisel verilerin korunmasına ilişkin metin.", en: "Notice on the protection of personal data.", ru: "Уведомление о защите персональных данных." }, meta: { tr: "Hukuki", en: "Legal", ru: "Юридический" } }
 ];
 
-/* Döviz kuru yedek değerleri (çevrimdışı gösterim) */
-const HK_RATES_FALLBACK = { usd: 41.24, eur: 48.67, updated: "kapanış" };
+const HK_RATES_FALLBACK = { usd: 41.24, eur: 48.67 };
