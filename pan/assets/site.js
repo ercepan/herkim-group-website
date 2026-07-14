@@ -23,6 +23,46 @@
     });
   }
 
+  /* İstatistik sayaçları (görününce say) */
+  function animateCount(elm) {
+    var target = parseFloat(elm.getAttribute("data-cnt"));
+    var suffix = elm.getAttribute("data-suffix") || "";
+    var plain = elm.getAttribute("data-fmt") === "plain";
+    var dur = 1300, t0 = performance.now();
+    function step(t) {
+      var p = Math.min((t - t0) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var val = Math.round(target * eased);
+      elm.textContent = (plain ? String(val) : val.toLocaleString("tr-TR")) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var cio = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { cio.unobserve(e.target); animateCount(e.target); }
+    });
+  }, { threshold: 0.5 });
+  $$("[data-cnt]").forEach(function (el) { cio.observe(el); });
+
+  /* Scrollspy — görünen bölümün menü linkini vurgula */
+  var spyMap = {};
+  $$(".nav a[href^='#']").forEach(function (a) { spyMap[a.getAttribute("href").slice(1)] = a; });
+  var spy = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var link = spyMap[e.target.id];
+      if (!link) return;
+      if (e.isIntersecting) {
+        $$(".nav a.act").forEach(function (x) { x.classList.remove("act"); });
+        link.classList.add("act");
+      }
+    });
+  }, { rootMargin: "-40% 0px -55% 0px" });
+  Object.keys(spyMap).forEach(function (id) {
+    var sec = document.getElementById(id);
+    if (sec) spy.observe(sec);
+  });
+
   /* Toast */
   var toastTimer;
   window.panToast = function (msg) {

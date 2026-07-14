@@ -16,9 +16,20 @@
 
   var SES_KEY = "pan_portal_session";
   var REQ_KEY = "pan_portal_requests_v1";
+  var LOCK_KEY = "pan_login_lock";
+  var LAST_KEY = "pan_last_login_";
+  var DEMO_PASS = "demo1234";
+  var MAX_FAILS = 3;
+  var LOCK_MS = 60 * 1000;          // 3 hatalı girişte 60 sn kilit
+  var IDLE_MS = 15 * 60 * 1000;     // 15 dk hareketsizlikte otomatik çıkış
 
   function getSession() {
     try { return JSON.parse(localStorage.getItem(SES_KEY)); } catch (e) { return null; }
+  }
+  function nowStr() {
+    var d = new Date();
+    function p(x) { return (x < 10 ? "0" : "") + x; }
+    return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear() + " " + p(d.getHours()) + ":" + p(d.getMinutes());
   }
   function getRequests() {
     var extra = [];
@@ -31,16 +42,59 @@
   var appView = $("#app-view");
 
   function enter(roleKey) {
-    localStorage.setItem(SES_KEY, JSON.stringify({ role: roleKey, at: "" + new Date().getTime() }));
+    localStorage.setItem(SES_KEY, JSON.stringify({ role: roleKey, at: Date.now() }));
+    localStorage.removeItem(LOCK_KEY);
+    localStorage.setItem(LAST_KEY + roleKey, nowStr());
     boot();
   }
   $$("[data-demo]").forEach(function (b) {
     b.addEventListener("click", function () { enter(b.getAttribute("data-demo")); });
   });
+
+  /* --- Kaba kuvvet koruması (demo): 3 hatalı giriş → 60 sn kilit --- */
+  var errBox = $("#login-err");
+  var loginBtn = $("#login-btn");
+  function getLock() {
+    try { return JSON.parse(localStorage.getItem(LOCK_KEY)) || { n: 0, until: 0 }; } catch (e) { return { n: 0, until: 0 }; }
+  }
+  function showErr(msg) {
+    if (!errBox) return;
+    errBox.textContent = msg;
+    errBox.classList.remove("show");
+    void errBox.offsetWidth; // animasyonu yeniden tetikle
+    errBox.classList.add("show");
+  }
+  var lockTimer = null;
+  function refreshLockUI() {
+    var lock = getLock();
+    var left = Math.ceil((lock.until - Date.now()) / 1000);
+    if (left > 0) {
+      if (loginBtn) { loginBtn.disabled = true; loginBtn.style.opacity = "0.55"; }
+      showErr("Çok fazla hatalı deneme. Güvenlik için giriş " + left + " sn kilitlendi.");
+      if (!lockTimer) lockTimer = setInterval(refreshLockUI, 1000);
+    } else {
+      if (loginBtn) { loginBtn.disabled = false; loginBtn.style.opacity = ""; }
+      if (lockTimer) { clearInterval(lockTimer); lockTimer = null; }
+      if (lock.until && errBox) { errBox.classList.remove("show"); localStorage.removeItem(LOCK_KEY); }
+    }
+  }
+  refreshLockUI();
+
   var lf = $("#login-form");
   if (lf) lf.addEventListener("submit", function (e) {
     e.preventDefault();
-    enter("musteri"); // demo: form da müşteri olarak girer
+    var lock = getLock();
+    if (lock.until > Date.now()) { refreshLockUI(); return; }
+    var pass = $("#lg-pass").value;
+    if (pass !== DEMO_PASS) {
+      lock.n = (lock.n || 0) + 1;
+      if (lock.n >= MAX_FAILS) { lock.until = Date.now() + LOCK_MS; lock.n = 0; }
+      localStorage.setItem(LOCK_KEY, JSON.stringify(lock));
+      if (lock.until > Date.now()) refreshLockUI();
+      else showErr("E-posta veya şifre hatalı. (" + lock.n + "/" + MAX_FAILS + " deneme)");
+      return;
+    }
+    enter("musteri"); // demo: form girişi müşteri rolü açar
   });
 
   function logout() {
@@ -53,8 +107,34 @@
   /* ---------- Uygulama ---------- */
   var USER = null;
 
+  /* --- Hareketsizlik zaman aşımı: 15 dk --- */
+  function touchSession() {
+    var s = getSession();
+    if (!s) return;
+    if (Date.now() - (s.touched || s.at) > 30 * 1000) { // 30 sn'de bir yaz
+      s.touched = Date.now();
+      localStorage.setItem(SES_KEY, JSON.stringify(s));
+    }
+  }
+  function idleCheck() {
+    var s = getSession();
+    if (!s) return;
+    if (Date.now() - (s.touched || s.at) > IDLE_MS) {
+      localStorage.removeItem(SES_KEY);
+      location.reload();
+    }
+  }
+  ["click", "keydown", "scroll", "touchstart"].forEach(function (ev) {
+    document.addEventListener(ev, touchSession, { passive: true });
+  });
+  setInterval(idleCheck, 60 * 1000);
+
   function boot() {
     var s = getSession();
+    if (s && Date.now() - (s.touched || s.at) > IDLE_MS) { // bayat oturumu açma
+      localStorage.removeItem(SES_KEY);
+      s = null;
+    }
     if (!s || !PAN_USERS[s.role]) {
       loginView.style.display = "";
       appView.style.display = "none";
@@ -67,6 +147,8 @@
     $("#u-initials").textContent = USER.initials;
     $("#u-name").textContent = USER.name;
     $("#u-company").textContent = USER.company;
+    var last = localStorage.getItem(LAST_KEY + USER.role);
+    $("#u-last").textContent = last ? "Son giriş: " + last : "";
     // rol farkları
     var isSales = USER.role === "satisci";
     $("#col-customer").style.display = isSales ? "" : "none";
@@ -107,17 +189,32 @@
     return c;
   }
 
-  /* ---------- KPI ---------- */
+  /* ---------- KPI (sayaç animasyonlu) ---------- */
+  function countTo(elm, target) {
+    var dur = 700, t0 = performance.now();
+    function step(t) {
+      var p = Math.min((t - t0) / dur, 1);
+      elm.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
   function renderKpis() {
     var o = myOrders();
     var active = o.filter(function (x) { return x.step < 4; }).length;
     var ship = o.filter(function (x) { return x.step === 3; }).length;
     var open = myRequests().filter(function (r) { return r.status === "acik" || r.status === "crm"; }).length;
-    $("#kpi-active").textContent = active;
-    $("#kpi-ship").textContent = ship;
-    $("#kpi-open").textContent = open;
-    $("#kpi-done").textContent = o.filter(function (x) { return x.step === 4; }).length;
+    countTo($("#kpi-active"), active);
+    countTo($("#kpi-ship"), ship);
+    countTo($("#kpi-open"), open);
+    countTo($("#kpi-done"), o.filter(function (x) { return x.step === 4; }).length);
   }
+
+  /* Talep detayı karakter sayacı */
+  var rfDetail = $("#rf-detail"), rfCount = $("#rf-count");
+  if (rfDetail && rfCount) rfDetail.addEventListener("input", function () {
+    rfCount.textContent = rfDetail.value.length + "/500";
+  });
 
   /* ---------- Sipariş tablosu ---------- */
   var fState = { q: "", st: "all" };

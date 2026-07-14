@@ -471,6 +471,138 @@ h1, h2, h3 { color: var(--ink); letter-spacing: -0.022em; }
 
 .empty { text-align: center; padding: 46px 20px; color: var(--muted); font-size: 14.5px; }
 
+/* ============================================================
+   CİLA KATMANI — derinlik, mikro-etkileşim, güvenlik duruşu
+   ============================================================ */
+
+/* Hero atmosferi: krem üzerine ısı + dev kartal filigranı */
+.hero { position: relative; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(900px 480px at 82% 10%, rgba(197, 18, 48, 0.055), transparent 60%),
+    radial-gradient(700px 420px at 8% 90%, rgba(20, 20, 22, 0.05), transparent 65%);
+}
+.hero-eagle {
+  position: absolute; right: -140px; top: -120px; width: 560px; height: 560px;
+  opacity: 0.045; pointer-events: none; user-select: none;
+  animation: eagle-drift 14s ease-in-out infinite;
+}
+@keyframes eagle-drift { 0%,100% { transform: rotate(-4deg) translateY(0); } 50% { transform: rotate(-1deg) translateY(14px); } }
+.hero .wrap { position: relative; }
+
+/* Fotoğrafa editoryal kırmızı çerçeve aksanı */
+.frame-red { position: relative; }
+.frame-red::after {
+  content: ""; position: absolute; inset: 18px -18px -18px 18px;
+  border: 2px solid var(--red); border-radius: var(--r);
+  z-index: -1; opacity: 0.55;
+}
+.hero-fig img, .about-fig img, .prod-fig img { transition: transform 0.5s var(--ease); }
+.hero-fig:hover img, .about-fig:hover img, .prod-fig:hover img { transform: scale(1.015); }
+
+/* Scrollspy: aktif bölüm */
+.nav a.act { color: var(--red); background: rgba(197, 18, 48, 0.07); }
+
+/* Kart & haber mikro-etkileşimleri */
+.card, .eco-card, .news-card { will-change: transform; }
+.card:hover .card-link .arr-i { transform: translateX(4px); }
+.news-img { overflow: hidden; }
+.news-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(15,15,15,0.24)); transition: opacity 0.3s; opacity: 0.6; }
+.news-card:hover .news-img::after { opacity: 0.25; }
+.news-body h3 { transition: color 0.2s; }
+.news-card:hover .news-body h3 { color: var(--red); }
+
+/* Pill'ler kademeli girsin */
+.pills .pill { opacity: 0; transform: translateY(10px); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease), background 0.15s, color 0.15s, border-color 0.15s; }
+.pills.in .pill { opacity: 1; transform: none; }
+.pills.in .pill:nth-child(1) { transition-delay: 0.02s; } .pills.in .pill:nth-child(2) { transition-delay: 0.07s; }
+.pills.in .pill:nth-child(3) { transition-delay: 0.12s; } .pills.in .pill:nth-child(4) { transition-delay: 0.17s; }
+.pills.in .pill:nth-child(5) { transition-delay: 0.22s; } .pills.in .pill:nth-child(6) { transition-delay: 0.27s; }
+.pills.in .pill:nth-child(7) { transition-delay: 0.32s; } .pills.in .pill:nth-child(8) { transition-delay: 0.37s; }
+
+/* İstatistik bandı: sayaç + çizgi vurgusu */
+.stat b { font-variant-numeric: tabular-nums; }
+.stats .stat { transition: border-color 0.25s; }
+.stats .stat:hover { border-color: #FF5C77; }
+
+/* Buton parlaması (birincil) */
+.btn--red { position: relative; overflow: hidden; }
+.btn--red::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -80%;
+  width: 40%; transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+  transition: left 0.45s var(--ease);
+}
+.btn--red:hover::after { left: 130%; }
+
+/* Portal tanıtımındaki canlı satırlar */
+.pp-shot .pp-row { transition: transform 0.2s var(--ease), border-color 0.2s; }
+.pp-shot .pp-row:hover { transform: translateX(4px); border-color: #C51230; }
+.pp-live { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; color: #34D399; margin-bottom: 12px; }
+.pp-live i { width: 8px; height: 8px; border-radius: 50%; background: #34D399; animation: blink 1.6s infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+.pp-sec { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 18px; }
+.pp-sec span { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: rgba(255,255,255,0.62); }
+
+/* ---------- Giriş ekranı cilası ---------- */
+.login-side { position: relative; overflow: hidden; }
+.login-eagle { position: absolute; right: -120px; bottom: -110px; width: 480px; height: 480px; opacity: 0.06; pointer-events: none; }
+.login-chips { display: flex; flex-direction: column; gap: 10px; margin-top: 30px; }
+.login-chip {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 8px; padding: 12px 16px;
+  opacity: 0; transform: translateY(12px);
+  animation: chip-in 0.6s var(--ease) forwards;
+}
+.login-chip:nth-child(2) { animation-delay: 0.15s; }
+.login-chip:nth-child(3) { animation-delay: 0.3s; }
+@keyframes chip-in { to { opacity: 1; transform: none; } }
+.login-chip b { color: #fff; font-size: 13.5px; }
+.login-chip span { font-size: 11.5px; color: rgba(255,255,255,0.5); }
+
+/* Güvenlik şeridi + kilit uyarısı */
+.sec-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.sec-strip span {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px;
+  background: #FDFDFB;
+}
+.login-err {
+  display: none; margin-bottom: 14px;
+  background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C;
+  border-radius: var(--r); padding: 11px 14px; font-size: 13.5px; font-weight: 600;
+}
+.login-err.show { display: block; animation: err-shake 0.3s; }
+@keyframes err-shake { 0%,100% { transform: none; } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* ---------- Portal uygulama cilası ---------- */
+.demo-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #FFF7E6; border: 1px solid #F5D9A8; color: #92600A;
+  font-size: 11.5px; font-weight: 800; letter-spacing: 0.1em;
+  border-radius: 999px; padding: 5px 13px;
+}
+.demo-badge i { width: 7px; height: 7px; border-radius: 50%; background: #E8A020; animation: blink 1.6s infinite; }
+.kpi { position: relative; overflow: hidden; transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+.kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.kpi::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--red); transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease); }
+.kpi:hover::after { transform: none; }
+.kpi b { font-variant-numeric: tabular-nums; }
+.tbl tbody tr { border-left: 3px solid transparent; }
+.tbl tbody tr:hover { border-left-color: var(--red); }
+.sb-last { font-size: 10.5px; color: rgba(255,255,255,0.38); padding: 4px 10px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+@media (max-width: 860px) {
+  .frame-red::after { display: none; }
+  .hero-eagle { width: 340px; right: -110px; }
+}
+
 /* ---------- Duyarlılık ---------- */
 @media (max-width: 1060px) {
   .nav { display: none; }
