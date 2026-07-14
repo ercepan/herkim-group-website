@@ -121,7 +121,8 @@ h1, h2, h3 { color: var(--ink); letter-spacing: -0.022em; }
 .hero p { max-width: 54ch; margin-bottom: 34px; }
 .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
 .hero-fig { position: relative; }
-.hero-fig img { border-radius: var(--r); box-shadow: var(--shadow); width: 100%; object-fit: cover; }
+.hero-fig img { border-radius: var(--r); box-shadow: var(--shadow); width: 100%; height: auto; }
+.about-fig img, .prod-fig img { width: 100%; height: auto; }
 .hero-stat {
   position: absolute; left: -26px; bottom: -30px;
   background: var(--card); border-radius: var(--r);
@@ -597,6 +598,17 @@ h1, h2, h3 { color: var(--ink); letter-spacing: -0.022em; }
 .tbl tbody tr { border-left: 3px solid transparent; }
 .tbl tbody tr:hover { border-left-color: var(--red); }
 .sb-last { font-size: 10.5px; color: rgba(255,255,255,0.38); padding: 4px 10px 0; }
+
+/* ---------- Dil değiştirici ---------- */
+.lang-sw { display: inline-flex; border: 1.5px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
+.lang-sw button { padding: 7px 13px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; color: var(--muted); border-left: 1px solid var(--line); transition: background 0.15s, color 0.15s; }
+.lang-sw button:first-child { border-left: 0; }
+.lang-sw button:hover { color: var(--ink); }
+.lang-sw button.on { background: var(--red); color: #fff; }
+.lang-sw--dark { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+.lang-sw--dark button { color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.14); }
+.lang-sw--dark button:hover { color: #fff; }
+.m-nav .lang-sw { margin-top: 22px; }
 
 /* ---------- WhatsApp ---------- */
 .wa-float {

@@ -7,6 +7,8 @@
   "use strict";
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+  var T = function (k) { return (window.pT ? window.pT(k) : k); };
+  var STEPS = function () { return (window.pSteps ? window.pSteps() : PAN_STEPS); };
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -70,7 +72,7 @@
     var left = Math.ceil((lock.until - Date.now()) / 1000);
     if (left > 0) {
       if (loginBtn) { loginBtn.disabled = true; loginBtn.style.opacity = "0.55"; }
-      showErr("Çok fazla hatalı deneme. Güvenlik için giriş " + left + " sn kilitlendi.");
+      showErr(T("lg.errLock").replace("{s}", left));
       if (!lockTimer) lockTimer = setInterval(refreshLockUI, 1000);
     } else {
       if (loginBtn) { loginBtn.disabled = false; loginBtn.style.opacity = ""; }
@@ -91,7 +93,7 @@
       if (lock.n >= MAX_FAILS) { lock.until = Date.now() + LOCK_MS; lock.n = 0; }
       localStorage.setItem(LOCK_KEY, JSON.stringify(lock));
       if (lock.until > Date.now()) refreshLockUI();
-      else showErr("E-posta veya şifre hatalı. (" + lock.n + "/" + MAX_FAILS + " deneme)");
+      else showErr(T("lg.errWrong").replace("{n}", lock.n));
       return;
     }
     enter("musteri"); // demo: form girişi müşteri rolü açar
@@ -148,12 +150,12 @@
     $("#u-name").textContent = USER.name;
     $("#u-company").textContent = USER.company;
     var last = localStorage.getItem(LAST_KEY + USER.role);
-    $("#u-last").textContent = last ? "Son giriş: " + last : "";
+    $("#u-last").textContent = last ? T("sb.last") + last : "";
     // rol farkları
     var isSales = USER.role === "satisci";
     $("#col-customer").style.display = isSales ? "" : "none";
     $("#nav-inbox").style.display = isSales ? "" : "none";
-    $("#kpi-scope").textContent = isSales ? "Tüm müşteriler" : USER.company;
+    $("#kpi-scope").textContent = isSales ? T("t.scopeAll") : USER.company;
     renderAll();
     show("dash");
   }
@@ -169,15 +171,17 @@
 
   /* ---------- Görünüm geçişi ---------- */
   var views = ["dash", "orders", "requests", "history"];
+  var curView = "dash";
   function show(key) {
+    curView = key;
     views.forEach(function (v) {
       var pane = $("#view-" + v);
       if (pane) pane.style.display = (v === key) ? "" : "none";
       var link = $('[data-view="' + v + '"]');
       if (link) link.classList.toggle("on", v === key);
     });
-    var titles = { dash: "Özet", orders: "Siparişlerim", requests: "Taleplerim", history: "Görüşme Geçmişi" };
-    $("#page-title").textContent = (USER.role === "satisci" && key === "orders") ? "Siparişler (Tüm Müşteriler)" : titles[key];
+    var titles = { dash: T("t.dash"), orders: T("t.orders"), requests: T("t.reqs"), history: T("t.hist") };
+    $("#page-title").textContent = (USER.role === "satisci" && key === "orders") ? T("t.ordersAll") : titles[key];
   }
   $$("[data-view]").forEach(function (b) {
     b.addEventListener("click", function () { show(b.getAttribute("data-view")); });
@@ -185,8 +189,7 @@
 
   /* ---------- Durum çipi ---------- */
   function statusChip(step) {
-    var c = el("span", "st st--" + PAN_STEP_CLASS[step], PAN_STEPS[step]);
-    return c;
+    return el("span", "st st--" + PAN_STEP_CLASS[step], STEPS()[step]);
   }
 
   /* ---------- KPI (sayaç animasyonlu) ---------- */
@@ -230,7 +233,7 @@
       return true;
     });
     if (!list.length) {
-      var tr0 = el("tr"); var td0 = el("td", "empty", "Kayıt bulunamadı.");
+      var tr0 = el("tr"); var td0 = el("td", "empty", T("p.none"));
       td0.colSpan = 6; tr0.appendChild(td0); tb.appendChild(tr0);
       return;
     }
@@ -276,17 +279,17 @@
 
   function openDrawer(o) {
     $("#dw-id").textContent = o.id;
-    $("#dw-sub").textContent = o.customer + " · Sipariş tarihi " + o.date;
+    $("#dw-sub").textContent = o.customer + T("dw.orderDate") + o.date;
     var stBox = $("#dw-status"); stBox.textContent = "";
     stBox.appendChild(statusChip(o.step));
 
     // zaman çizelgesi
     var tl = $("#dw-tl"); tl.textContent = "";
-    PAN_STEPS.forEach(function (name, i) {
+    STEPS().forEach(function (name, i) {
       var cls = i < o.step ? "tl-step done" : (i === o.step ? "tl-step now" : "tl-step");
       var st = el("div", cls);
       st.appendChild(el("b", null, name));
-      st.appendChild(el("span", null, o.timeline[i] ? o.timeline[i] : (i === o.step ? "Devam ediyor…" : "—")));
+      st.appendChild(el("span", null, o.timeline[i] ? o.timeline[i] : (i === o.step ? T("dw.cont") : "—")));
       tl.appendChild(st);
     });
 
@@ -310,7 +313,7 @@
   }
   $$(".doc-btn").forEach(function (b) {
     b.addEventListener("click", function () {
-      window.panToast("Demo: " + b.textContent.trim() + " belgesi gerçek sistemde Logo Tiger'dan gelir.");
+      window.panToast(T("to.doc").replace("{d}", b.getAttribute("data-doc") || b.textContent.trim()));
     });
   });
 
@@ -318,7 +321,7 @@
   function renderRequests() {
     var wrap = $("#req-list"); wrap.textContent = "";
     var list = myRequests();
-    if (!list.length) { wrap.appendChild(el("div", "empty", "Henüz talep yok.")); return; }
+    if (!list.length) { wrap.appendChild(el("div", "empty", T("rq.none"))); return; }
     list.forEach(function (r) {
       var card = el("div", "panel");
       var head = el("div", "panel-head");
@@ -332,7 +335,7 @@
       head.appendChild(left);
       var chip = el("span",
         r.status === "acik" ? "st st--acik" : (r.status === "crm" ? "st st--crm" : "st st--yanit"),
-        r.status === "acik" ? "Açık" : (r.status === "crm" ? "CRM'e iletildi" : "Yanıtlandı"));
+        r.status === "acik" ? T("rq.open") : (r.status === "crm" ? T("rq.crm") : T("rq.ans")));
       head.appendChild(chip);
       card.appendChild(head);
 
@@ -362,7 +365,7 @@
     e.preventDefault();
     var subj = $("#rf-subject").value.trim();
     var det = $("#rf-detail").value.trim();
-    if (!subj || !det) { window.panToast("Lütfen konu ve detay girin."); return; }
+    if (!subj || !det) { window.panToast(T("to.reqErr")); return; }
     var extra = [];
     try { extra = JSON.parse(localStorage.getItem(REQ_KEY)) || []; } catch (err) {}
     var no = 313 + extra.length;
@@ -371,12 +374,12 @@
       customer: USER.role === "musteri" ? USER.company : "Derim Deri San. A.Ş.",
       subject: subj, detail: det,
       date: "14.07.2026", status: "crm",
-      reply: { by: "Sistem", when: "şimdi", text: "Talebiniz satış temsilciniz " + (USER.rep || "Ayşe Yılmaz") + "'ın CRM kartına düştü. En kısa sürede dönüş yapılacak." }
+      reply: { by: T("to.sysBy"), when: T("to.now"), text: T("to.sysReply").replace("{rep}", USER.rep || "Ayşe Yılmaz") }
     });
     localStorage.setItem(REQ_KEY, JSON.stringify(extra));
     rf.reset();
     renderRequests(); renderKpis();
-    window.panToast("Talebiniz alındı ve CRM'e iletildi ✓");
+    window.panToast(T("to.reqOk"));
   });
 
   /* ---------- Görüşme geçmişi ---------- */
@@ -430,6 +433,21 @@
   function renderAll() {
     renderKpis(); renderOrders(); renderRequests(); renderHistory(); renderNotifs(); renderDash();
   }
+
+  /* + Yeni Talep butonu */
+  var bnr = $("#btn-new-req");
+  if (bnr) bnr.addEventListener("click", function (e) { e.preventDefault(); show("requests"); });
+
+  /* Dil değişince dinamik içeriği yeniden çiz */
+  document.addEventListener("pan:lang", function () {
+    if (!USER) return;
+    var isSales = USER.role === "satisci";
+    $("#kpi-scope").textContent = isSales ? T("t.scopeAll") : USER.company;
+    var last = localStorage.getItem(LAST_KEY + USER.role);
+    $("#u-last").textContent = last ? T("sb.last") + last : "";
+    renderAll();
+    show(curView);
+  });
 
   /* başlat */
   boot();

@@ -25,29 +25,39 @@
         <b>PAN <i>HOLDING</i></b>
       </a>
       <nav class="nav" aria-label="Ana menü">
-        <a href="#kimdir">Kurumsal</a>
-        <a href="#sirketler">Şirketler</a>
-        <a href="#uretim">Üretim</a>
-        <a href="#cevre">Sürdürülebilirlik</a>
-        <a href="#haberler">Haberler</a>
-        <a href="portal.html" class="nav-portal">Müşteri Portalı</a>
-        <a href="#iletisim" class="nav-cta">İletişim</a>
+        <a href="#kimdir" data-i18n="nav.corp">Kurumsal</a>
+        <a href="#sirketler" data-i18n="nav.cos">Şirketler</a>
+        <a href="#uretim" data-i18n="nav.prod">Üretim</a>
+        <a href="#cevre" data-i18n="nav.sust">Sürdürülebilirlik</a>
+        <a href="#haberler" data-i18n="nav.news">Haberler</a>
+        <span class="lang-sw" role="group" aria-label="Dil / Language / Язык">
+          <button type="button" data-plang="tr" class="on">TR</button>
+          <button type="button" data-plang="en">EN</button>
+          <button type="button" data-plang="ru">RU</button>
+        </span>
+        <a href="portal.html" class="nav-portal" data-i18n="nav.portal">Müşteri Portalı</a>
+        <a href="#iletisim" class="nav-cta" data-i18n="nav.contact">İletişim</a>
       </nav>
-      <button class="burger" aria-label="Menüyü aç">
+      <button class="burger" aria-label="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
     </div>
   </header>
 
   <div class="m-nav" aria-label="Mobil menü">
-    <button class="m-close">KAPAT ×</button>
-    <a href="#kimdir">Kurumsal</a>
-    <a href="#sirketler">Şirketler</a>
-    <a href="#uretim">Üretim</a>
-    <a href="#cevre">Sürdürülebilirlik</a>
-    <a href="#haberler">Haberler</a>
-    <a href="portal.html">Müşteri Portalı</a>
-    <a href="#iletisim">İletişim</a>
+    <button class="m-close" data-i18n="nav.close">KAPAT ×</button>
+    <a href="#kimdir" data-i18n="nav.corp">Kurumsal</a>
+    <a href="#sirketler" data-i18n="nav.cos">Şirketler</a>
+    <a href="#uretim" data-i18n="nav.prod">Üretim</a>
+    <a href="#cevre" data-i18n="nav.sust">Sürdürülebilirlik</a>
+    <a href="#haberler" data-i18n="nav.news">Haberler</a>
+    <a href="portal.html" data-i18n="nav.portal">Müşteri Portalı</a>
+    <a href="#iletisim" data-i18n="nav.contact">İletişim</a>
+    <span class="lang-sw lang-sw--dark" role="group" aria-label="Dil">
+      <button type="button" data-plang="tr" class="on">TR</button>
+      <button type="button" data-plang="en">EN</button>
+      <button type="button" data-plang="ru">RU</button>
+    </span>
   </div>
 
   <main>
@@ -56,17 +66,17 @@
       <img class="hero-eagle" src="assets/img/pan-emblem.png" alt="" aria-hidden="true">
       <div class="wrap">
         <div>
-          <span class="kicker rv in">1975'TEN BU YANA</span>
-          <h1 class="h-display rv in rv-1">İhtiyaçlarınıza uygun <span class="dot">çözümler.</span></h1>
-          <p class="lead rv in rv-2">Sizin için değer yaratmak, talep ve gereksinimlerinizi en üst düzeyde karşılamak için varız. Deri ve kimya sanayiinde üretim, kalite ve teknik servisi tek çatı altında buluşturuyoruz.</p>
+          <span class="kicker rv in" data-i18n="hero.kicker">1975'TEN BU YANA</span>
+          <h1 class="h-display rv in rv-1"><span data-i18n="hero.t1">İhtiyaçlarınıza uygun </span><span class="dot" data-i18n="hero.t2">çözümler.</span></h1>
+          <p class="lead rv in rv-2" data-i18n="hero.lead">Sizin için değer yaratmak, talep ve gereksinimlerinizi en üst düzeyde karşılamak için varız. Deri ve kimya sanayiinde üretim, kalite ve teknik servisi tek çatı altında buluşturuyoruz.</p>
           <div class="hero-ctas rv in rv-3">
-            <a class="btn btn--ink" href="#sirketler">Grup şirketlerimiz</a>
-            <a class="btn btn--ghost" href="#kimdir">Bizi tanıyın</a>
+            <a class="btn btn--ink" href="#sirketler" data-i18n="hero.b1">Grup şirketlerimiz</a>
+            <a class="btn btn--ghost" href="#kimdir" data-i18n="hero.b2">Bizi tanıyın</a>
           </div>
         </div>
         <figure class="hero-fig frame-red rv in rv-2">
-          <img src="assets/img/factory.jpg" alt="Pan Holding tesisi — Herkim, Farben ve Helsa" width="1200" height="711">
-          <div class="hero-stat"><b>12</b><span>bölgede uygulama laboratuvarı</span></div>
+          <img src="assets/img/factory.jpg" data-i18n-alt="hero.alt" alt="Pan Holding tesisi — Herkim, Farben ve Helsa" width="1200" height="804">
+          <div class="hero-stat"><b>12</b><span data-i18n="hero.stat">bölgede uygulama laboratuvarı</span></div>
         </figure>
       </div>
     </section>
@@ -74,7 +84,7 @@
     <!-- ===== Logo şeridi ===== -->
     <div class="strip">
       <div class="wrap">
-        <span class="st-label">GRUP ŞİRKETLERİ &amp; MARKALARIMIZ</span>
+        <span class="st-label" data-i18n="strip.label">GRUP ŞİRKETLERİ &amp; MARKALARIMIZ</span>
         <div class="st-logos">
           <span class="wordmark"><b>HER<span class="wm-red">KİM</span></b></span>
           <span class="wordmark"><b>FARBEN</b></span>
@@ -89,16 +99,16 @@
     <section class="sec about" id="kimdir">
       <div class="wrap">
         <figure class="about-fig rv">
-          <img src="assets/img/atelier.jpg" alt="Deri atölyesinde el işçiliği" width="1028" height="1200">
+          <img src="assets/img/atelier.jpg" data-i18n-alt="about.alt" alt="Deri atölyesinde el işçiliği" width="1028" height="1200">
         </figure>
         <div class="rv rv-1">
-          <span class="kicker">PAN HOLDİNG KİMDİR?</span>
-          <h2 class="h-sec">Kalite, süreklilik ve güvenirlik üzerine kurulu bir sanayi grubu<span class="dot">.</span></h2>
-          <p>Herkim Şirketler Grubu, ana firması Herkim Kimya ile birlikte 1975 yılında, Türkiye'de deri sektörünün modernizasyon döneminde İstanbul–Kazlıçeşme'deki ünlü deri sanayi bölgesinde kuruldu.</p>
-          <p>1997'de üretim firması Farben Kimya'yı hayata geçirerek deri kimyasalları, tekstil kimyasalları, boya ve binder gruplarında üretim ve satışa; ardından inşaat, matbaa ve polimer sektörlerine genişledi. Bugün başta Rusya ve Ukrayna olmak üzere 10 ülkeye ihracat yapıyor.</p>
+          <span class="kicker" data-i18n="about.kicker">PAN HOLDİNG KİMDİR?</span>
+          <h2 class="h-sec"><span data-i18n="about.title">Kalite, süreklilik ve güvenirlik üzerine kurulu bir sanayi grubu</span><span class="dot">.</span></h2>
+          <p data-i18n="about.p1">Herkim Şirketler Grubu, ana firması Herkim Kimya ile birlikte 1975 yılında, Türkiye'de deri sektörünün modernizasyon döneminde İstanbul–Kazlıçeşme'deki ünlü deri sanayi bölgesinde kuruldu.</p>
+          <p data-i18n="about.p2">1997'de üretim firması Farben Kimya'yı hayata geçirerek deri kimyasalları, tekstil kimyasalları, boya ve binder gruplarında üretim ve satışa; ardından inşaat, matbaa ve polimer sektörlerine genişledi. Bugün başta Rusya ve Ukrayna olmak üzere 10 ülkeye ihracat yapıyor.</p>
           <div class="mini-feats">
-            <div class="mini-feat"><b>Üretim Teknolojisi</b><span>İleri teknoloji, bilgisayar kontrollü ekipmanlar.</span></div>
-            <div class="mini-feat"><b>Çevreye Saygı</b><span>İnsan ve çevre dostu, su bazlı ürünler.</span></div>
+            <div class="mini-feat"><b data-i18n="about.f1t">Üretim Teknolojisi</b><span data-i18n="about.f1d">İleri teknoloji, bilgisayar kontrollü ekipmanlar.</span></div>
+            <div class="mini-feat"><b data-i18n="about.f2t">Çevreye Saygı</b><span data-i18n="about.f2d">İnsan ve çevre dostu, su bazlı ürünler.</span></div>
           </div>
         </div>
       </div>
@@ -107,10 +117,10 @@
     <!-- ===== İstatistikler ===== -->
     <section class="stats">
       <div class="wrap">
-        <div class="stat rv"><b data-cnt="1975" data-fmt="plain">1975</b><span>Kuruluş yılı</span></div>
-        <div class="stat rv rv-1"><b data-cnt="12">12</b><span>Bölgede uygulama laboratuvarı</span></div>
-        <div class="stat rv rv-2"><b data-cnt="10">10</b><span>Ülkeye ihracat</span></div>
-        <div class="stat rv rv-3"><b data-cnt="8000" data-suffix=" m²">8.000 m²</b><span>Farben fabrika alanı</span></div>
+        <div class="stat rv"><b data-cnt="1975" data-fmt="plain">1975</b><span data-i18n="stats.s1">Kuruluş yılı</span></div>
+        <div class="stat rv rv-1"><b data-cnt="12">12</b><span data-i18n="stats.s2">Bölgede uygulama laboratuvarı</span></div>
+        <div class="stat rv rv-2"><b data-cnt="10">10</b><span data-i18n="stats.s3">Ülkeye ihracat</span></div>
+        <div class="stat rv rv-3"><b data-cnt="8000" data-suffix=" m²">8.000 m²</b><span data-i18n="stats.s4">Farben fabrika alanı</span></div>
       </div>
     </section>
 
@@ -118,27 +128,27 @@
     <section class="sec" id="sirketler">
       <div class="wrap">
         <div class="sec-head rv">
-          <span class="kicker">GRUP ŞİRKETLERİMİZ</span>
-          <h2 class="h-sec">Tek çatı, üç uzmanlık<span class="dot">.</span></h2>
+          <span class="kicker" data-i18n="cos.kicker">GRUP ŞİRKETLERİMİZ</span>
+          <h2 class="h-sec"><span data-i18n="cos.title">Tek çatı, üç uzmanlık</span><span class="dot">.</span></h2>
         </div>
         <div class="cards-3">
           <article class="card rv">
             <div class="co-logo"><span class="wordmark" style="opacity:1;filter:none"><b style="font-size:19px">HER<span class="wm-red">KİM</span></b></span></div>
             <h3>Herkim Kimya</h3>
-            <p>1975'ten bu yana deri kimyasallarının tüm ürün gruplarını teknik servisiyle sunar. 12 satış noktasıyla sektörde lider konumdadır.</p>
+            <p data-i18n="cos.d1">1975'ten bu yana deri kimyasallarının tüm ürün gruplarını teknik servisiyle sunar. 12 satış noktasıyla sektörde lider konumdadır.</p>
             <a class="card-link" href="https://ercepan.github.io/herkim-group-website/" target="_blank" rel="noopener">herkim.com.tr →</a>
           </article>
           <article class="card rv rv-1">
             <div class="co-logo"><span class="wordmark" style="opacity:1;filter:none"><b style="font-size:19px">FARBEN</b></span></div>
             <h3>Farben Kimya</h3>
-            <p>1972'den beri finisaj kimyasalları üretir. Tuzla OSB'de 15.000 m² arazi, 8.000 m² fabrika; AR-GE ile çevre dostu kimyasallar geliştirir.</p>
+            <p data-i18n="cos.d2">1972'den beri finisaj kimyasalları üretir. Tuzla OSB'de 15.000 m² arazi, 8.000 m² fabrika; AR-GE ile çevre dostu kimyasallar geliştirir.</p>
             <a class="card-link" href="#iletisim">farben.com.tr →</a>
           </article>
           <article class="card rv rv-2">
             <div class="co-logo"><span class="wordmark" style="opacity:1;filter:none"><b style="font-size:19px" class="wm-serif">HELSA</b></span></div>
             <h3>Helsa</h3>
-            <p>Grup bünyesinde deri ve tekstil kimyasalları alanında faaliyet gösteren, uluslararası pazarlara yönelen kardeş markadır.</p>
-            <a class="card-link" href="#iletisim">İletişime geçin →</a>
+            <p data-i18n="cos.d3">Grup bünyesinde deri ve tekstil kimyasalları alanında faaliyet gösteren, uluslararası pazarlara yönelen kardeş markadır.</p>
+            <a class="card-link" href="#iletisim" data-i18n="cos.l3">İletişime geçin →</a>
           </article>
         </div>
       </div>
@@ -149,16 +159,16 @@
       <div class="wrap">
         <div class="sec-head sec-head--row rv">
           <div style="max-width:640px">
-            <span class="kicker">MARKALARIMIZ &amp; İŞ ORTAKLARIMIZ</span>
-            <h2 class="h-sec" style="margin:18px 0 14px">Her ürün grubu için uzmanlaşmış markalar<span class="dot">.</span></h2>
+            <span class="kicker" data-i18n="br.kicker">MARKALARIMIZ &amp; İŞ ORTAKLARIMIZ</span>
+            <h2 class="h-sec" style="margin:18px 0 14px"><span data-i18n="br.title">Her ürün grubu için uzmanlaşmış markalar</span><span class="dot">.</span></h2>
           </div>
-          <p style="max-width:34ch;font-size:15px">Farben, ürün gruplarına göre yarattığı markaları ve uzman ekipleriyle yurtiçi ve yurtdışında hizmet verir.</p>
+          <p style="max-width:34ch;font-size:15px" data-i18n="br.side">Farben, ürün gruplarına göre yarattığı markaları ve uzman ekipleriyle yurtiçi ve yurtdışında hizmet verir.</p>
         </div>
         <div class="cards-4">
-          <article class="card rv" style="text-align:center"><b class="wm-serif" style="font-size:24px;color:var(--ink)">PELLE</b><p style="margin-top:10px">Deri finisaj ürün ailesi</p></article>
-          <article class="card rv rv-1" style="text-align:center"><b style="font-size:22px;font-weight:900;color:var(--ink)"><span class="wm-chip" style="background:#F5B301;display:inline-block;margin-right:8px"></span>CURTEX</b><p style="margin-top:10px">Deri ve tekstil kimyasalları</p></article>
-          <article class="card rv rv-2" style="text-align:center"><b class="wm-serif" style="font-size:22px;color:#8A6D1F">ALLIANZ</b><p style="margin-top:10px">Leather — premium seri</p></article>
-          <article class="card card--dash rv rv-3">ve grup bünyesindeki<br>diğer markalar</article>
+          <article class="card rv" style="text-align:center"><b class="wm-serif" style="font-size:24px;color:var(--ink)">PELLE</b><p style="margin-top:10px" data-i18n="br.p1">Deri finisaj ürün ailesi</p></article>
+          <article class="card rv rv-1" style="text-align:center"><b style="font-size:22px;font-weight:900;color:var(--ink)"><span class="wm-chip" style="background:#F5B301;display:inline-block;margin-right:8px"></span>CURTEX</b><p style="margin-top:10px" data-i18n="br.p2">Deri ve tekstil kimyasalları</p></article>
+          <article class="card rv rv-2" style="text-align:center"><b class="wm-serif" style="font-size:22px;color:#8A6D1F">ALLIANZ</b><p style="margin-top:10px" data-i18n="br.p3">Leather — premium seri</p></article>
+          <article class="card card--dash rv rv-3" data-i18n="br.other">ve grup bünyesindeki diğer markalar</article>
         </div>
       </div>
     </section>
@@ -167,16 +177,16 @@
     <section class="sec prod" id="uretim">
       <div class="wrap">
         <div class="rv">
-          <span class="kicker">ÜRETİM TEKNOLOJİSİ</span>
-          <h2 class="h-sec" style="margin:18px 0 16px">Tekrarlanabilir kalite, ölçülebilir hassasiyet<span class="dot">.</span></h2>
-          <p>İleri teknoloji, bilgisayar kontrollü ekipmanlar ve eğitimli iş gücüyle "exproof" bir ortamda, işçi sağlığı ve güvenliğiyle özdeşleşmiş üretim yapıyoruz.</p>
+          <span class="kicker" data-i18n="pr.kicker">ÜRETİM TEKNOLOJİSİ</span>
+          <h2 class="h-sec" style="margin:18px 0 16px"><span data-i18n="pr.title">Tekrarlanabilir kalite, ölçülebilir hassasiyet</span><span class="dot">.</span></h2>
+          <p data-i18n="pr.lead">İleri teknoloji, bilgisayar kontrollü ekipmanlar ve eğitimli iş gücüyle "exproof" bir ortamda, işçi sağlığı ve güvenliğiyle özdeşleşmiş üretim yapıyoruz.</p>
           <div class="spec-list">
-            <div class="spec"><b>ISO 9001 mantığı</b><span>Hassasiyet ve tekrarlanabilirlik maksimize edilerek insan kaynaklı hatalar en aza indirilir.</span></div>
-            <div class="spec"><b>Kalite kontrol laboratuvarları</b><span>Üretim sırasında alınan ara numuneler test edilerek proses kontrol altında tutulur.</span></div>
+            <div class="spec"><b data-i18n="pr.s1t">ISO 9001 mantığı</b><span data-i18n="pr.s1d">Hassasiyet ve tekrarlanabilirlik maksimize edilerek insan kaynaklı hatalar en aza indirilir.</span></div>
+            <div class="spec"><b data-i18n="pr.s2t">Kalite kontrol laboratuvarları</b><span data-i18n="pr.s2d">Üretim sırasında alınan ara numuneler test edilerek proses kontrol altında tutulur.</span></div>
           </div>
         </div>
         <figure class="prod-fig rv rv-1">
-          <img src="assets/img/rolls.jpg" alt="Renkli deri ruloları" width="1100" height="1036">
+          <img src="assets/img/rolls.jpg" data-i18n-alt="pr.alt" alt="Renkli deri ruloları" width="1100" height="1036">
         </figure>
       </div>
     </section>
@@ -185,14 +195,14 @@
     <section class="sec sec--green" id="cevre">
       <div class="wrap">
         <div class="sec-head rv">
-          <span class="kicker kicker--green">ÇEVREYE SAYGI</span>
-          <h2 class="h-sec">Odağında çevre ve insan olan bir üretim anlayışı<span class="dot" style="color:var(--green)">.</span></h2>
-          <p style="margin-top:14px">Üretiminden kullanımına kadar tüm ürünlerimizin insan ve çevre dostu olmasına özen gösteriyoruz. Kullanılan hammaddelerin parçalanabilir ve Dünya Sağlık Teşkilatı limitlerine uygun olmasına dikkat ediyoruz.</p>
+          <span class="kicker kicker--green" data-i18n="eco.kicker">ÇEVREYE SAYGI</span>
+          <h2 class="h-sec"><span data-i18n="eco.title">Odağında çevre ve insan olan bir üretim anlayışı</span><span class="dot" style="color:var(--green)">.</span></h2>
+          <p style="margin-top:14px" data-i18n="eco.lead">Üretiminden kullanımına kadar tüm ürünlerimizin insan ve çevre dostu olmasına özen gösteriyoruz. Kullanılan hammaddelerin parçalanabilir ve Dünya Sağlık Teşkilatı limitlerine uygun olmasına dikkat ediyoruz.</p>
         </div>
         <div class="eco-cards">
-          <article class="eco-card rv"><b>Su bazlı</b><p>Üretimimizin çok büyük bir kısmını su bazlı ürünler oluşturur.</p></article>
-          <article class="eco-card rv rv-1"><b>Üçlü Sorumluluk</b><p>Kuruluşundan bu yana benimsenmiş ve resmen onaylanmış bir taahhüt.</p></article>
-          <article class="eco-card rv rv-2"><b>Arıtma</b><p>Son teknoloji arıtma sistemine sahip İstanbul Organize Deri Sanayi Bölgesi.</p></article>
+          <article class="eco-card rv"><b data-i18n="eco.c1t">Su bazlı</b><p data-i18n="eco.c1d">Üretimimizin çok büyük bir kısmını su bazlı ürünler oluşturur.</p></article>
+          <article class="eco-card rv rv-1"><b data-i18n="eco.c2t">Üçlü Sorumluluk</b><p data-i18n="eco.c2d">Kuruluşundan bu yana benimsenmiş ve resmen onaylanmış bir taahhüt.</p></article>
+          <article class="eco-card rv rv-2"><b data-i18n="eco.c3t">Arıtma</b><p data-i18n="eco.c3d">Son teknoloji arıtma sistemine sahip İstanbul Organize Deri Sanayi Bölgesi.</p></article>
         </div>
       </div>
     </section>
@@ -201,45 +211,45 @@
     <section class="sec" id="degerler">
       <div class="wrap">
         <div class="sec-head rv">
-          <span class="kicker">İLKE VE DEĞERLERİMİZ</span>
-          <h2 class="h-sec">Değer yaratmak, güvenle sürdürmek<span class="dot">.</span></h2>
-          <p style="margin-top:14px">Müşteriler için değer yaratmak, talep ve gereksinimlerini en üst düzeyde karşılamak, kaliteli ürün ve hizmet sağlamak ve istikrarlı politikalar izlemek temel yaklaşımımızdır.</p>
+          <span class="kicker" data-i18n="val.kicker">İLKE VE DEĞERLERİMİZ</span>
+          <h2 class="h-sec"><span data-i18n="val.title">Değer yaratmak, güvenle sürdürmek</span><span class="dot">.</span></h2>
+          <p style="margin-top:14px" data-i18n="val.lead">Müşteriler için değer yaratmak, talep ve gereksinimlerini en üst düzeyde karşılamak, kaliteli ürün ve hizmet sağlamak ve istikrarlı politikalar izlemek temel yaklaşımımızdır.</p>
         </div>
         <div class="pills rv">
-          <span class="pill">Müşteri Memnuniyeti</span>
-          <span class="pill">Dürüstlük</span>
-          <span class="pill">Süreklilik</span>
-          <span class="pill on">Kalite</span>
-          <span class="pill">Açıklık</span>
-          <span class="pill">Ekip Çalışması</span>
-          <span class="pill">Sosyal Sorumluluk</span>
-          <span class="pill">Güvenilirlik</span>
+          <span class="pill" data-i18n="val.1">Müşteri Memnuniyeti</span>
+          <span class="pill" data-i18n="val.2">Dürüstlük</span>
+          <span class="pill" data-i18n="val.3">Süreklilik</span>
+          <span class="pill on" data-i18n="val.4">Kalite</span>
+          <span class="pill" data-i18n="val.5">Açıklık</span>
+          <span class="pill" data-i18n="val.6">Ekip Çalışması</span>
+          <span class="pill" data-i18n="val.7">Sosyal Sorumluluk</span>
+          <span class="pill" data-i18n="val.8">Güvenilirlik</span>
         </div>
       </div>
     </section>
 
-    <!-- ===== Müşteri Portalı (yeni nesil fark) ===== -->
+    <!-- ===== Müşteri Portalı ===== -->
     <section class="portal-promo" id="portal">
       <div class="wrap">
         <div class="rv">
-          <span class="kicker kicker--plain" style="color:#FF5C77">MÜŞTERİ PORTALI · YENİ</span>
-          <h2 class="h-sec" style="margin:16px 0 14px">Siparişiniz hangi aşamada?<br>Bir bakışta<span class="dot">.</span></h2>
-          <p class="lead">Yetkilendirilmiş müşterilerimiz ve satış ekibimiz; siparişleri, teslimat durumunu ve talep geçmişini artık doğrudan web üzerinden takip ediyor.</p>
+          <span class="kicker kicker--plain" style="color:#FF5C77" data-i18n="pp.kicker">MÜŞTERİ PORTALI · YENİ</span>
+          <h2 class="h-sec" style="margin:16px 0 14px"><span data-i18n="pp.t1">Siparişiniz hangi aşamada?</span><br><span data-i18n="pp.t2">Bir bakışta</span><span class="dot">.</span></h2>
+          <p class="lead" data-i18n="pp.lead">Yetkilendirilmiş müşterilerimiz ve satış ekibimiz; siparişleri, teslimat durumunu ve talep geçmişini artık doğrudan web üzerinden takip ediyor.</p>
           <ul class="pp-feats">
-            <li>7/24 sipariş ve teslimat durumu takibi — üretimden teslimata adım adım</li>
-            <li>Yeni talepler anında satış temsilcinizin CRM kartına düşer</li>
-            <li>Sipariş belgeleri ve görüşme geçmişi tek ekranda</li>
+            <li data-i18n="pp.f1">7/24 sipariş ve teslimat durumu takibi — üretimden teslimata adım adım</li>
+            <li data-i18n="pp.f2">Yeni talepler anında satış temsilcinizin CRM kartına düşer</li>
+            <li data-i18n="pp.f3">Sipariş belgeleri ve görüşme geçmişi tek ekranda</li>
           </ul>
-          <a class="btn btn--red" href="portal.html">Portala giriş yapın <span class="arr">→</span></a>
-          <p class="pp-note">* Demo sürüm — örnek verilerle canlı olarak deneyebilirsiniz.</p>
+          <a class="btn btn--red" href="portal.html"><span data-i18n="pp.btn">Portala giriş yapın</span> <span class="arr">→</span></a>
+          <p class="pp-note" data-i18n="pp.note">* Demo sürüm — örnek verilerle canlı olarak deneyebilirsiniz.</p>
           <div class="pp-sec">
-            <span>🔐 Yetki bazlı erişim</span>
-            <span>🛡 KVKK uyumlu</span>
-            <span>⏱ Otomatik oturum sonlandırma</span>
+            <span data-i18n="pp.s1">🔐 Yetki bazlı erişim</span>
+            <span data-i18n="pp.s2">🛡 KVKK uyumlu</span>
+            <span data-i18n="pp.s3">⏱ Otomatik oturum sonlandırma</span>
           </div>
         </div>
         <div class="pp-shot rv rv-1" aria-hidden="true">
-          <span class="pp-live"><i></i>CANLI DURUM</span>
+          <span class="pp-live"><i></i><span data-i18n="pp.live">CANLI DURUM</span></span>
           <div class="pp-row"><div><b>PH-2026-0147</b><br><span>Su Bazlı Top Coat · 2.400 kg</span></div><span class="chip chip--ship">Sevkiyatta</span></div>
           <div class="pp-row"><div><b>PH-2026-0146</b><br><span>Altkat Binder AL-40 · 1.200 kg</span></div><span class="chip chip--prod">Üretimde</span></div>
           <div class="pp-row"><div><b>PH-2026-0141</b><br><span>Anilin Boya Serisi · 800 kg</span></div><span class="chip chip--done">Teslim edildi</span></div>
@@ -253,23 +263,23 @@
       <div class="wrap">
         <div class="sec-head sec-head--row rv">
           <div>
-            <span class="kicker">SON GELİŞMELER</span>
-            <h2 class="h-sec" style="margin-top:16px">Bizden haberler<span class="dot">.</span></h2>
+            <span class="kicker" data-i18n="nw.kicker">SON GELİŞMELER</span>
+            <h2 class="h-sec" style="margin-top:16px"><span data-i18n="nw.title">Bizden haberler</span><span class="dot">.</span></h2>
           </div>
-          <a class="link-red" href="#haberler">Tüm haberler →</a>
+          <a class="link-red" href="#haberler" data-i18n="nw.all">Tüm haberler →</a>
         </div>
         <div class="news">
           <article class="news-card rv">
-            <div class="news-img" style="background:linear-gradient(135deg,#2A2A2E,#4A3A33)"><span class="tag">FUAR</span></div>
-            <div class="news-body"><time>20.08.2023</time><h3>Leather Fair India</h3><p>Pan Holding, Hindistan'daki yoğun katılımlı fuarda yerini aldı.</p></div>
+            <div class="news-img" style="background:linear-gradient(135deg,#2A2A2E,#4A3A33)"><span class="tag" data-i18n="nw.tag">FUAR</span></div>
+            <div class="news-body"><time>20.08.2023</time><h3 data-i18n="nw.1t">Leather Fair India</h3><p data-i18n="nw.1d">Pan Holding, Hindistan'daki yoğun katılımlı fuarda yerini aldı.</p></div>
           </article>
           <article class="news-card rv rv-1">
-            <div class="news-img" style="background:linear-gradient(135deg,#5A1220,#8A2033)"><span class="tag">FUAR</span></div>
-            <div class="news-body"><time>20.08.2023</time><h3>Leather Fair İstanbul</h3><p>İstanbul'daki fuarda yeni ürün gruplarımızı ziyaretçilerle buluşturduk.</p></div>
+            <div class="news-img" style="background:linear-gradient(135deg,#5A1220,#8A2033)"><span class="tag" data-i18n="nw.tag">FUAR</span></div>
+            <div class="news-body"><time>20.08.2023</time><h3 data-i18n="nw.2t">Leather Fair İstanbul</h3><p data-i18n="nw.2d">İstanbul'daki fuarda yeni ürün gruplarımızı ziyaretçilerle buluşturduk.</p></div>
           </article>
           <article class="news-card rv rv-2">
-            <div class="news-img" style="background:linear-gradient(135deg,#4A3A2A,#6B5138)"><span class="tag">FUAR</span></div>
-            <div class="news-body"><time>20.08.2023</time><h3>Uluslararası Deri Fuarı</h3><p>Global sektör fuarlarını yakından takip ederek son trendleri müşterilerimize taşıyoruz.</p></div>
+            <div class="news-img" style="background:linear-gradient(135deg,#4A3A2A,#6B5138)"><span class="tag" data-i18n="nw.tag">FUAR</span></div>
+            <div class="news-body"><time>20.08.2023</time><h3 data-i18n="nw.3t">Uluslararası Deri Fuarı</h3><p data-i18n="nw.3d">Global sektör fuarlarını yakından takip ederek son trendleri müşterilerimize taşıyoruz.</p></div>
           </article>
         </div>
       </div>
@@ -279,23 +289,23 @@
     <section class="sec sec--card contact" id="iletisim">
       <div class="wrap">
         <div class="rv">
-          <span class="kicker">İLETİŞİM</span>
-          <h2 class="h-sec" style="margin:16px 0 6px">Bir mesaj kadar yakınız<span class="dot">.</span></h2>
+          <span class="kicker" data-i18n="ct.kicker">İLETİŞİM</span>
+          <h2 class="h-sec" style="margin:16px 0 6px"><span data-i18n="ct.title">Bir mesaj kadar yakınız</span><span class="dot">.</span></h2>
           <div class="c-rows">
-            <div class="c-row"><b>TELEFON</b><a href="tel:4445658">444 56 58</a></div>
-            <div class="c-row"><b>WHATSAPP</b><a data-wa href="#" style="color:#1DA851">Mesaj gönderin →</a></div>
-            <div class="c-row"><b>E-POSTA</b><a href="mailto:info@panholding.com.tr">info@panholding.com.tr</a></div>
-            <div class="c-row"><b>ADRES</b><span>İstanbul Deri OSB, Pres Sokak No:3, Tuzla — İstanbul</span></div>
-            <div class="c-row"><b>ÇALIŞMA SAATLERİ</b><span>Hafta içi 08:30 – 17:30</span></div>
+            <div class="c-row"><b data-i18n="ct.l1">TELEFON</b><a href="tel:4445658">444 56 58</a></div>
+            <div class="c-row"><b data-i18n="ct.l2">WHATSAPP</b><a data-wa href="#" style="color:#1DA851" data-i18n="ct.l2v">Mesaj gönderin →</a></div>
+            <div class="c-row"><b data-i18n="ct.l3">E-POSTA</b><a href="mailto:info@panholding.com.tr">info@panholding.com.tr</a></div>
+            <div class="c-row"><b data-i18n="ct.l4">ADRES</b><span data-i18n="ct.addr">İstanbul Deri OSB, Pres Sokak No:3, Tuzla — İstanbul</span></div>
+            <div class="c-row"><b data-i18n="ct.l5">ÇALIŞMA SAATLERİ</b><span data-i18n="ct.hours">Hafta içi 08:30 – 17:30</span></div>
           </div>
         </div>
         <aside class="newsbox rv rv-1">
-          <h3>E-Bülten Aboneliği</h3>
-          <p>Bizimle ilgili haberleri ilk siz öğrenmek isterseniz e-bültenimize abone olun.</p>
+          <h3 data-i18n="nb.title">E-Bülten Aboneliği</h3>
+          <p data-i18n="nb.lead">Bizimle ilgili haberleri ilk siz öğrenmek isterseniz e-bültenimize abone olun.</p>
           <form id="news-form">
-            <input type="text" placeholder="Ad Soyad" aria-label="Ad Soyad">
-            <input type="email" placeholder="E-posta adresiniz" aria-label="E-posta adresiniz">
-            <button class="btn btn--red" type="submit">Abone ol</button>
+            <input type="text" data-i18n-ph="nb.ph1" placeholder="Ad Soyad" aria-label="Ad Soyad">
+            <input type="email" data-i18n-ph="nb.ph2" placeholder="E-posta adresiniz" aria-label="E-posta adresiniz">
+            <button class="btn btn--red" type="submit" data-i18n="nb.btn">Abone ol</button>
           </form>
         </aside>
       </div>
@@ -310,45 +320,46 @@
           <img class="lg-img inv" src="assets/img/pan-emblem.png" alt="">
           <b style="color:#fff">PAN <i>HOLDING</i></b>
         </a>
-        <p>1975'ten bu yana deri ve kimya sanayiinde üretim, kalite ve teknik servisi tek çatı altında buluşturan sanayi grubu.</p>
+        <p data-i18n="ft.desc">1975'ten bu yana deri ve kimya sanayiinde üretim, kalite ve teknik servisi tek çatı altında buluşturan sanayi grubu.</p>
       </div>
       <div>
-        <h4>KURUMSAL</h4>
+        <h4 data-i18n="ft.corp">KURUMSAL</h4>
         <ul class="ftr-links">
-          <li><a href="#kimdir">Pan Holding Kimdir</a></li>
-          <li><a href="#sirketler">Şirketlerimiz</a></li>
-          <li><a href="#uretim">Üretim Teknolojisi</a></li>
-          <li><a href="#cevre">Çevreye Saygı</a></li>
-          <li><a href="portal.html">Müşteri Portalı</a></li>
+          <li><a href="#kimdir" data-i18n="ft.l1">Pan Holding Kimdir</a></li>
+          <li><a href="#sirketler" data-i18n="ft.l2">Şirketlerimiz</a></li>
+          <li><a href="#uretim" data-i18n="ft.l3">Üretim Teknolojisi</a></li>
+          <li><a href="#cevre" data-i18n="ft.l4">Çevreye Saygı</a></li>
+          <li><a href="portal.html" data-i18n="ft.l5">Müşteri Portalı</a></li>
         </ul>
       </div>
       <div>
-        <h4>İLETİŞİM</h4>
+        <h4 data-i18n="ft.contact">İLETİŞİM</h4>
         <ul class="ftr-links">
           <li><a href="tel:4445658">444 56 58</a></li>
           <li><a href="mailto:info@panholding.com.tr">info@panholding.com.tr</a></li>
-          <li>İstanbul Deri OSB, Pres Sokak No:3, Tuzla — İstanbul</li>
+          <li data-i18n="ct.addr">İstanbul Deri OSB, Pres Sokak No:3, Tuzla — İstanbul</li>
         </ul>
       </div>
     </div>
     <div class="ftr-bottom">
       <div class="wrap">
-        <span>© 2026 Pan Holding. Tüm hakları saklıdır.</span>
+        <span data-i18n="ft.rights">© 2026 Pan Holding. Tüm hakları saklıdır.</span>
         <nav>
-          <a href="#">KVKK</a>
-          <a href="#">Kullanıcı Sözleşmesi</a>
-          <a href="#">Çerez Politikası</a>
+          <a href="#" data-i18n="ft.kvkk">KVKK</a>
+          <a href="#" data-i18n="ft.terms">Kullanıcı Sözleşmesi</a>
+          <a href="#" data-i18n="ft.cookie">Çerez Politikası</a>
         </nav>
       </div>
     </div>
   </footer>
 
   <!-- WhatsApp yüzen buton -->
-  <a class="wa-float" data-wa href="#" aria-label="WhatsApp ile yazın" title="WhatsApp ile yazın">
+  <a class="wa-float" data-wa href="#" data-i18n-aria="wa.title" data-i18n-title="wa.title" aria-label="WhatsApp" title="WhatsApp">
     <span class="wa-ping" aria-hidden="true"></span>
     <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.4 3 4 8.3 4 14.9c0 2.1.6 4.1 1.6 5.9L4 29l8.4-1.6c1.7.9 3.6 1.4 5.6 1.4 6.6 0 12-5.3 12-11.9C30 8.3 24.6 3 16 3zm0 21.9c-1.8 0-3.5-.5-5-1.3l-.4-.2-5 1 1-4.8-.3-.4c-1-1.6-1.5-3.4-1.5-5.3 0-5.5 4.5-9.9 10.2-9.9 5.6 0 10.1 4.4 10.1 9.9s-4.5 10-9.1 10zm5.6-7.4c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-.9 1.2-.3.2-.6.1c-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1s0-.5.1-.6c.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2.1-.4 0-.6s-.7-1.7-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1.1 1-1.1 2.5 1.1 2.9 1.3 3.1c.2.2 2.2 3.4 5.4 4.8.8.3 1.4.5 1.8.7.8.2 1.5.2 2 .1.6-.1 1.8-.7 2.1-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.4z"/></svg>
   </a>
 
+  <script src="assets/pan-i18n.js"></script>
   <script src="assets/site.js"></script>
 </body>
 </html>

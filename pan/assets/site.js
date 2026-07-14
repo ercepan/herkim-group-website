@@ -11,11 +11,16 @@ var PAN_WA_MSG = "Merhaba, Pan Holding web sitesinden ulaşıyorum. Bilgi almak 
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
 
   /* WhatsApp bağlantıları: [data-wa] olan her öğe tıklanınca sohbet açar */
-  $$("[data-wa]").forEach(function (a) {
-    a.href = "https://wa.me/" + PAN_WA_NUMBER + "?text=" + encodeURIComponent(PAN_WA_MSG);
-    a.target = "_blank";
-    a.rel = "noopener";
-  });
+  function waMsg() { return (window.pT ? window.pT("wa.msg") : PAN_WA_MSG); }
+  function wireWa() {
+    $$("[data-wa]").forEach(function (a) {
+      a.href = "https://wa.me/" + PAN_WA_NUMBER + "?text=" + encodeURIComponent(waMsg());
+      a.target = "_blank";
+      a.rel = "noopener";
+    });
+  }
+  wireWa();
+  document.addEventListener("pan:lang", wireWa);
 
   /* Görünürlük animasyonu */
   var io = new IntersectionObserver(function (entries) {
@@ -96,9 +101,9 @@ var PAN_WA_MSG = "Merhaba, Pan Holding web sitesinden ulaşıyorum. Bilgi almak 
   if (nf) nf.addEventListener("submit", function (e) {
     e.preventDefault();
     var em = $('input[type="email"]', nf);
-    if (!em.value || em.value.indexOf("@") === -1) { window.panToast("Geçerli bir e-posta adresi girin."); return; }
+    if (!em.value || em.value.indexOf("@") === -1) { window.panToast(window.pT ? window.pT("nb.err") : "Geçerli bir e-posta adresi girin."); return; }
     localStorage.setItem("pan_newsletter", em.value);
     nf.reset();
-    window.panToast("E-bülten kaydınız alındı. Teşekkürler!");
+    window.panToast(window.pT ? window.pT("nb.ok") : "E-bülten kaydınız alındı. Teşekkürler!");
   });
 })();
