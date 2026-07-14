@@ -7,7 +7,7 @@
 - **Ünvan:** Herkim Kimya San. ve Tic. · **Kuruluş:** 1975 (54 yıl tecrübe)
 - **İş:** Deri kimyasalları dağıtım ve üretimi. Türkiye'de **Türk Henkel, Camsar ve BASF Türk** distribütörü; **12 satış noktası**.
 - **Adres:** Organize Deri San. Böl. 19. Yol 12/6 Parsel, Tuzla — İstanbul / Türkiye
-- **Tel:** +90 216 394 11 25 · **Faks:** +90 216 394 10 04 · **E-posta:** info@herkim.com.tr
+- **Tel:** +90 216 394 11 25 · **Faks:** +90 216 394 10 04 · **E-posta:** info@herkimgroup.com
 - **Grup:** [herkimgroup.com](https://www.herkimgroup.com)
 
 ## Sayfalar

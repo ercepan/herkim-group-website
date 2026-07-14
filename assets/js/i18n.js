@@ -19,7 +19,7 @@ const HK_I18N = {
 
     "top.rateNote": "indikatif",
     "top.phone": "+90 216 394 11 25",
-    "top.email": "info@herkim.com.tr",
+    "top.email": "info@herkimgroup.com",
 
     "nav.home": "Anasayfa",
     "nav.corporate": "Kurumsal",
@@ -203,7 +203,7 @@ const HK_I18N = {
     "ci.email": "E-posta",
     "ci.fax": "Faks",
     "ci.hours": "Çalışma Saatleri",
-    "ci.hoursVal": "Hafta içi 08:30 – 18:00",
+    "ci.hoursVal": "Hafta içi 08:30 – 17:30",
 
     "tl.1975.t": "Kuruluş",
     "tl.1975.d": "İstanbul Kazlıçeşme deri bölgesinde kurulduk.",
@@ -318,7 +318,7 @@ const HK_I18N = {
     "contact.depGeneral": "Genel",
 
     "kvkk.s1.title": "Kişisel verilerin korunması",
-    "kvkk.s1.body": "Herkim Kimya, 6698 sayılı KVKK kapsamında veri sorumlusu sıfatıyla hareket eder. İletişim ve teklif formları aracılığıyla paylaştığınız ad, firma, telefon ve e-posta bilgileri yalnızca talebinizin karşılanması amacıyla işlenir; açık rızanız olmadan üçüncü kişilerle paylaşılmaz. KVKK haklarınızı info@herkim.com.tr adresine başvurarak kullanabilirsiniz.",
+    "kvkk.s1.body": "Herkim Kimya, 6698 sayılı KVKK kapsamında veri sorumlusu sıfatıyla hareket eder. İletişim ve teklif formları aracılığıyla paylaştığınız ad, firma, telefon ve e-posta bilgileri yalnızca talebinizin karşılanması amacıyla işlenir; açık rızanız olmadan üçüncü kişilerle paylaşılmaz. KVKK haklarınızı info@herkimgroup.com adresine başvurarak kullanabilirsiniz.",
     "kvkk.s2.title": "Çerez kullanımı",
     "kvkk.s2.body": "Sitemiz yalnızca gerekli çerezleri ve yerel depolamayı kullanır: teklif sepetiniz, dil tercihiniz ve çerez onayınız. Reklam veya izleme amaçlı üçüncü taraf çerezi kullanılmaz. Tarayıcı ayarlarınızdan bu verileri dilediğinizde temizleyebilirsiniz.",
     "kvkk.note": "NOT: Bu metin bir şablondur; yayına almadan önce hukuk danışmanınızla güncelleyiniz."
@@ -330,7 +330,7 @@ const HK_I18N = {
 
     "top.rateNote": "indicative",
     "top.phone": "+90 216 394 11 25",
-    "top.email": "info@herkim.com.tr",
+    "top.email": "info@herkimgroup.com",
 
     "nav.home": "Home",
     "nav.corporate": "Corporate",
@@ -514,7 +514,7 @@ const HK_I18N = {
     "ci.email": "E-mail",
     "ci.fax": "Fax",
     "ci.hours": "Working Hours",
-    "ci.hoursVal": "Weekdays 08:30 – 18:00",
+    "ci.hoursVal": "Weekdays 08:30 – 17:30",
 
     "tl.1975.t": "Foundation",
     "tl.1975.d": "Founded in Istanbul's Kazlıçeşme leather district.",
@@ -629,7 +629,7 @@ const HK_I18N = {
     "contact.depGeneral": "General",
 
     "kvkk.s1.title": "Protection of personal data",
-    "kvkk.s1.body": "Herkim Kimya acts as data controller under Turkey's KVKK (Law No. 6698). The name, company, phone and e-mail you share via contact and quote forms are processed solely to fulfill your request and are not shared with third parties without your explicit consent. You may exercise your rights by writing to info@herkim.com.tr.",
+    "kvkk.s1.body": "Herkim Kimya acts as data controller under Turkey's KVKK (Law No. 6698). The name, company, phone and e-mail you share via contact and quote forms are processed solely to fulfill your request and are not shared with third parties without your explicit consent. You may exercise your rights by writing to info@herkimgroup.com.",
     "kvkk.s2.title": "Cookie usage",
     "kvkk.s2.body": "Our site uses only necessary cookies and local storage: your quote basket, language preference and cookie consent. No third-party advertising or tracking cookies are used. You can clear this data anytime from your browser settings.",
     "kvkk.note": "NOTE: This text is a template; update it with your legal advisor before publishing."
@@ -641,7 +641,7 @@ const HK_I18N = {
 
     "top.rateNote": "ориентировочно",
     "top.phone": "+90 216 394 11 25",
-    "top.email": "info@herkim.com.tr",
+    "top.email": "info@herkimgroup.com",
 
     "nav.home": "Главная",
     "nav.corporate": "О компании",
@@ -825,7 +825,7 @@ const HK_I18N = {
     "ci.email": "E-mail",
     "ci.fax": "Факс",
     "ci.hours": "Часы работы",
-    "ci.hoursVal": "Будни 08:30 – 18:00",
+    "ci.hoursVal": "Будни 08:30 – 17:30",
 
     "tl.1975.t": "Основание",
     "tl.1975.d": "Основана в кожевенном районе Казлычешме, Стамбул.",
@@ -940,7 +940,7 @@ const HK_I18N = {
     "contact.depGeneral": "Общий",
 
     "kvkk.s1.title": "Защита персональных данных",
-    "kvkk.s1.body": "Herkim Kimya выступает оператором данных согласно закону Турции KVKK (№ 6698). Имя, компания, телефон и e-mail, переданные через формы, обрабатываются исключительно для выполнения вашего запроса и не передаются третьим лицам без вашего согласия. Свои права вы можете реализовать, написав на info@herkim.com.tr.",
+    "kvkk.s1.body": "Herkim Kimya выступает оператором данных согласно закону Турции KVKK (№ 6698). Имя, компания, телефон и e-mail, переданные через формы, обрабатываются исключительно для выполнения вашего запроса и не передаются третьим лицам без вашего согласия. Свои права вы можете реализовать, написав на info@herkimgroup.com.",
     "kvkk.s2.title": "Использование cookie",
     "kvkk.s2.body": "Сайт использует только необходимые cookie и локальное хранилище: корзину запроса, выбор языка и согласие на cookie. Рекламные и трекинговые cookie третьих сторон не используются. Эти данные можно очистить в настройках браузера.",
     "kvkk.note": "ПРИМЕЧАНИЕ: этот текст — шаблон; обновите его с юристом перед публикацией."

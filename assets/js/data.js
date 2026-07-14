@@ -16,11 +16,12 @@ const HK_COMPANY = {
   experience: 54,
   salesPoints: 12,
   address: "Organize Deri San. Böl. 19. Yol 12/6 Parsel, Tuzla — İstanbul / Türkiye",
-  phone: "+90 216 394 11 25",
+  phone: "444 56 58",
+  phone2: "+90 216 394 11 25",
   phoneTel: "+902163941125",
   fax: "+90 216 394 10 04",
-  email: "info@herkim.com.tr",
-  mailQuote: "info@herkim.com.tr",
+  email: "info@herkimgroup.com",
+  mailQuote: "info@herkimgroup.com",
   whatsapp: "902163941125",   // wa.me — WhatsApp Business hattınızla değiştirin
   group: "https://www.herkimgroup.com",
   brands: ["Herkim", "Herkim", "Herkim"]
