@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Müşteri Portalı — Herkim Kimya</title>
+  <meta name="description" content="Herkim Kimya Portalı: sipariş verme, sipariş/teslimat takibi, talepler, müşteri kartı ve yönetim görünürlüğü — uçtan uca tek akış. Demo.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body class="pt-body">
+
+  <!-- ================= GİRİŞ ================= -->
+  <div id="login-view">
+    <div class="lgw">
+      <div class="lg-side">
+        <a class="brand" href="index.html" aria-label="Herkim Kimya">
+          <svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true"><circle cx="160" cy="160" r="148" fill="#1B1216" stroke="#C42449" stroke-width="10"/><g fill="#FAF6F1"><rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/><polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/></g></svg>
+          <span class="brand-name"><b>HERKİM</b><span>PORTAL</span></span>
+        </a>
+        <svg class="lg-hex" viewBox="0 0 200 200" aria-hidden="true"><path d="M100 10l78 45v90l-78 45-78-45V55z" fill="none" stroke="#FAF6F1" stroke-width="3"/></svg>
+        <div class="lg-mid">
+          <h1>Müşteriden yönetime,<br><em>tek akış.</em></h1>
+          <p>Talep tek noktadan toplanır, sipariş verilir, satış onaylar, depo ilerletir, yönetim anlık izler. Her temas noktası dijital kayıt altında.</p>
+          <div class="lg-flow" aria-hidden="true">
+            <div class="lg-step"><span class="no">1</span><b>Talep / Sipariş — tek noktadan</b></div>
+            <div class="lg-step"><span class="no">2</span><b>Akıllı CRM — tek müşteri kartı</b></div>
+            <div class="lg-step"><span class="no">3</span><b>Satış onayı — sipariş & süreç takibi</b></div>
+            <div class="lg-step"><span class="no">4</span><b>Depo / Üretim / Sevkiyat</b></div>
+            <div class="lg-step"><span class="no">5</span><b>Yönetim görünürlüğü — anlık</b></div>
+          </div>
+        </div>
+        <a class="lg-back" href="index.html">← herkim.com.tr'ye dön</a>
+      </div>
+      <div class="lg-form-wrap">
+        <div class="lg-card">
+          <h2>Portala giriş<span class="accent">.</span></h2>
+          <p class="sub">Uçtan uca akışı dört farklı gözden deneyin.</p>
+          <div class="lg-err" id="lg-err" role="alert"></div>
+          <form id="lg-form">
+            <div class="field" style="margin-bottom:14px">
+              <label for="lg-mail">E-POSTA</label>
+              <input id="lg-mail" type="email" value="satinalma@derimderi.com.tr" autocomplete="username" maxlength="80">
+            </div>
+            <div class="field" style="margin-bottom:16px">
+              <label for="lg-pass">ŞİFRE <span style="text-transform:none;letter-spacing:0">(demo: demo1234)</span></label>
+              <input id="lg-pass" type="password" value="demo1234" autocomplete="current-password" maxlength="64">
+            </div>
+            <button class="btn btn--primary" style="width:100%;justify-content:center" type="submit" id="lg-btn">Giriş yap</button>
+          </form>
+          <div class="rolebar">
+            <button class="rolebtn" data-role="musteri"><b>👤 Müşteri</b><span>Sipariş ver &amp; takip et</span></button>
+            <button class="rolebtn" data-role="satis"><b>💼 Satış (CRM)</b><span>Onay, talepler, müşteri kartı</span></button>
+            <button class="rolebtn" data-role="depo"><b>🏭 Depo / Üretim</b><span>Sipariş akışını ilerlet</span></button>
+            <button class="rolebtn" data-role="yonetim"><b>📊 Yönetim</b><span>Anlık görünürlük</span></button>
+          </div>
+          <div class="sec-strip" aria-label="Güvenlik">
+            <span>🔐 Yetki bazlı erişim</span>
+            <span>⏱ 15 dk'da otomatik çıkış</span>
+            <span>🚫 3 hatada kilit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= UYGULAMA ================= -->
+  <div id="app-view" style="display:none">
+    <div class="app">
+      <aside class="sb">
+        <a class="brand" href="index.html" aria-label="Herkim">
+          <svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true" style="width:38px;height:38px"><circle cx="160" cy="160" r="148" fill="#1B1216" stroke="#C42449" stroke-width="10"/><g fill="#FAF6F1"><rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/><polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/></g></svg>
+          <span class="brand-name"><b>HERKİM</b><span>PORTAL</span></span>
+        </a>
+        <span class="role-pill" id="role-pill">—</span>
+        <div class="sb-label">Menü</div>
+        <nav id="sb-nav" style="display:contents"></nav>
+        <div class="sb-foot">
+          <div class="sb-user">
+            <span class="avatar" id="u-initials">—</span>
+            <div><b id="u-name">—</b><span id="u-title">—</span></div>
+          </div>
+          <div class="sb-last" id="u-last"></div>
+          <button class="sb-link" id="btn-switch" style="margin-top:6px">🔁 Rol değiştir</button>
+          <button class="sb-link" id="btn-logout">↩ Çıkış yap</button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topline">
+          <div>
+            <div class="crumb">HERKİM · TEK AKIŞ PORTALI · <span id="scope">—</span></div>
+            <h1 id="page-title">Özet</h1>
+          </div>
+          <div class="top-actions">
+            <span class="demo-badge"><i></i>DEMO ORTAMI</span>
+            <button class="btn btn--ghost btn--sm" id="btn-reset" title="Demo verisini başa sar">↺ Demoyu sıfırla</button>
+            <button class="btn btn--primary btn--sm" id="btn-primary-action" style="display:none">+ Yeni Sipariş</button>
+          </div>
+        </div>
+
+        <!-- ÖZET / DASHBOARD -->
+        <section id="view-dash">
+          <div class="kpis" id="kpi-row"></div>
+          <div class="panel" id="dash-funnel-panel">
+            <div class="panel-head"><h2>Uçtan uca akış — bugünkü durum</h2><span class="ops-note">Talep → Onay → Üretim → Teslim</span></div>
+            <div class="funnel" id="funnel"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2 id="dash-list-title">Son siparişler</h2><button class="link-crimson" id="dash-more">Tümünü gör →</button></div>
+            <div class="tbl-wrap"><table class="ptbl"><thead><tr id="dash-thead"></tr></thead><tbody id="dash-body"></tbody></table></div>
+          </div>
+          <div class="panel" id="feed-panel">
+            <div class="panel-head"><h2>Canlı aktivite akışı</h2><span class="ops-note">Her temas noktası kayıt altında</span></div>
+            <div class="feed" id="feed"></div>
+          </div>
+        </section>
+
+        <!-- YENİ SİPARİŞ (müşteri) -->
+        <section id="view-neworder" style="display:none">
+          <div class="order-grid">
+            <div class="panel">
+              <div class="panel-head">
+                <h2>Ürün kataloğu</h2>
+                <div class="panel-tools"><input type="text" id="cat-search" placeholder="Ürün ara…"></div>
+              </div>
+              <div class="cat-list" id="cat-list"></div>
+            </div>
+            <div class="panel cart-box">
+              <div class="panel-head"><h2>Sipariş özeti</h2><span class="st st--bekliyor" style="background:var(--crimson-soft);color:var(--crimson)">Onaya gider</span></div>
+              <div class="cart-lines" id="cart-lines"><div class="empty2">Soldan ürün ekleyin.</div></div>
+              <div class="cart-foot">
+                <button class="btn btn--primary" style="justify-content:center" id="btn-place-order">Siparişi Gönder</button>
+                <span class="cart-note">* Sipariş, satış temsilcinizin onayına düşer; durumunu buradan izlersiniz. Fiyatlar onay aşamasında netleşir.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SİPARİŞLER -->
+        <section id="view-orders" style="display:none">
+          <div class="panel">
+            <div class="panel-head">
+              <h2 id="orders-title">Siparişler</h2>
+              <div class="panel-tools">
+                <input type="text" id="o-search" placeholder="Sipariş no / ürün / müşteri ara…">
+                <select id="o-status"><option value="all">Tüm durumlar</option><option value="0">Onay Bekliyor</option><option value="1">Onaylandı</option><option value="2">Üretimde</option><option value="3">Sevkiyatta</option><option value="4">Teslim Edildi</option></select>
+              </div>
+            </div>
+            <div class="tbl-wrap"><table class="ptbl"><thead><tr id="orders-thead"></tr></thead><tbody id="orders-body"></tbody></table></div>
+          </div>
+        </section>
+
+        <!-- TALEPLER -->
+        <section id="view-requests" style="display:none">
+          <div class="panel" id="new-req-panel" style="margin-bottom:18px">
+            <div class="panel-head"><h2>Yeni talep oluştur</h2><span class="st st--acik">Anında CRM'e düşer</span></div>
+            <form id="req-form" style="padding:18px 20px;display:grid;gap:13px">
+              <div class="field"><label for="rf-subject">KONU</label><input id="rf-subject" type="text" placeholder="örn. Numune talebi — su bazlı top coat" maxlength="90"></div>
+              <div class="field"><label for="rf-detail">DETAY <span id="rf-count" style="text-transform:none;letter-spacing:0">0/500</span></label><textarea id="rf-detail" rows="3" placeholder="İhtiyacınızı kısaca anlatın." maxlength="500"></textarea></div>
+              <div><button class="btn btn--primary btn--sm" type="submit">Talebi gönder</button></div>
+            </form>
+          </div>
+          <div id="req-list" style="display:grid;gap:13px"></div>
+        </section>
+
+        <!-- MÜŞTERİLER (satış) -->
+        <section id="view-customers" style="display:none">
+          <div class="cust-grid" id="cust-grid"></div>
+        </section>
+
+        <!-- OPERASYON (depo) -->
+        <section id="view-ops" style="display:none">
+          <div class="panel">
+            <div class="panel-head"><h2>Operasyon panosu</h2><span class="ops-note">Onaylanan siparişleri üretim → sevkiyat → teslim olarak ilerletin</span></div>
+            <div class="tbl-wrap"><table class="ptbl"><thead><tr><th>SİPARİŞ / MÜŞTERİ</th><th>KALEMLER</th><th>DURUM</th><th>SONRAKİ ADIM</th></tr></thead><tbody id="ops-body"></tbody></table></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Sipariş çekmecesi -->
+    <div class="ov2" id="ov2"></div>
+    <aside class="dw" id="dw-order" aria-label="Sipariş detayı">
+      <div class="dw-head">
+        <div><h2 id="do-id">—</h2><div class="sub" id="do-sub">—</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+          <button class="dw-x" data-close>KAPAT ×</button>
+          <span id="do-chip"></span>
+        </div>
+      </div>
+      <div class="dw-body">
+        <div class="dw-t">Sipariş durumu</div>
+        <div class="tl2" id="do-tl"></div>
+        <div class="dw-t">Kalemler</div>
+        <div class="dw-items" id="do-items"></div>
+        <div class="dw-t">Sevkiyat &amp; temsilci</div>
+        <div class="dw-meta">
+          <div class="box"><b>NAKLİYE</b><span id="do-carrier">—</span></div>
+          <div class="box"><b>TAKİP NO</b><span id="do-track">—</span></div>
+          <div class="box"><b>TAHMİNİ TESLİM</b><span id="do-eta">—</span></div>
+          <div class="box"><b>SATIŞ TEMSİLCİSİ</b><span id="do-rep">Ayşe Yılmaz</span></div>
+        </div>
+        <div id="do-actions" style="margin-top:22px"></div>
+      </div>
+    </aside>
+
+    <!-- Müşteri kartı çekmecesi -->
+    <aside class="dw" id="dw-cust" aria-label="Müşteri kartı">
+      <div class="dw-head">
+        <div><h2 id="dc-name">—</h2><div class="sub" id="dc-sub">—</div></div>
+        <button class="dw-x" data-close>KAPAT ×</button>
+      </div>
+      <div class="dw-body">
+        <div class="crm-note2" style="margin-bottom:4px"><span>🪪</span><span><b>Tek müşteri kartı:</b> iletişim geçmişi, siparişler ve talepler tek yerde — temsilci değişse de hafıza şirkette kalır.</span></div>
+        <div class="dw-t">İletişim</div>
+        <div class="dw-meta">
+          <div class="box"><b>YETKİLİ</b><span id="dc-contact">—</span></div>
+          <div class="box"><b>TELEFON</b><span id="dc-phone">—</span></div>
+          <div class="box"><b>E-POSTA</b><span id="dc-mail">—</span></div>
+          <div class="box"><b>TEMSİLCİ</b><span id="dc-rep">—</span></div>
+        </div>
+        <div class="dw-t">Görüşme geçmişi</div>
+        <div class="dw-items" id="dc-history"></div>
+        <div class="dw-t">Not ekle</div>
+        <div class="reply-box">
+          <textarea id="dc-note" placeholder="örn. Telefonla arandı; eylül için 2 ton finisaj planlıyor." maxlength="300"></textarea>
+          <button class="btn btn--primary btn--sm" id="dc-note-btn" style="margin-top:10px">Nota kaydet</button>
+        </div>
+        <div class="dw-t">Siparişleri</div>
+        <div class="dw-items" id="dc-orders"></div>
+        <div class="dw-t">Talepleri</div>
+        <div class="dw-items" id="dc-requests"></div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/portal-store.js"></script>
+  <script src="assets/js/portal-app.js"></script>
+</body>
+</html>

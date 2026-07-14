@@ -155,6 +155,15 @@
       empty.appendChild(p1); body.appendChild(empty);
       return;
     }
+    // Teklif sepetini portala taşı: tek tıkla sipariş akışı
+    const go = el("button", "btn btn--primary btn--sm", "");
+    go.style.cssText = "width:100%;justify-content:center;margin-bottom:12px";
+    go.textContent = { tr: "🛒 Portalda sipariş ver", en: "🛒 Order in the portal", ru: "🛒 Заказать в портале" }[L()] || "🛒 Portalda sipariş ver";
+    go.addEventListener("click", () => {
+      localStorage.setItem("hg_order_prefill", JSON.stringify({ ids: b }));
+      location.href = "portal.html";
+    });
+    body.appendChild(go);
     b.forEach(id => {
       const p = HK_PRODUCTS.find(x => x.id === id);
       if (!p) return;
@@ -463,6 +472,15 @@
     if (!name || !msg) { toast(T("toast.formErr")); return; }
     const body = "Ad/Name: " + name + "\nFirma/Company: " + firm +
       "\nTel: " + (data.get("phone") || "") + "\nKonu/Subject: " + (data.get("topic") || "") + "\n\n" + msg;
+    // Landing → CRM: talep portaldaki satış kutusuna da düşer (demo)
+    try {
+      const q = JSON.parse(localStorage.getItem("hg_landing_queue") || "[]");
+      const d = new Date();
+      const pad = (x) => (x < 10 ? "0" : "") + x;
+      q.push({ name, firm, topic: (data.get("topic") || "").toString(), msg,
+               date: pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() });
+      localStorage.setItem("hg_landing_queue", JSON.stringify(q));
+    } catch (err) {}
     location.href = "mailto:" + HK.email + "?subject=" + encodeURIComponent("Web — " + (firm || name)) + "&body=" + encodeURIComponent(body);
     toast(T("toast.mailOpening"));
   });

@@ -35,6 +35,7 @@ const HK_I18N = {
     "nav.docs": "Doküman Merkezi",
     "nav.news": "Duyurular",
     "nav.contact": "İletişim",
+    "nav.portalLink": "Portal",
     "nav.openMenu": "Menüyü aç",
     "nav.close": "KAPAT ×",
 
@@ -346,6 +347,7 @@ const HK_I18N = {
     "nav.docs": "Document Center",
     "nav.news": "News",
     "nav.contact": "Contact",
+    "nav.portalLink": "Portal",
     "nav.openMenu": "Open menu",
     "nav.close": "CLOSE ×",
 
@@ -657,6 +659,7 @@ const HK_I18N = {
     "nav.docs": "Документы",
     "nav.news": "Новости",
     "nav.contact": "Контакты",
+    "nav.portalLink": "Портал",
     "nav.openMenu": "Открыть меню",
     "nav.close": "ЗАКРЫТЬ ×",
 
