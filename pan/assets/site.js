@@ -1,8 +1,21 @@
 /* PAN HOLDING — kurumsal sayfa etkileşimleri */
+
+/* AYAR: WhatsApp hattı — wa.me formatı (ülke kodu + numara, boşluksuz).
+   Gerçek WhatsApp Business numaranızla değiştirin: */
+var PAN_WA_NUMBER = "902163941125";
+var PAN_WA_MSG = "Merhaba, Pan Holding web sitesinden ulaşıyorum. Bilgi almak istiyorum.";
+
 (function () {
   "use strict";
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+
+  /* WhatsApp bağlantıları: [data-wa] olan her öğe tıklanınca sohbet açar */
+  $$("[data-wa]").forEach(function (a) {
+    a.href = "https://wa.me/" + PAN_WA_NUMBER + "?text=" + encodeURIComponent(PAN_WA_MSG);
+    a.target = "_blank";
+    a.rel = "noopener";
+  });
 
   /* Görünürlük animasyonu */
   var io = new IntersectionObserver(function (entries) {

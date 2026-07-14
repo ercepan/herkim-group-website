@@ -9,7 +9,7 @@
   <meta property="og:title" content="Pan Holding — İhtiyaçlarınıza uygun çözümler.">
   <meta property="og:description" content="Deri ve kimya sanayiinde üretim, kalite ve teknik servis tek çatı altında. 1975'ten bu yana.">
   <meta property="og:image" content="https://ercepan.github.io/herkim-group-website/pan/assets/img/factory.jpg">
-  <link rel="icon" type="image/svg+xml" href="assets/img/pan-favicon.svg">
+  <link rel="icon" type="image/png" href="assets/img/pan-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -21,11 +21,7 @@
   <header class="hdr">
     <div class="wrap">
       <a class="logo" href="index.html" aria-label="Pan Holding">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <g fill="#141416">
-            <path d="M32 8c-2 5-6 8-11 9 3 1 5 1 7 0-4 4-10 5-15 3 2 4 6 6 10 6-2 2-5 3-8 2 3 4 8 5 12 3-1 3-3 5-6 6 4 1 8-1 10-4v10l-3 9h8l-3-9V33c2 3 6 5 10 4-3-1-5-3-6-6 4 2 9 1 12-3-3 1-6 0-8-2 4 0 8-2 10-6-5 2-11 1-15-3 2 1 4 1 7 0-5-1-9-4-11-9z"/>
-          </g>
-        </svg>
+        <img class="lg-img" src="assets/img/pan-emblem.png" alt="">
         <b>PAN <i>HOLDING</i></b>
       </a>
       <nav class="nav" aria-label="Ana menü">
@@ -57,7 +53,7 @@
   <main>
     <!-- ===== Hero ===== -->
     <section class="hero">
-      <svg class="hero-eagle" viewBox="0 0 64 64" aria-hidden="true"><path fill="#141416" d="M32 8c-2 5-6 8-11 9 3 1 5 1 7 0-4 4-10 5-15 3 2 4 6 6 10 6-2 2-5 3-8 2 3 4 8 5 12 3-1 3-3 5-6 6 4 1 8-1 10-4v10l-3 9h8l-3-9V33c2 3 6 5 10 4-3-1-5-3-6-6 4 2 9 1 12-3-3 1-6 0-8-2 4 0 8-2 10-6-5 2-11 1-15-3 2 1 4 1 7 0-5-1-9-4-11-9z"/></svg>
+      <img class="hero-eagle" src="assets/img/pan-emblem.png" alt="" aria-hidden="true">
       <div class="wrap">
         <div>
           <span class="kicker rv in">1975'TEN BU YANA</span>
@@ -287,6 +283,7 @@
           <h2 class="h-sec" style="margin:16px 0 6px">Bir mesaj kadar yakınız<span class="dot">.</span></h2>
           <div class="c-rows">
             <div class="c-row"><b>TELEFON</b><a href="tel:4445658">444 56 58</a></div>
+            <div class="c-row"><b>WHATSAPP</b><a data-wa href="#" style="color:#1DA851">Mesaj gönderin →</a></div>
             <div class="c-row"><b>E-POSTA</b><a href="mailto:info@panholding.com.tr">info@panholding.com.tr</a></div>
             <div class="c-row"><b>ADRES</b><span>İstanbul Deri OSB, Pres Sokak No:3, Tuzla — İstanbul</span></div>
             <div class="c-row"><b>ÇALIŞMA SAATLERİ</b><span>Hafta içi 08:30 – 17:30</span></div>
@@ -310,7 +307,7 @@
     <div class="wrap ftr-main">
       <div>
         <a class="logo" href="index.html" aria-label="Pan Holding">
-          <svg viewBox="0 0 64 64" aria-hidden="true"><g fill="#FFFFFF"><path d="M32 8c-2 5-6 8-11 9 3 1 5 1 7 0-4 4-10 5-15 3 2 4 6 6 10 6-2 2-5 3-8 2 3 4 8 5 12 3-1 3-3 5-6 6 4 1 8-1 10-4v10l-3 9h8l-3-9V33c2 3 6 5 10 4-3-1-5-3-6-6 4 2 9 1 12-3-3 1-6 0-8-2 4 0 8-2 10-6-5 2-11 1-15-3 2 1 4 1 7 0-5-1-9-4-11-9z"/></g></svg>
+          <img class="lg-img inv" src="assets/img/pan-emblem.png" alt="">
           <b style="color:#fff">PAN <i>HOLDING</i></b>
         </a>
         <p>1975'ten bu yana deri ve kimya sanayiinde üretim, kalite ve teknik servisi tek çatı altında buluşturan sanayi grubu.</p>
@@ -345,6 +342,12 @@
       </div>
     </div>
   </footer>
+
+  <!-- WhatsApp yüzen buton -->
+  <a class="wa-float" data-wa href="#" aria-label="WhatsApp ile yazın" title="WhatsApp ile yazın">
+    <span class="wa-ping" aria-hidden="true"></span>
+    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.4 3 4 8.3 4 14.9c0 2.1.6 4.1 1.6 5.9L4 29l8.4-1.6c1.7.9 3.6 1.4 5.6 1.4 6.6 0 12-5.3 12-11.9C30 8.3 24.6 3 16 3zm0 21.9c-1.8 0-3.5-.5-5-1.3l-.4-.2-5 1 1-4.8-.3-.4c-1-1.6-1.5-3.4-1.5-5.3 0-5.5 4.5-9.9 10.2-9.9 5.6 0 10.1 4.4 10.1 9.9s-4.5 10-9.1 10zm5.6-7.4c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-.9 1.2-.3.2-.6.1c-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1s0-.5.1-.6c.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2.1-.4 0-.6s-.7-1.7-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1.1 1-1.1 2.5 1.1 2.9 1.3 3.1c.2.2 2.2 3.4 5.4 4.8.8.3 1.4.5 1.8.7.8.2 1.5.2 2 .1.6-.1 1.8-.7 2.1-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.4z"/></svg>
+  </a>
 
   <script src="assets/site.js"></script>
 </body>
