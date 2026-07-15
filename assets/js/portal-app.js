@@ -566,6 +566,12 @@
       r.appendChild(el("span", null, i.q));
       items.appendChild(r);
     });
+    if (o.note) {
+      var nr = el("div", "dw-item");
+      nr.appendChild(el("b", null, "🗒 Sipariş notu"));
+      nr.appendChild(el("span", null, o.note));
+      items.appendChild(nr);
+    }
     $("#do-carrier").textContent = o.carrier;
     $("#do-track").textContent = o.track;
     $("#do-eta").textContent = o.eta;
@@ -687,6 +693,9 @@
     } else pa.style.display = "none";
     curView = "dash";
     show("dash");
+    // Ana siteden derin bağlantı: portal.html#orders → ilgili görünüm
+    var hv = (location.hash || "").replace("#", "");
+    if (hv && NAV[USER.role].some(function (n) { return n.v === hv; })) show(hv);
     consumePrefill();
   }
   boot();

@@ -114,21 +114,202 @@
   }
   window.hkToast = toast;
 
-  /* ============ 6) Teklif sepeti ============ */
-  const BASKET_KEY = "hk_basket_v2";
-  const getBasket = () => { try { return JSON.parse(localStorage.getItem(BASKET_KEY)) || []; } catch (_) { return []; } };
+  /* ============ 6) Sepet: teklif + doğrudan sipariş ============ */
+  const BASKET_KEY = "hk_basket_v3"; // [{id, qty}] — eski v2 (yalnız id listesi) otomatik taşınır
+  const getBasket = () => {
+    try {
+      const v3 = JSON.parse(localStorage.getItem(BASKET_KEY));
+      if (Array.isArray(v3)) return v3.filter(x => x && x.id);
+    } catch (_) {}
+    try {
+      const v2 = JSON.parse(localStorage.getItem("hk_basket_v2"));
+      if (Array.isArray(v2) && v2.length) {
+        const m = v2.map(id => ({ id: id, qty: 1 }));
+        localStorage.setItem(BASKET_KEY, JSON.stringify(m));
+        localStorage.removeItem("hk_basket_v2");
+        return m;
+      }
+    } catch (_) {}
+    return [];
+  };
   const setBasket = (b) => { localStorage.setItem(BASKET_KEY, JSON.stringify(b)); renderBasket(); };
+  const isCust = () => !!(window.hkAuth && window.hkAuth.isCustomer());
+
+  let bdView = "cart"; // cart | confirm | success
+  let lastOrderId = "";
 
   function addToBasket(id) {
     const p = HK_PRODUCTS.find(x => x.id === id);
     if (!p) return;
     const b = getBasket();
-    if (b.includes(id)) { toast("“" + PNAME(p) + "” " + T("basket.exists")); openBasket(); return; }
-    b.push(id);
+    const line = b.find(x => x.id === id);
+    bdView = "cart";
+    if (line) {
+      line.qty = Math.min(999, (line.qty || 1) + 1);
+      setBasket(b);
+      toast("“" + PNAME(p) + "” — " + T("basket.inc") + ": " + line.qty);
+      openBasket();
+      return;
+    }
+    b.push({ id: id, qty: 1 });
     setBasket(b);
     toast("“" + PNAME(p) + "” " + T("basket.added"));
   }
   window.hkAdd = addToBasket;
+
+  /* Çekmece başlığı ve alt butonlar duruma göre */
+  function basketChrome() {
+    const cust = isCust();
+    const h3 = $(".basket-drawer .bd-head h3"), sub = $(".basket-drawer .bd-head .mono");
+    if (h3) h3.textContent = cust ? T("basket.titleOrder") : T("basket.title");
+    if (sub) sub.textContent = cust ? T("basket.subOrder") : T("basket.sub");
+    const foot = $(".basket-drawer .bd-foot");
+    if (foot) foot.style.display = bdView === "cart" ? "" : "none";
+  }
+
+  function qtyControl(b, line) {
+    const q = el("div", "bd-qty");
+    const minus = el("button", null, "−");
+    minus.type = "button";
+    minus.disabled = (line.qty || 1) <= 1;
+    minus.addEventListener("click", () => { line.qty = Math.max(1, (line.qty || 1) - 1); setBasket(b); });
+    const plus = el("button", null, "+");
+    plus.type = "button";
+    plus.addEventListener("click", () => { line.qty = Math.min(999, (line.qty || 1) + 1); setBasket(b); });
+    q.appendChild(minus);
+    q.appendChild(el("i", null, String(line.qty || 1)));
+    q.appendChild(plus);
+    return q;
+  }
+
+  function renderCart(body, b) {
+    const cust = isCust();
+    if (cust) {
+      const u = window.hkAuth.user();
+      body.appendChild(el("span", "bd-mode", "● " + T("basket.modePill") + " — " + u.company));
+    }
+    b.forEach(line => {
+      const p = HK_PRODUCTS.find(x => x.id === line.id);
+      if (!p) return;
+      const item = el("div", "bd-item");
+      const info = el("div");
+      info.appendChild(el("b", null, PNAME(p)));
+      info.appendChild(el("span", "mono", p.pack));
+      const right = el("div", "bd-right");
+      right.appendChild(qtyControl(b, line));
+      const rm = el("button", "bd-remove", "×");
+      rm.setAttribute("aria-label", "×");
+      rm.addEventListener("click", () => setBasket(getBasket().filter(x => x.id !== line.id)));
+      right.appendChild(rm);
+      item.appendChild(info); item.appendChild(right);
+      body.appendChild(item);
+    });
+    const cta = el("button", "btn btn--primary");
+    cta.style.cssText = "width:100%;justify-content:center;margin-top:14px";
+    if (cust) {
+      cta.textContent = "✓ " + T("order.place");
+      cta.addEventListener("click", () => { bdView = "confirm"; renderBasket(); });
+    } else {
+      cta.textContent = "🔐 " + T("basket.loginToOrder");
+      cta.addEventListener("click", () => {
+        if (!window.hkAuth) return;
+        window.hkAuth.openLogin(() => { openBasket(); bdView = "confirm"; renderBasket(); });
+      });
+    }
+    body.appendChild(cta);
+    const note = el("p", null, cust ? T("order.info") : T("order.loginNote"));
+    note.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
+    body.appendChild(note);
+  }
+
+  function renderConfirm(body, b) {
+    const u = window.hkAuth.user();
+    if (!u) { bdView = "cart"; renderBasket(); return; }
+    const back = el("button", null, "← " + T("order.cancel"));
+    back.type = "button";
+    back.style.cssText = "font-family:var(--font-mono);font-size:12px;color:var(--crimson);font-weight:600;margin-bottom:12px";
+    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
+    body.appendChild(back);
+    const h = el("h4", null, T("order.confirmTitle"));
+    h.style.cssText = "font-family:var(--font-display);font-weight:800;font-size:17px;margin-bottom:6px";
+    body.appendChild(h);
+    b.forEach(line => {
+      const p = HK_PRODUCTS.find(x => x.id === line.id);
+      if (!p) return;
+      const row = el("div", "bd-item");
+      const info = el("div");
+      info.appendChild(el("b", null, PNAME(p)));
+      info.appendChild(el("span", "mono", line.qty + " × " + p.pack));
+      row.appendChild(info);
+      body.appendChild(row);
+    });
+    const meta = el("div");
+    meta.style.cssText = "margin:14px 0;padding:12px 14px;background:var(--paper-2);border:1px solid var(--line-soft);border-radius:3px;font-size:13px";
+    const m1 = el("div");
+    m1.appendChild(el("span", null, T("order.company") + ": "));
+    m1.appendChild(el("b", null, u.company));
+    const m2 = el("div");
+    m2.style.marginTop = "4px";
+    m2.appendChild(el("span", null, T("order.rep") + ": "));
+    m2.appendChild(el("b", null, u.rep || "Herkim Satış"));
+    meta.appendChild(m1); meta.appendChild(m2);
+    body.appendChild(meta);
+    const lb = el("label", null, T("order.note"));
+    lb.setAttribute("for", "bd-note");
+    lb.style.cssText = "font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;color:var(--ink-2);display:block;margin-bottom:6px";
+    body.appendChild(lb);
+    const ta = el("textarea");
+    ta.id = "bd-note"; ta.maxLength = 200; ta.placeholder = T("order.notePh");
+    ta.style.cssText = "width:100%;min-height:70px;padding:10px 12px;border:1.5px solid var(--line);border-radius:3px;background:var(--white);resize:vertical";
+    body.appendChild(ta);
+    const send = el("button", "btn btn--primary", "✓ " + T("order.confirm"));
+    send.style.cssText = "width:100%;justify-content:center;margin-top:14px";
+    send.addEventListener("click", () => placeOrder(ta.value));
+    body.appendChild(send);
+    const info2 = el("p", null, T("order.info"));
+    info2.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
+    body.appendChild(info2);
+  }
+
+  function placeOrder(noteRaw) {
+    const u = window.hkAuth && window.hkAuth.user();
+    const b = getBasket();
+    if (!u || u.role !== "musteri") {
+      bdView = "cart"; renderBasket();
+      if (window.hkAuth) window.hkAuth.openLogin(() => { openBasket(); bdView = "confirm"; renderBasket(); });
+      return;
+    }
+    if (!b.length || typeof hgpAddOrder !== "function") return;
+    const items = b.map(line => {
+      const p = HK_PRODUCTS.find(x => x.id === line.id);
+      return p ? { n: p.n.tr, q: line.qty + " × " + p.pack } : null;
+    }).filter(Boolean);
+    const note = (noteRaw || "").trim().slice(0, 200);
+    lastOrderId = hgpAddOrder(u.company, items, u.name, note);
+    bdView = "success";
+    localStorage.setItem(BASKET_KEY, "[]");
+    renderBasket();
+    toast(T("order.toast") + " " + lastOrderId);
+  }
+
+  function renderSuccess(body) {
+    const box = el("div", "bd-success");
+    box.appendChild(el("div", "ok-ring", "✓"));
+    box.appendChild(el("h4", null, T("order.successTitle")));
+    box.appendChild(el("div", "mono", lastOrderId));
+    const p1 = el("p", null, T("order.successBody"));
+    p1.style.marginTop = "8px";
+    box.appendChild(p1);
+    const track = el("a", "btn btn--primary", T("order.track"));
+    track.href = "portal.html#orders";
+    track.style.cssText = "width:100%;justify-content:center;margin-top:18px";
+    box.appendChild(track);
+    const cont = el("button", "btn btn--ghost btn--sm", T("order.continue"));
+    cont.style.cssText = "width:100%;justify-content:center;margin-top:10px";
+    cont.addEventListener("click", () => { bdView = "cart"; renderBasket(); closeBasket(); });
+    box.appendChild(cont);
+    body.appendChild(box);
+  }
 
   function renderBasket() {
     const b = getBasket();
@@ -138,7 +319,11 @@
     });
     const body = $("#basket-body");
     if (!body) return;
+    if (bdView === "confirm" && (!b.length || !isCust())) bdView = "cart";
+    if (bdView !== "success" && !b.length) bdView = "cart";
+    basketChrome();
     body.replaceChildren();
+    if (bdView === "success") { renderSuccess(body); return; }
     if (!b.length) {
       const empty = el("div", "bd-empty");
       const ico = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -155,28 +340,8 @@
       empty.appendChild(p1); body.appendChild(empty);
       return;
     }
-    // Teklif sepetini portala taşı: tek tıkla sipariş akışı
-    const go = el("button", "btn btn--primary btn--sm", "");
-    go.style.cssText = "width:100%;justify-content:center;margin-bottom:12px";
-    go.textContent = { tr: "🛒 Portalda sipariş ver", en: "🛒 Order in the portal", ru: "🛒 Заказать в портале" }[L()] || "🛒 Portalda sipariş ver";
-    go.addEventListener("click", () => {
-      localStorage.setItem("hg_order_prefill", JSON.stringify({ ids: b }));
-      location.href = "portal.html";
-    });
-    body.appendChild(go);
-    b.forEach(id => {
-      const p = HK_PRODUCTS.find(x => x.id === id);
-      if (!p) return;
-      const item = el("div", "bd-item");
-      const info = el("div");
-      info.appendChild(el("b", null, PNAME(p)));
-      info.appendChild(el("span", "mono", p.brand + " · " + p.pack));
-      const rm = el("button", "bd-remove", "×");
-      rm.setAttribute("aria-label", "×");
-      rm.addEventListener("click", () => setBasket(getBasket().filter(x => x !== id)));
-      item.appendChild(info); item.appendChild(rm);
-      body.appendChild(item);
-    });
+    if (bdView === "confirm") { renderConfirm(body, b); return; }
+    renderCart(body, b);
   }
 
   const drawer = $(".basket-drawer");
@@ -190,9 +355,9 @@
 
   function basketMessage() {
     const b = getBasket();
-    const lines = b.map(id => {
-      const p = HK_PRODUCTS.find(x => x.id === id);
-      return p ? "• " + PNAME(p) + " (" + p.brand + ", " + p.pack + ")" : "";
+    const lines = b.map(line => {
+      const p = HK_PRODUCTS.find(x => x.id === line.id);
+      return p ? "• " + PNAME(p) + " (" + line.qty + " × " + p.pack + ")" : "";
     }).filter(Boolean);
     const intro = { tr: "Merhaba, aşağıdaki ürünler için fiyat teklifi rica ederim:", en: "Hello, I would like a quote for the following products:", ru: "Здравствуйте, прошу цену на следующие продукты:" }[L()];
     const foot = { tr: "\n\nFirma: \nİlgili kişi: \nTahmini miktar: ", en: "\n\nCompany: \nContact: \nEstimated quantity: ", ru: "\n\nКомпания: \nКонтакт: \nОриент. объём: " }[L()];
@@ -316,7 +481,7 @@
       docs.appendChild(tds); docs.appendChild(sds);
       tdDocs.appendChild(docs); tr.appendChild(tdDocs);
       const tdAdd = el("td");
-      const btn = el("button", "add-quote", "+ " + T("basket.quoteWord"));
+      const btn = el("button", "add-quote", "+ " + T(isCust() ? "basket.orderWord" : "basket.quoteWord"));
       btn.addEventListener("click", () => addToBasket(p.id));
       tdAdd.appendChild(btn); tr.appendChild(tdAdd);
       return tr;
@@ -405,9 +570,11 @@
     ch.classList.add("on"); docState.cat = ch.dataset.cat; renderDocs();
   }));
 
-  /* İlk çizim + dil değişiminde re-observe */
+  /* İlk çizim + dil/oturum değişiminde tazele */
   window.hkRenderDynamic();
-  document.addEventListener("hk:langchange", () => observeReveal(document));
+  renderBasket();
+  document.addEventListener("hk:langchange", () => { observeReveal(document); renderBasket(); });
+  document.addEventListener("hk:authchange", () => { bdView = "cart"; renderBasket(); renderTable(); });
 
   /* ============ 9) Site içi arama ============ */
   const so = $(".search-overlay");

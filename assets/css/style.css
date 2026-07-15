@@ -892,6 +892,63 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .cookie-bar p { font-size: 13.5px; color: var(--ink-2); margin-bottom: 14px; }
 .cookie-bar .cb-actions { display: flex; gap: 10px; }
 
+/* ---------- Müşteri girişi & sipariş sepeti ---------- */
+.user-wrap { position: relative; display: flex; }
+.user-ini { font-family: var(--font-display); font-weight: 800; font-size: 13px; color: var(--white); background: var(--crimson); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; }
+.icon-btn.user-on { border-color: var(--crimson); }
+.icon-btn.user-on:hover { background: var(--white); }
+
+.auth-overlay {
+  position: fixed; inset: 0; z-index: 97;
+  background: rgba(27, 18, 22, 0.66); backdrop-filter: blur(6px);
+  display: grid; place-items: center; padding: 20px;
+  opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s;
+}
+.auth-overlay.open { opacity: 1; visibility: visible; }
+.auth-panel {
+  position: relative;
+  width: min(420px, 100%); background: var(--white);
+  border: 2px solid var(--ink); border-radius: var(--radius);
+  box-shadow: 8px 8px 0 rgba(163, 28, 60, 0.85);
+  padding: 30px 28px;
+  transform: translateY(-12px); transition: transform 0.25s var(--ease-out);
+}
+.auth-overlay.open .auth-panel { transform: translateY(0); }
+.auth-panel h3 { font-family: var(--font-display); font-weight: 800; font-stretch: 110%; font-size: 22px; }
+.auth-panel .a-sub { font-size: 13.5px; color: var(--ink-3); margin: 4px 0 18px; }
+.auth-err { display: none; margin-bottom: 12px; background: #FDECEC; border: 1px solid #F3B8B8; color: #A31C1C; border-radius: var(--radius); padding: 10px 13px; font-size: 13px; font-weight: 600; }
+.auth-err.show { display: block; }
+.auth-demo { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 14px; }
+.auth-close { position: absolute; top: 14px; right: 16px; font-family: var(--font-mono); font-size: 12px; color: var(--crimson); font-weight: 600; }
+.auth-close:hover { text-decoration: underline; }
+
+.user-pop {
+  position: absolute; right: 0; top: calc(100% + 10px); z-index: 70;
+  min-width: 230px; background: var(--white); border: 2px solid var(--ink);
+  border-radius: var(--radius); box-shadow: var(--shadow-offset);
+  padding: 8px; display: none; text-align: left;
+}
+.user-pop.open { display: block; }
+.user-pop .up-head { padding: 10px 12px; border-bottom: 1px solid var(--line-soft); margin-bottom: 6px; }
+.user-pop .up-head b { display: block; font-size: 14px; color: var(--ink); }
+.user-pop .up-head span { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.user-pop a, .user-pop button.up-item { display: block; width: 100%; text-align: left; padding: 9px 12px; font-size: 14px; font-weight: 500; border-radius: 2px; }
+.user-pop a:hover, .user-pop button.up-item:hover { background: var(--crimson); color: #fff; }
+
+/* Sepette miktar denetimi */
+.bd-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.bd-qty { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.bd-qty button:disabled { opacity: 0.35; cursor: default; }
+.bd-qty button { width: 27px; height: 27px; font-weight: 700; color: var(--crimson); background: var(--paper-2); line-height: 1; }
+.bd-qty button:hover { background: var(--crimson-soft); }
+.bd-qty i { font-style: normal; min-width: 30px; text-align: center; font-family: var(--font-mono); font-size: 12.5px; }
+.bd-mode { display: inline-flex; align-items: center; gap: 7px; margin: 2px 0 10px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em; color: #15803D; background: #E3F4E9; border: 1px solid #BFE3CC; border-radius: 999px; padding: 4px 11px; }
+.bd-success { text-align: center; padding: 34px 16px; }
+.bd-success .ok-ring { width: 62px; height: 62px; margin: 0 auto 14px; border-radius: 50%; border: 3px solid #15803D; color: #15803D; display: grid; place-items: center; font-size: 26px; font-weight: 800; }
+.bd-success h4 { font-family: var(--font-display); font-weight: 800; font-stretch: 110%; font-size: 19px; margin-bottom: 6px; }
+.bd-success p { font-size: 13.5px; color: var(--ink-2); }
+.bd-success .mono { color: var(--crimson); font-weight: 600; }
+
 /* ---------- Görünürlük animasyonları ---------- */
 .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
 .reveal.in { opacity: 1; transform: none; }

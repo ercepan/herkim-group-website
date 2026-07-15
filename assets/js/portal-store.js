@@ -141,14 +141,14 @@ function hgpAct(s, who, what, type) {
   if (s.activities.length > 60) s.activities.length = 60;
 }
 
-/* Sipariş oluştur (müşteri) → Onay Bekliyor */
-function hgpAddOrder(customer, items, who) {
+/* Sipariş oluştur (müşteri) → Onay Bekliyor. note: web sepetinden gelen sipariş notu */
+function hgpAddOrder(customer, items, who, note) {
   var s = hgpGet();
   s.seq += 1;
   var id = "HG-2026-" + s.seq;
   s.orders.unshift({
     id: id, customer: customer, step: 0, date: hgpToday(), eta: "—",
-    items: items, carrier: "—", track: "—",
+    items: items, carrier: "—", track: "—", note: note || "",
     tl: [hgpNow(), null, null, null, null]
   });
   hgpAct(s, who, "Yeni sipariş oluşturdu: " + id, "siparis");
