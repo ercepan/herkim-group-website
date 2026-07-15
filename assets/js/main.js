@@ -20,7 +20,8 @@
     return n;
   }
 
-  const HK = window.HK_COMPANY || {};
+  // NOT: const ile bildirilen HK_COMPANY window'a yazılmaz; çıplak ada başvur.
+  const HK = (typeof HK_COMPANY !== "undefined" && HK_COMPANY) || window.HK_COMPANY || {};
   window.HK_CONFIG = HK;
 
   const CAT_OF = (sub) => (HK_SUBS[sub] ? HK_SUBS[sub].cat : "");
@@ -271,6 +272,48 @@
     body.appendChild(info2);
   }
 
+  function renderQuoteForm(body, b) {
+    const back = el("button", null, "← " + T("order.cancel"));
+    back.type = "button";
+    back.style.cssText = "font-family:var(--font-mono);font-size:12px;color:var(--crimson);font-weight:600;margin-bottom:12px";
+    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
+    body.appendChild(back);
+    const h = el("h4", null, T("quote.formTitle"));
+    h.style.cssText = "font-family:var(--font-display);font-weight:800;font-size:17px;margin-bottom:4px";
+    body.appendChild(h);
+    const sub = el("p", null, T("quote.formSub"));
+    sub.style.cssText = "font-size:12.5px;color:var(--ink-3);margin-bottom:14px";
+    body.appendChild(sub);
+    const mk = (id, key, req) => {
+      const f = el("div", "field");
+      f.style.marginBottom = "10px";
+      const lb = el("label", null, T(key) + (req ? " *" : ""));
+      lb.setAttribute("for", id);
+      const inp = el("input");
+      inp.type = "text"; inp.id = id; inp.maxLength = 80;
+      f.appendChild(lb); f.appendChild(inp);
+      body.appendChild(f);
+      return inp;
+    };
+    const iName = mk("qf-name", "quote.name", true);
+    const iFirm = mk("qf-firm", "quote.firm", false);
+    const iCont = mk("qf-contact", "quote.contact", true);
+    const send = el("button", "btn btn--primary", T("quote.send"));
+    send.style.cssText = "width:100%;justify-content:center;margin-top:8px";
+    send.addEventListener("click", () => {
+      const name = iName.value.trim(), firm = iFirm.value.trim(), cont = iCont.value.trim();
+      if (!name) { toast(T("toast.formErr")); iName.focus(); return; }
+      const digits = (cont.match(/\d/g) || []).length;
+      if (!cont || (cont.indexOf("@") < 1 && digits < 7)) { toast(T("quote.errContact")); iCont.focus(); return; }
+      send.disabled = true;
+      sendQuote(name, firm, cont, () => { send.disabled = false; });
+    });
+    body.appendChild(send);
+    const n = el("p", null, T("basket.note"));
+    n.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
+    body.appendChild(n);
+  }
+
   function placeOrder(noteRaw) {
     const u = window.hkAuth && window.hkAuth.user();
     const b = getBasket();
@@ -286,6 +329,12 @@
     }).filter(Boolean);
     const note = (noteRaw || "").trim().slice(0, 200);
     lastOrderId = hgpAddOrder(u.company, items, u.name, note);
+    // Yetkiliye anında bildirim (anahtar girildiyse; sipariş bildirime bağımlı değildir)
+    hgNotify("🛒 Yeni Sipariş " + lastOrderId + " — " + u.company,
+      ["Sipariş No: " + lastOrderId, "Müşteri: " + u.company, "Veren: " + u.name, ""]
+        .concat(items.map(i => "• " + i.n + " — " + i.q))
+        .concat(note ? ["", "Not: " + note] : []),
+      u.name);
     bdView = "success";
     localStorage.setItem(BASKET_KEY, "[]");
     renderBasket();
@@ -341,6 +390,7 @@
       return;
     }
     if (bdView === "confirm") { renderConfirm(body, b); return; }
+    if (bdView === "quoteform") { renderQuoteForm(body, b); return; }
     renderCart(body, b);
   }
 
@@ -368,11 +418,29 @@
     if (!getBasket().length) { toast(T("basket.addFirst")); return; }
     window.open("https://wa.me/" + HK.whatsapp + "?text=" + basketMessage(), "_blank", "noopener");
   });
+  function quoteMailFallback() {
+    const subj = { tr: "Fiyat Teklifi Talebi — Herkim Kimya", en: "Quote Request — Herkim Kimya", ru: "Запрос цены — Herkim Kimya" }[L()];
+    location.href = "mailto:" + HK.mailQuote + "?subject=" + encodeURIComponent(subj) + "&body=" + basketMessage();
+  }
+  function sendQuote(name, firm, contact, done) {
+    const lines = ["Ad: " + name, "Firma: " + (firm || "—"), "İletişim: " + (contact || "—"), ""]
+      .concat(getBasket().map(line => {
+        const p = HK_PRODUCTS.find(x => x.id === line.id);
+        return p ? "• " + p.n.tr + " (" + line.qty + " × " + p.pack + ")" : "";
+      }).filter(Boolean));
+    hgNotify("💬 Teklif Talebi — " + (firm || name), lines, name, contact).then(ok => {
+      if (done) done();
+      if (ok) { bdView = "cart"; renderBasket(); toast(T("quote.sentOk")); }
+      else quoteMailFallback();
+    });
+  }
   const mailBtn = $("#basket-mail");
   if (mailBtn) mailBtn.addEventListener("click", () => {
     if (!getBasket().length) { toast(T("basket.addFirst")); return; }
-    const subj = { tr: "Fiyat Teklifi Talebi — Herkim Kimya", en: "Quote Request — Herkim Kimya", ru: "Запрос цены — Herkim Kimya" }[L()];
-    location.href = "mailto:" + HK.mailQuote + "?subject=" + encodeURIComponent(subj) + "&body=" + basketMessage();
+    if (!HK.web3forms) { quoteMailFallback(); return; }
+    const u = window.hkAuth && window.hkAuth.user();
+    if (u && u.role === "musteri") sendQuote(u.name, u.company, "Portal müşterisi");
+    else { bdView = "quoteform"; renderBasket(); }
   });
   const clearBtn = $("#basket-clear");
   if (clearBtn) clearBtn.addEventListener("click", () => { setBasket([]); toast(T("basket.cleared")); });
@@ -637,19 +705,34 @@
     const firm = (data.get("firm") || "").toString().trim();
     const msg = (data.get("msg") || "").toString().trim();
     if (!name || !msg) { toast(T("toast.formErr")); return; }
-    const body = "Ad/Name: " + name + "\nFirma/Company: " + firm +
-      "\nTel: " + (data.get("phone") || "") + "\nKonu/Subject: " + (data.get("topic") || "") + "\n\n" + msg;
+    const phone = (data.get("phone") || "").toString().trim();
+    const topic = (data.get("topic") || "").toString().trim();
     // Landing → CRM: talep portaldaki satış kutusuna da düşer (demo)
     try {
       const q = JSON.parse(localStorage.getItem("hg_landing_queue") || "[]");
       const d = new Date();
       const pad = (x) => (x < 10 ? "0" : "") + x;
-      q.push({ name, firm, topic: (data.get("topic") || "").toString(), msg,
+      q.push({ name, firm, topic, msg,
                date: pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() });
       localStorage.setItem("hg_landing_queue", JSON.stringify(q));
     } catch (err) {}
-    location.href = "mailto:" + HK.email + "?subject=" + encodeURIComponent("Web — " + (firm || name)) + "&body=" + encodeURIComponent(body);
-    toast(T("toast.mailOpening"));
+    // Önce gerçek gönderim (Web3Forms); anahtar yoksa/başarısızsa e-posta yedeği
+    const mailFallback = () => {
+      const body = "Ad/Name: " + name + "\nFirma/Company: " + firm +
+        "\nTel: " + phone + "\nKonu/Subject: " + topic + "\n\n" + msg;
+      location.href = "mailto:" + HK.email + "?subject=" + encodeURIComponent("Web — " + (firm || name)) + "&body=" + encodeURIComponent(body);
+      toast(T("toast.mailOpening"));
+    };
+    const sbtn = cform.querySelector("[type=submit]");
+    if (sbtn) sbtn.disabled = true;
+    hgNotify("📥 Web İletişim Formu — " + (firm || name),
+      ["Ad: " + name, "Firma: " + (firm || "—"), "Tel: " + (phone || "—"), "Konu: " + (topic || "—"), "", msg],
+      name)
+      .then(ok => {
+        if (sbtn) sbtn.disabled = false;
+        if (ok) { cform.reset(); toast(T("toast.sentOk")); }
+        else mailFallback();
+      });
   });
 
   $$("[id^='newsletter-form']").forEach(nf => nf.addEventListener("submit", (e) => {

@@ -478,6 +478,9 @@
     var subj = $("#rf-subject").value.trim(), det = $("#rf-detail").value.trim();
     if (!subj || !det) { toast("Lütfen konu ve detay girin."); return; }
     hgpAddRequest(USER.company, subj, det, USER.name + " (" + USER.company + ")");
+    if (typeof hgNotify === "function")
+      hgNotify("📝 Yeni Talep — " + USER.company,
+        ["Konu: " + subj, "", det, "", "Talep eden: " + USER.name + " (" + USER.company + ")"], USER.name);
     rf.reset(); rfc.textContent = "0/500";
     toast("Talebiniz satış temsilcinizin CRM kutusuna düştü ✓");
     renderAll();

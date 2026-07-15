@@ -23,6 +23,9 @@ const HK_COMPANY = {
   email: "info@herkimgroup.com",
   mailQuote: "info@herkimgroup.com",
   whatsapp: "902163941125",   // wa.me — WhatsApp Business hattınızla değiştirin
+  web3forms: "",              // Web3Forms erişim anahtarı — girilince form/teklif/sipariş/talep
+                              // bildirimleri şirket e-postasına ANINDA düşer. Anahtar almak:
+                              // web3forms.com → e-postayı gir → gelen anahtarı buraya yapıştır.
   group: "https://www.herkimgroup.com",
   brands: ["Herkim", "Herkim", "Herkim"]
 };

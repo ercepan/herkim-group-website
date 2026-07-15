@@ -205,3 +205,30 @@ function hgpAddNote(custName, note, who) {
 
 /* Demoyu sıfırla */
 function hgpReset() { localStorage.removeItem(HGP_KEY); }
+
+/* ---------------- Gerçek bildirim (Web3Forms) ----------------
+   HK_COMPANY.web3forms anahtarı girilince site olayları (iletişim
+   formu, teklif, sipariş, talep) şirket e-postasına ANINDA düşer.
+   Anahtar boşken false döner; site eski akışıyla çalışmaya devam
+   eder — hiçbir akış bildirime bağımlı DEĞİLDİR (yedekli tasarım). */
+function hgNotify(subject, lines, senderName, senderEmail) {
+  try {
+    var key = (typeof HK_COMPANY !== "undefined" && HK_COMPANY.web3forms) || "";
+    if (!key) return Promise.resolve(false);
+    var body = {
+      access_key: key,
+      subject: subject,
+      from_name: "Herkim Web Sitesi",
+      name: senderName || "Web ziyaretçisi",
+      message: (lines || []).join("\n")
+    };
+    if (senderEmail && senderEmail.indexOf("@") > 0) body.email = senderEmail;
+    return fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); })
+      .then(function (j) { return !!(j && j.success); })
+      .catch(function () { return false; });
+  } catch (e) { return Promise.resolve(false); }
+}
