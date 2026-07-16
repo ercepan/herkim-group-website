@@ -21,3 +21,4 @@ dist/
 # Ortam / gizli
 .env
 .env.*
+.playwright-mcp/
