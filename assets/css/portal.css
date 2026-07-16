@@ -236,3 +236,13 @@
   .fun-row { grid-template-columns: 110px 1fr 40px; }
 }
 @media (max-width: 560px) { .kpis { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- Hesap başvuruları (satış onay kutusu) ---------- */
+.app-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); flex-wrap: wrap; }
+.app-row:last-child { border-bottom: 0; }
+.app-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.app-info b { font-size: 14.5px; }
+.app-info .mono { font-size: 11.5px; color: var(--ink-3); }
+.app-msg { font-size: 12.5px; color: var(--ink-2); font-style: italic; margin-top: 2px; }
+.app-links a { margin-right: 12px; font-weight: 600; }
+.app-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }

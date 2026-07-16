@@ -32,8 +32,10 @@
   /* ---------- Giriş + güvenlik ---------- */
   function nowMs() { return Date.now(); }
   function getSes() { try { return JSON.parse(localStorage.getItem(SES)); } catch (e) { return null; } }
-  function enter(role) {
-    localStorage.setItem(SES, JSON.stringify({ role: role, at: nowMs() }));
+  function enter(role, acct) {
+    var payload = { role: role, at: nowMs() };
+    if (acct) payload.acct = acct;
+    localStorage.setItem(SES, JSON.stringify(payload));
     localStorage.removeItem(LOCK);
     localStorage.setItem(LAST + role, hgpNow());
     boot();
@@ -68,15 +70,22 @@
     e.preventDefault();
     var l = getLock();
     if (l.until > nowMs()) { lockUI(); return; }
-    if ($("#lg-pass").value !== PASS) {
+    var failTry = function (msg) {
       l.n = (l.n || 0) + 1;
       if (l.n >= 3) { l.until = nowMs() + 60000; l.n = 0; }
       localStorage.setItem(LOCK, JSON.stringify(l));
       if (l.until > nowMs()) lockUI();
-      else showErr("E-posta veya şifre hatalı. (" + l.n + "/3 deneme)");
-      return;
-    }
-    enter("musteri");
+      else showErr(msg.replace("{n}", l.n));
+    };
+    if ($("#lg-pass").value !== PASS) { failTry("E-posta veya şifre hatalı. ({n}/3 deneme)"); return; }
+    // E-posta → hesap: varsayılan demo müşteri ya da onaylı web hesabı
+    var em = ($("#lg-mail") ? $("#lg-mail").value : "").trim().toLowerCase();
+    if (!em || em === "satinalma@derimderi.com.tr") { enter("musteri"); return; }
+    var acc = null;
+    (hgpGet().accounts || []).forEach(function (a) { if (a.email === em) acc = a; });
+    if (!acc) { failTry("Bu e-postayla onaylı hesap bulunamadı. Önce başvuru yapın. ({n}/3)"); return; }
+    enter("musteri", { role: "musteri", name: acc.name, company: acc.company,
+                       initials: acc.initials, rep: "Ayşe Yılmaz", email: acc.email });
   });
 
   function logout() { localStorage.removeItem(SES); location.reload(); }
@@ -113,7 +122,7 @@
       { v: "dash", t: "⬛ CRM Özeti" },
       { v: "orders", t: "✅ Siparişler & Onay", cnt: "onay" },
       { v: "requests", t: "📥 Gelen Talepler", cnt: "acik" },
-      { v: "customers", t: "🪪 Müşteri Kartları" }
+      { v: "customers", t: "🪪 Müşteri Kartları", cnt: "basvuru" }
     ],
     depo: [
       { v: "dash", t: "⬛ Özet" },
@@ -156,6 +165,7 @@
         if (item.cnt === "onay") n = s.orders.filter(function (o) { return o.step === 0; }).length;
         if (item.cnt === "acik") n = s.requests.filter(function (r) { return r.status === "acik"; }).length;
         if (item.cnt === "ops") n = s.orders.filter(function (o) { return o.step >= 1 && o.step <= 3; }).length;
+        if (item.cnt === "basvuru") n = (s.applications || []).filter(function (a) { return a.status === "bekliyor"; }).length;
         if (n) b.appendChild(el("span", "cnt", String(n)));
       }
       b.addEventListener("click", function () { show(item.v); });
@@ -214,7 +224,7 @@
       row.appendChild(kpi(cnt(function (x) { return x.step === 0; }), "Onay bekleyen sipariş"));
       row.appendChild(kpi(r.filter(function (x) { return x.status === "acik"; }).length, "Açık talep"));
       row.appendChild(kpi(cnt(function (x) { return x.step >= 1 && x.step < 4; }), "Süreçteki sipariş"));
-      row.appendChild(kpi(HGP_CUSTOMERS.length, "Aktif müşteri"));
+      row.appendChild(kpi(HGP_CUSTOMERS.length + (s.customers || []).length, "Aktif müşteri"));
     } else if (USER.role === "depo") {
       row.appendChild(kpi(cnt(function (x) { return x.step === 1; }), "Üretim bekleyen"));
       row.appendChild(kpi(cnt(function (x) { return x.step === 2; }), "Üretimde"));
@@ -491,7 +501,8 @@
     var s = hgpGet();
     var wrap = $("#cust-grid"); if (!wrap) return;
     wrap.textContent = "";
-    HGP_CUSTOMERS.forEach(function (c) {
+    renderApplications(s);
+    HGP_CUSTOMERS.concat(s.customers || []).forEach(function (c) {
       var oc = s.orders.filter(function (o) { return o.customer === c.name; }).length;
       var rc = s.requests.filter(function (r) { return r.customer === c.name && r.status === "acik"; }).length;
       var card = el("div", "cust-card");
@@ -508,6 +519,60 @@
       card.addEventListener("click", function () { openCust(c); });
       wrap.appendChild(card);
     });
+  }
+
+  /* ---------- Hesap başvuruları (satış onay kutusu) ---------- */
+  function renderApplications(s) {
+    var view = $("#view-customers"); if (!view) return;
+    var old = $("#apps-panel", view);
+    if (old) old.remove();
+    if (USER.role !== "satis") return;
+    var pend = (s.applications || []).filter(function (a) { return a.status === "bekliyor"; });
+    if (!pend.length) return;
+    var panel = el("div", "panel");
+    panel.id = "apps-panel";
+    panel.style.marginBottom = "22px";
+    var head = el("div", "p-head");
+    head.appendChild(el("h3", null, "🆕 Bekleyen Hesap Başvuruları (" + pend.length + ")"));
+    head.appendChild(el("span", "mono", "Web sitesinden — firma doğrulaması sizde"));
+    panel.appendChild(head);
+    pend.forEach(function (a) {
+      var row = el("div", "app-row");
+      var info = el("div", "app-info");
+      info.appendChild(el("b", null, a.firm));
+      var vknOk = hgpValidTaxId(a.vkn);
+      var l1 = el("span", "mono");
+      l1.appendChild(document.createTextNode("VKN: " + a.vkn + " · " + a.taxOffice + " "));
+      l1.appendChild(el("i", "vkn-badge " + (vknOk ? "ok" : "bad"), vknOk ? "✓ biçim geçerli" : "✗ biçim geçersiz"));
+      info.appendChild(l1);
+      info.appendChild(el("span", "mono", "Yetkili: " + a.contact + " · " + a.email + " · " + a.mobile));
+      if (a.msg) info.appendChild(el("span", "app-msg", "“" + a.msg + "”"));
+      var links = el("span", "mono app-links");
+      var g1 = el("a", "accent", "GİB doğrula ↗");
+      g1.href = "https://ivd.gib.gov.tr/"; g1.target = "_blank"; g1.rel = "noopener";
+      var g2 = el("a", "accent", "Ticaret Sicil ↗");
+      g2.href = "https://www.ticaretsicil.gov.tr/"; g2.target = "_blank"; g2.rel = "noopener";
+      links.appendChild(g1); links.appendChild(document.createTextNode("  ")); links.appendChild(g2);
+      info.appendChild(links);
+      row.appendChild(info);
+      var act = el("div", "app-actions");
+      var ok = el("button", "btn btn--primary btn--sm", "✓ Onayla & Hesap Aç");
+      ok.addEventListener("click", function () {
+        hgpDecideApplication(a.id, true, USER.name + " (Satış)");
+        toast(a.firm + " onaylandı — müşteri kartı ve giriş hesabı oluşturuldu ✓");
+        renderAll();
+      });
+      var no = el("button", "btn btn--ghost btn--sm", "✗ Reddet");
+      no.addEventListener("click", function () {
+        hgpDecideApplication(a.id, false, USER.name + " (Satış)");
+        toast(a.firm + " başvurusu reddedildi.");
+        renderAll();
+      });
+      act.appendChild(ok); act.appendChild(no);
+      row.appendChild(act);
+      panel.appendChild(row);
+    });
+    view.insertBefore(panel, view.firstChild);
   }
 
   /* ---------- Operasyon (depo) ---------- */
@@ -680,6 +745,12 @@
       return;
     }
     USER = HGP_USERS[s.role];
+    // Ana siteden onaylı web hesabıyla giriş: oturumdaki hesap bilgisi baskındır
+    if (s.acct && s.role === "musteri") {
+      USER = { role: "musteri", name: s.acct.name, title: "Satın Alma",
+               company: s.acct.company, initials: s.acct.initials || "MK",
+               rep: s.acct.rep || "Ayşe Yılmaz" };
+    }
     $("#login-view").style.display = "none";
     $("#app-view").style.display = "";
     $("#u-initials").textContent = USER.initials;

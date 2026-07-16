@@ -31,7 +31,9 @@
   }
   function user() {
     const s = ses();
-    return (s && typeof HGP_USERS !== "undefined" && HGP_USERS[s.role]) || null;
+    if (!s) return null;
+    if (s.acct) return s.acct; // onaylı web hesabı (başvurudan doğar)
+    return (typeof HGP_USERS !== "undefined" && HGP_USERS[s.role]) || null;
   }
   const isCustomer = () => { const u = user(); return !!u && u.role === "musteri"; };
 
@@ -56,8 +58,10 @@
 
   let pendingCb = null;
 
-  function login(role) {
-    localStorage.setItem(SES, JSON.stringify({ role: role, at: Date.now() }));
+  function login(role, acct) {
+    const payload = { role: role, at: Date.now() };
+    if (acct) payload.acct = acct;
+    localStorage.setItem(SES, JSON.stringify(payload));
     localStorage.removeItem(LOCK);
     try { if (typeof hgpNow === "function") localStorage.setItem(LAST + role, hgpNow()); } catch (_) {}
     const cb = pendingCb; pendingCb = null;
@@ -209,8 +213,14 @@
     db.style.cssText = "width:100%;justify-content:center";
     db.addEventListener("click", () => login("musteri"));
     demo.appendChild(db);
+    const apply = el("p");
+    apply.style.cssText = "margin-top:12px;font-size:12.5px;color:var(--ink-3)";
+    const aa = el("a", "accent", T("auth.applyLink"));
+    aa.href = "hesap.html";
+    apply.appendChild(aa);
+    demo.appendChild(apply);
     const staff = el("p");
-    staff.style.cssText = "margin-top:12px;font-size:12.5px;color:var(--ink-3)";
+    staff.style.cssText = "margin-top:6px;font-size:12.5px;color:var(--ink-3)";
     staff.appendChild(document.createTextNode(T("auth.staff") + " "));
     const sa = el("a", "accent", T("auth.staffLink"));
     sa.href = "portal.html";
@@ -245,15 +255,24 @@
       e.preventDefault();
       const l = getLock();
       if (l.until > Date.now()) { lockUI(); return; }
-      if (i2.value !== PASS) {
+      const fail = (msg) => {
         l.n = (l.n || 0) + 1;
         if (l.n >= 3) { l.until = Date.now() + 60000; l.n = 0; }
         localStorage.setItem(LOCK, JSON.stringify(l));
         if (l.until > Date.now()) lockUI();
-        else showErr(T("auth.err").replace("{n}", l.n));
-        return;
-      }
-      login("musteri");
+        else showErr(msg.replace("{n}", l.n));
+      };
+      if (i2.value !== PASS) { fail(T("auth.err")); return; }
+      // E-posta → hesap eşleme: varsayılan demo müşteri ya da onaylı web hesabı
+      const em = i1.value.trim().toLowerCase();
+      if (!em || em === "satinalma@derimderi.com.tr") { login("musteri"); return; }
+      let acc = null;
+      try {
+        (hgpGet().accounts || []).forEach(a => { if (a.email === em) acc = a; });
+      } catch (_) {}
+      if (!acc) { fail(T("auth.noAccount")); return; }
+      login("musteri", { role: "musteri", name: acc.name, company: acc.company,
+                         initials: acc.initials, rep: "Ayşe Yılmaz", email: acc.email });
     });
 
     return i2;

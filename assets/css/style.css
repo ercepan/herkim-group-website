@@ -935,6 +935,11 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .user-pop a, .user-pop button.up-item { display: block; width: 100%; text-align: left; padding: 9px 12px; font-size: 14px; font-weight: 500; border-radius: 2px; }
 .user-pop a:hover, .user-pop button.up-item:hover { background: var(--crimson); color: #fff; }
 
+/* VKN/TCKN biçim rozeti (hesap başvurusu + portal onay kutusu) */
+.vkn-badge { font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; font-style: normal; }
+.vkn-badge.ok { color: #15803D; }
+.vkn-badge.bad { color: var(--crimson); }
+
 /* Sepette miktar denetimi */
 .bd-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .bd-qty { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; }

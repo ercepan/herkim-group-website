@@ -210,15 +210,20 @@
     if (cust) {
       cta.textContent = "✓ " + T("order.place");
       cta.addEventListener("click", () => { bdView = "confirm"; renderBasket(); });
+      body.appendChild(cta);
     } else {
       cta.textContent = "🔐 " + T("basket.loginToOrder");
       cta.addEventListener("click", () => {
         if (!window.hkAuth) return;
         window.hkAuth.openLogin(() => { openBasket(); bdView = "confirm"; renderBasket(); });
       });
+      body.appendChild(cta);
+      const ap = el("a", "btn btn--ghost btn--sm", "📋 " + T("basket.applyBtn"));
+      ap.href = "hesap.html";
+      ap.style.cssText = "width:100%;justify-content:center;margin-top:10px";
+      body.appendChild(ap);
     }
-    body.appendChild(cta);
-    const note = el("p", null, cust ? T("order.info") : T("order.loginNote"));
+    const note = el("p", null, cust ? T("order.info") : T("basket.memberNote"));
     note.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
     body.appendChild(note);
   }
@@ -270,48 +275,6 @@
     const info2 = el("p", null, T("order.info"));
     info2.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
     body.appendChild(info2);
-  }
-
-  function renderQuoteForm(body, b) {
-    const back = el("button", null, "← " + T("order.cancel"));
-    back.type = "button";
-    back.style.cssText = "font-family:var(--font-mono);font-size:12px;color:var(--crimson);font-weight:600;margin-bottom:12px";
-    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
-    body.appendChild(back);
-    const h = el("h4", null, T("quote.formTitle"));
-    h.style.cssText = "font-family:var(--font-display);font-weight:800;font-size:17px;margin-bottom:4px";
-    body.appendChild(h);
-    const sub = el("p", null, T("quote.formSub"));
-    sub.style.cssText = "font-size:12.5px;color:var(--ink-3);margin-bottom:14px";
-    body.appendChild(sub);
-    const mk = (id, key, req) => {
-      const f = el("div", "field");
-      f.style.marginBottom = "10px";
-      const lb = el("label", null, T(key) + (req ? " *" : ""));
-      lb.setAttribute("for", id);
-      const inp = el("input");
-      inp.type = "text"; inp.id = id; inp.maxLength = 80;
-      f.appendChild(lb); f.appendChild(inp);
-      body.appendChild(f);
-      return inp;
-    };
-    const iName = mk("qf-name", "quote.name", true);
-    const iFirm = mk("qf-firm", "quote.firm", false);
-    const iCont = mk("qf-contact", "quote.contact", true);
-    const send = el("button", "btn btn--primary", T("quote.send"));
-    send.style.cssText = "width:100%;justify-content:center;margin-top:8px";
-    send.addEventListener("click", () => {
-      const name = iName.value.trim(), firm = iFirm.value.trim(), cont = iCont.value.trim();
-      if (!name) { toast(T("toast.formErr")); iName.focus(); return; }
-      const digits = (cont.match(/\d/g) || []).length;
-      if (!cont || (cont.indexOf("@") < 1 && digits < 7)) { toast(T("quote.errContact")); iCont.focus(); return; }
-      send.disabled = true;
-      sendQuote(name, firm, cont, () => { send.disabled = false; });
-    });
-    body.appendChild(send);
-    const n = el("p", null, T("basket.note"));
-    n.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
-    body.appendChild(n);
   }
 
   function placeOrder(noteRaw) {
@@ -390,7 +353,6 @@
       return;
     }
     if (bdView === "confirm") { renderConfirm(body, b); return; }
-    if (bdView === "quoteform") { renderQuoteForm(body, b); return; }
     renderCart(body, b);
   }
 
@@ -413,9 +375,18 @@
     const foot = { tr: "\n\nFirma: \nİlgili kişi: \nTahmini miktar: ", en: "\n\nCompany: \nContact: \nEstimated quantity: ", ru: "\n\nКомпания: \nКонтакт: \nОриент. объём: " }[L()];
     return encodeURIComponent(intro + "\n\n" + lines.join("\n") + foot);
   }
+  /* NGB modeli: teklif kanalları yalnız onaylı müşteri girişine açık */
+  function requireCust() {
+    const u = window.hkAuth && window.hkAuth.user();
+    if (u && u.role === "musteri") return u;
+    toast(T("basket.quoteLogin"));
+    if (window.hkAuth) window.hkAuth.openLogin(() => { openBasket(); renderBasket(); });
+    return null;
+  }
   const waBtn = $("#basket-wa");
   if (waBtn) waBtn.addEventListener("click", () => {
     if (!getBasket().length) { toast(T("basket.addFirst")); return; }
+    if (!requireCust()) return;
     window.open("https://wa.me/" + HK.whatsapp + "?text=" + basketMessage(), "_blank", "noopener");
   });
   function quoteMailFallback() {
@@ -437,10 +408,10 @@
   const mailBtn = $("#basket-mail");
   if (mailBtn) mailBtn.addEventListener("click", () => {
     if (!getBasket().length) { toast(T("basket.addFirst")); return; }
+    const u = requireCust();
+    if (!u) return;
     if (!HK.web3forms) { quoteMailFallback(); return; }
-    const u = window.hkAuth && window.hkAuth.user();
-    if (u && u.role === "musteri") sendQuote(u.name, u.company, "Portal müşterisi");
-    else { bdView = "quoteform"; renderBasket(); }
+    sendQuote(u.name, u.company, u.email || "satinalma@derimderi.com.tr");
   });
   const clearBtn = $("#basket-clear");
   if (clearBtn) clearBtn.addEventListener("click", () => { setBasket([]); toast(T("basket.cleared")); });
@@ -462,7 +433,7 @@
 
     const meta = el("div", "ec-meta");
     meta.appendChild(el("span", null, SUB_LABEL(p.sub)));
-    meta.appendChild(el("span", null, CAT_LABEL(CAT_OF(p.sub)) + " · " + p.pack));
+    meta.appendChild(el("span", null, p.pack));
     card.appendChild(meta);
 
     const add = el("button", "ec-add", "+");
@@ -734,6 +705,62 @@
         else mailFallback();
       });
   });
+
+  /* Hesap başvurusu (hesap.html) — NGB modeli: başvur → doğrula → onayla → hesap açılır */
+  const aform = $("#acct-form");
+  if (aform) {
+    const vknInput = $("#ac-vkn"), vknBadge = $("#ac-vkn-badge");
+    const checkVkn = () => {
+      const v = vknInput.value.replace(/\D/g, "").slice(0, 11);
+      vknInput.value = v;
+      if (!vknBadge) return;
+      if (v.length < 10) { vknBadge.textContent = ""; vknBadge.className = "vkn-badge"; return; }
+      const ok = hgpValidTaxId(v);
+      vknBadge.textContent = ok ? T("acct.vknOk") : T("acct.vknBad");
+      vknBadge.className = "vkn-badge " + (ok ? "ok" : "bad");
+    };
+    if (vknInput) vknInput.addEventListener("input", checkVkn);
+    const demoBtn = $("#ac-demo");
+    if (demoBtn) demoBtn.addEventListener("click", () => {
+      $("#ac-firm").value = "Örnek Kimya San. ve Tic. Ltd. Şti.";
+      $("#ac-taxoffice").value = "Tuzla / İstanbul";
+      vknInput.value = "4621003580"; // sağlama basamağı geçerli örnek VKN
+      $("#ac-phone").value = "+90 216 000 11 22";
+      $("#ac-web").value = "ornekkimya.com.tr";
+      $("#ac-address").value = "Sanayi Mah. Deneme Cad. No: 5 Tuzla / İstanbul";
+      $("#ac-contact").value = "Deniz Örnek";
+      $("#ac-email").value = "satinalma@ornekkimya.com.tr";
+      $("#ac-mobile").value = "+90 533 000 11 22";
+      $("#ac-kvkk").checked = true;
+      checkVkn();
+    });
+    aform.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const val = (s) => { const n = $(s); return n ? n.value.trim() : ""; };
+      const firm = val("#ac-firm"), tax = val("#ac-taxoffice"), vkn = val("#ac-vkn"),
+            phone = val("#ac-phone"), web = val("#ac-web"), addr = val("#ac-address"),
+            contact = val("#ac-contact"), email = val("#ac-email").toLowerCase(),
+            mobile = val("#ac-mobile"), msg = val("#ac-msg");
+      if (!firm || !tax || !contact || !phone || !mobile) { toast(T("acct.errReq")); return; }
+      if (!hgpValidTaxId(vkn)) { toast(T("acct.errVkn")); vknInput.focus(); return; }
+      if (!email || email.indexOf("@") < 1) { toast(T("acct.errMail")); $("#ac-email").focus(); return; }
+      if (!$("#ac-kvkk").checked) { toast(T("acct.errKvkk")); return; }
+      const id = hgpAddApplication({ firm, taxOffice: tax, vkn, phone, web, address: addr, contact, email, mobile, msg });
+      hgNotify("🆕 Hesap Başvurusu " + id + " — " + firm,
+        ["Başvuru No: " + id, "Firma: " + firm, "Vergi D./No: " + tax + " / " + vkn,
+         "Yetkili: " + contact, "E-posta: " + email, "Cep: " + mobile,
+         "Tel: " + phone, "Adres: " + (addr || "—"), "Web: " + (web || "—")]
+          .concat(msg ? ["", "Mesaj: " + msg] : []),
+        contact, email);
+      const okBox = $("#acct-ok");
+      aform.style.display = "none";
+      if (okBox) {
+        const no = $("#acct-ok-no"); if (no) no.textContent = id;
+        okBox.style.display = "";
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
 
   $$("[id^='newsletter-form']").forEach(nf => nf.addEventListener("submit", (e) => {
     e.preventDefault();

@@ -11,17 +11,17 @@
 /* Şirket bilgileri — tek kaynaktan düzenleyin */
 const HK_COMPANY = {
   name: "Herkim Kimya",
-  legal: "Herkim Kimya San. ve Tic.",
+  legal: "Herkim Group Kimyevi Maddeler A.Ş.",
   founded: 1975,
   experience: 54,
   salesPoints: 12,
-  address: "Organize Deri San. Böl. 19. Yol 12/6 Parsel, Tuzla — İstanbul / Türkiye",
+  address: "Deri OSB Mah. Pres Sok. No: 3, Tuzla — İstanbul / Türkiye",
   phone: "444 56 58",
-  phone2: "+90 216 394 11 25",
-  phoneTel: "+902163941125",
+  phone2: "+90 216 394 11 33 (Dahili 224)",
+  phoneTel: "+902163941133",
   fax: "+90 216 394 10 04",
   email: "info@herkimgroup.com",
-  mailQuote: "info@herkimgroup.com",
+  mailQuote: "sales@herkimgroup.com",
   whatsapp: "902163941125",   // wa.me — WhatsApp Business hattınızla değiştirin
   web3forms: "",              // Web3Forms erişim anahtarı — girilince form/teklif/sipariş/talep
                               // bildirimleri şirket e-postasına ANINDA düşer. Anahtar almak:
@@ -30,72 +30,82 @@ const HK_COMPANY = {
   brands: ["Herkim", "Herkim", "Herkim"]
 };
 
-/* Ana kategoriler (üç dilli) */
+/* Ana kategoriler (üç dilli) — kaynak: resmî Herkim Group ürün listesi */
 const HK_CATS = {
-  deri:    { tr: "Deri Kimyasalları",    en: "Leather Chemicals", ru: "Кожевенная химия" },
-  tekstil: { tr: "Tekstil Kimyasalları", en: "Textile Chemicals", ru: "Текстильная химия" },
-  binder:  { tr: "Binderler",            en: "Binders",           ru: "Биндеры" }
+  asit:    { tr: "Asitler",                             en: "Acids",                          ru: "Кислоты" },
+  alkol:   { tr: "Alkoller & Glikoller",                en: "Alcohols & Glycols",             ru: "Спирты и гликоли" },
+  amonyum: { tr: "Amonyum Bazlı Ürünler",               en: "Ammonium Based Products",        ru: "Продукты на основе аммония" },
+  deri:    { tr: "Deri & Tabaklama Kimyasalları",       en: "Leather & Tanning Chemicals",    ru: "Химия для кожи и дубления" },
+  sodyum:  { tr: "Sodyum Bazlı Kimyasallar",            en: "Sodium Based Chemicals",         ru: "Химия на основе натрия" },
+  solvent: { tr: "Solventler & Endüstriyel Kimyasallar",en: "Solvents & Industrial Chemicals",ru: "Растворители и промышленная химия" }
 };
 
-/* Alt kategoriler (üç dilli) — cat: ana kategori anahtarı */
+/* Alt kategoriler ana kategorilerle bire bir (düz katalog yapısı) */
 const HK_SUBS = {
-  altkat:  { cat: "deri",    code: "ALT", tr: "Altkat Kimyasalları",    en: "Base-Coat Chemicals",   ru: "Грунтовая химия" },
-  finisaj: { cat: "deri",    code: "FIN", tr: "Finisaj Kimyasalları",   en: "Finishing Chemicals",   ru: "Финишная химия" },
-  dolap:   { cat: "deri",    code: "DLP", tr: "Dolap Boyaları",         en: "Drum Dyes",             ru: "Барабанные красители" },
-  proses:  { cat: "tekstil", code: "PRS", tr: "Proses Kimyasalları",    en: "Process Chemicals",     ru: "Химия процессов" },
-  tekboya: { cat: "tekstil", code: "BOY", tr: "Tekstil Boyaları",       en: "Textile Dyes",          ru: "Текстильные красители" },
-  insaatB: { cat: "binder",  code: "İNŞ", tr: "İnşaat Boya Binderleri", en: "Construction Binders",  ru: "Строительные биндеры" },
-  matbaaB: { cat: "binder",  code: "MTB", tr: "Matbaa Binderleri",      en: "Printing Binders",      ru: "Печатные биндеры" },
-  tekstilB:{ cat: "binder",  code: "TKS", tr: "Tekstil Binderleri",     en: "Textile Binders",       ru: "Текстильные биндеры" }
+  asit:    { cat: "asit",    code: "ACD", tr: "Asitler",                              en: "Acids",                           ru: "Кислоты" },
+  alkol:   { cat: "alkol",   code: "ALK", tr: "Alkoller & Glikoller",                 en: "Alcohols & Glycols",              ru: "Спирты и гликоли" },
+  amonyum: { cat: "amonyum", code: "AMN", tr: "Amonyum Bazlı Ürünler",                en: "Ammonium Based Products",         ru: "Продукты на основе аммония" },
+  deri:    { cat: "deri",    code: "DER", tr: "Deri & Tabaklama Kimyasalları",        en: "Leather & Tanning Chemicals",     ru: "Химия для кожи и дубления" },
+  sodyum:  { cat: "sodyum",  code: "SOD", tr: "Sodyum Bazlı Kimyasallar",             en: "Sodium Based Chemicals",          ru: "Химия на основе натрия" },
+  solvent: { cat: "solvent", code: "SLV", tr: "Solventler & Endüstriyel Kimyasallar", en: "Solvents & Industrial Chemicals", ru: "Растворители и промышленная химия" }
 };
 
-/* Ürünler — cat, sub anahtarları HK_SUBS'tan türetilir.
-   n: ad (tr/en/ru), brand: marka, pack: ambalaj, tag: "yeni"|"one"|null */
+/* Ürünler — resmî Herkim Group ürün listesi (Temmuz 2026 flyer).
+   n: ad (tr/en/ru), brand: marka/menşei, pack: ambalaj, tag: "yeni"|"one"|null */
 const HK_PRODUCTS = [
-  // ---- Deri · Altkat ----
-  { id: 1,  sub: "altkat",  n: { tr: "Altkat Penetratörü",        en: "Base-Coat Penetrator",       ru: "Пенетратор грунта" },        brand: "Herkim", pack: "120 kg varil", tag: "one" },
-  { id: 2,  sub: "altkat",  n: { tr: "İmpregnasyon Reçinesi",     en: "Impregnation Resin",         ru: "Пропиточная смола" },        brand: "Herkim",   pack: "120 kg varil", tag: null },
-  { id: 3,  sub: "altkat",  n: { tr: "Altkat Pigment Pastası",    en: "Base-Coat Pigment Paste",    ru: "Пигментная паста грунта" },  brand: "Herkim",      pack: "25 kg bidon",  tag: null },
-  { id: 4,  sub: "altkat",  n: { tr: "Alpine Altkat Binderi",     en: "Alpine Base-Coat Binder",    ru: "Грунтовый биндер Alpine" },  brand: "Herkim",      pack: "120 kg varil", tag: "one" },
-  { id: 5,  sub: "altkat",  n: { tr: "Dolgu Altkat Sistemi",      en: "Filler Base-Coat System",    ru: "Наполняющий грунт" },        brand: "Herkim", pack: "120 kg varil", tag: null },
+  // ---- Asitler ----
+  { id: 1,  sub: "asit",    n: { tr: "Asetik Asit",                          en: "Acetic Acid",                                        ru: "Уксусная кислота" },                          brand: "Herkim",   pack: "30 kg bidon / IBC", tag: null },
+  { id: 2,  sub: "asit",    n: { tr: "Akrilik Asit",                         en: "Acrylic Acid",                                       ru: "Акриловая кислота" },                         brand: "Herkim",   pack: "200 kg varil",      tag: null },
+  { id: 3,  sub: "asit",    n: { tr: "Sitrik Asit Monohidrat",               en: "Citric Acid Monohydrate",                            ru: "Лимонная кислота моногидрат" },               brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 4,  sub: "asit",    n: { tr: "HEDP (Hidroksietiliden Difosfonik Asit)", en: "HEDP (Hydroxyethylidene Diphosphonic Acid)",      ru: "HEDP (оксиэтилидендифосфоновая кислота)" },   brand: "Herkim",   pack: "30 kg bidon",       tag: null },
+  { id: 5,  sub: "asit",    n: { tr: "Formik Asit %85",                      en: "Formic Acid 85%",                                    ru: "Муравьиная кислота 85%" },                    brand: "Luxi",     pack: "35 kg bidon / IBC", tag: "one" },
+  { id: 6,  sub: "asit",    n: { tr: "Oksalik Asit",                         en: "Oxalic Acid",                                        ru: "Щавелевая кислота" },                         brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 7,  sub: "asit",    n: { tr: "Fosforik Asit %85",                    en: "Phosphoric Acid 85%",                                ru: "Ортофосфорная кислота 85%" },                 brand: "Herkim",   pack: "35 kg bidon / IBC", tag: null },
+  { id: 8,  sub: "asit",    n: { tr: "Sülfürik Asit",                        en: "Sulphuric Acid",                                     ru: "Серная кислота" },                            brand: "Herkim",   pack: "IBC / dökme",       tag: null },
 
-  // ---- Deri · Finisaj ----
-  { id: 6,  sub: "finisaj", n: { tr: "Nitroselülozik Lak",        en: "Nitrocellulose Lacquer",     ru: "Нитроцеллюлозный лак" },     brand: "Herkim",   pack: "25 kg bidon",  tag: null },
-  { id: 7,  sub: "finisaj", n: { tr: "Su Bazlı Top Coat",         en: "Water-Based Top Coat",       ru: "Водный топ-кот" },           brand: "Herkim", pack: "120 kg varil", tag: "yeni" },
-  { id: 8,  sub: "finisaj", n: { tr: "Tutuş (Handle) Ajanı",      en: "Handle Agent",               ru: "Агент грифа" },              brand: "Herkim",      pack: "25 kg bidon",  tag: null },
-  { id: 9,  sub: "finisaj", n: { tr: "Matlaştırıcı Ajan",         en: "Matting Agent",              ru: "Матирующий агент" },         brand: "Herkim",   pack: "25 kg bidon",  tag: null },
-  { id: 10, sub: "finisaj", n: { tr: "Kaymazlık Ajanı",           en: "Anti-Slip Agent",            ru: "Антискользящий агент" },     brand: "Herkim", pack: "25 kg bidon",  tag: null },
-  { id: 11, sub: "finisaj", n: { tr: "Parlaklık (Gloss) Ajanı",   en: "Gloss Agent",                ru: "Агент блеска" },             brand: "Herkim",      pack: "25 kg bidon",  tag: null },
+  // ---- Alkoller & Glikoller ----
+  { id: 9,  sub: "alkol",   n: { tr: "Butil Glikol",                         en: "Butyl Glycol",                                       ru: "Бутилгликоль" },                              brand: "Herkim",   pack: "180 kg varil",      tag: null },
+  { id: 10, sub: "alkol",   n: { tr: "İzopropil Alkol (IPA)",                en: "IPA (Isopropyl Alcohol)",                            ru: "Изопропиловый спирт (IPA)" },                 brand: "Herkim",   pack: "160 kg varil",      tag: null },
+  { id: 11, sub: "alkol",   n: { tr: "Monoetilen Glikol (MEG)",              en: "MEG (Monoethylene Glycol)",                          ru: "Моноэтиленгликоль (MEG)" },                   brand: "Herkim",   pack: "230 kg varil / IBC",tag: "one" },
+  { id: 12, sub: "alkol",   n: { tr: "Monopropilen Glikol (MPG)",            en: "Mono Propylene Glycol (MPG)",                        ru: "Монопропиленгликоль (MPG)" },                 brand: "Herkim",   pack: "215 kg varil",      tag: null },
 
-  // ---- Deri · Dolap Boyaları ----
-  { id: 12, sub: "dolap",   n: { tr: "Anilin Deri Boyası",        en: "Aniline Leather Dye",        ru: "Анилиновый краситель" },     brand: "Herkim",   pack: "25 kg torba",  tag: null },
-  { id: 13, sub: "dolap",   n: { tr: "Asit Deri Boyası",          en: "Acid Leather Dye",           ru: "Кислотный краситель" },      brand: "Herkim",   pack: "25 kg torba",  tag: null },
-  { id: 14, sub: "dolap",   n: { tr: "Direkt Deri Boyası",        en: "Direct Leather Dye",         ru: "Прямой краситель кожи" },    brand: "Herkim",      pack: "25 kg torba",  tag: null },
+  // ---- Amonyum Bazlı Ürünler ----
+  { id: 13, sub: "amonyum", n: { tr: "Amonyum Bikarbonat",                   en: "Ammonium Bicarbonate",                               ru: "Бикарбонат аммония" },                        brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 14, sub: "amonyum", n: { tr: "Amonyum Klorür",                       en: "Ammonium Chloride",                                  ru: "Хлорид аммония" },                            brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 15, sub: "amonyum", n: { tr: "Amonyum Sülfat",                       en: "Ammonium Sulphate",                                  ru: "Сульфат аммония" },                           brand: "Herkim",   pack: "25 kg torba",       tag: null },
 
-  // ---- Tekstil · Proses ----
-  { id: 15, sub: "proses",  n: { tr: "Islatıcı Ajan",             en: "Wetting Agent",              ru: "Смачиватель" },              brand: "Herkim", pack: "60 kg bidon",  tag: null },
-  { id: 16, sub: "proses",  n: { tr: "Yıkama / Sabunlama Ajanı",  en: "Scouring / Soaping Agent",   ru: "Моющий агент" },             brand: "Herkim",   pack: "60 kg bidon",  tag: null },
-  { id: 17, sub: "proses",  n: { tr: "Düzgünleştirici (Leveling)",en: "Leveling Agent",             ru: "Выравниватель" },            brand: "Herkim",   pack: "60 kg bidon",  tag: null },
-  { id: 18, sub: "proses",  n: { tr: "Silikon Yumuşatıcı",        en: "Silicone Softener",          ru: "Силиконовый смягчитель" },   brand: "Herkim",      pack: "120 kg varil", tag: "yeni" },
-  { id: 19, sub: "proses",  n: { tr: "Fikse Ajanı",               en: "Fixing Agent",               ru: "Фиксирующий агент" },        brand: "Herkim", pack: "60 kg bidon",  tag: null },
+  // ---- Deri & Tabaklama ----
+  { id: 16, sub: "deri",    n: { tr: "Mimoza Tozu",                          en: "Mimosa Powder",                                      ru: "Порошок мимозы" },                            brand: "Tanac",    pack: "25 kg torba",       tag: "one" },
+  { id: 17, sub: "deri",    n: { tr: "Kebrako (Quebracho)",                  en: "Quebracho",                                          ru: "Квебрахо" },                                  brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 18, sub: "deri",    n: { tr: "Saviotan A (Astrenjan)",               en: "Saviotan A (Astringent)",                            ru: "Saviotan A (вяжущий)" },                      brand: "Saviotan", pack: "25 kg torba",       tag: null },
+  { id: 19, sub: "deri",    n: { tr: "Saviotan RS (Tatlandırılmış)",         en: "Saviotan RS (Sweetened)",                            ru: "Saviotan RS (подслащённый)" },                brand: "Saviotan", pack: "25 kg torba",       tag: null },
+  { id: 20, sub: "deri",    n: { tr: "Tara Tozu",                            en: "Tara Powder",                                        ru: "Порошок тары" },                              brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 21, sub: "deri",    n: { tr: "Valeks (Palamut Ekstraktı)",           en: "Valex (Valonia Extract)",                            ru: "Валекс (экстракт валлонеи)" },                brand: "Valex",    pack: "25 kg torba",       tag: null },
 
-  // ---- Tekstil · Boyalar ----
-  { id: 20, sub: "tekboya", n: { tr: "Reaktif Boya",              en: "Reactive Dye",               ru: "Активный краситель" },       brand: "Herkim",   pack: "25 kg torba",  tag: null },
-  { id: 21, sub: "tekboya", n: { tr: "Dispers Boya",              en: "Disperse Dye",               ru: "Дисперсный краситель" },     brand: "Herkim",   pack: "25 kg torba",  tag: null },
-  { id: 22, sub: "tekboya", n: { tr: "Asit Boya (Tekstil)",       en: "Acid Dye (Textile)",         ru: "Кислотный краситель" },      brand: "Herkim",      pack: "25 kg torba",  tag: null },
+  // ---- Sodyum Bazlı Kimyasallar ----
+  { id: 22, sub: "sodyum",  n: { tr: "Kostik Soda",                          en: "Caustic Soda",                                       ru: "Каустическая сода" },                         brand: "Herkim",   pack: "25 kg torba",       tag: "one" },
+  { id: 23, sub: "sodyum",  n: { tr: "Nanocon (Povercon) — Sodyum Naftalin Sülfonat (Açık Renk)", en: "Nanocon (Povercon) — Sodium Naphthalene Sulfonate (Light Colour)", ru: "Nanocon (Povercon) — нафталинсульфонат натрия (светлый)" }, brand: "Povercon", pack: "25 kg torba", tag: null },
+  { id: 24, sub: "sodyum",  n: { tr: "Povercon 100 — Sodyum Naftalin Sülfonat", en: "Povercon 100 — Sodium Naphthalene Sulfonate",     ru: "Povercon 100 — нафталинсульфонат натрия" },   brand: "Povercon", pack: "25 kg torba",       tag: "yeni" },
+  { id: 25, sub: "sodyum",  n: { tr: "Sodyum Bikarbonat",                    en: "Sodium Bicarbonate",                                 ru: "Бикарбонат натрия" },                         brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 26, sub: "sodyum",  n: { tr: "Sodyum Karbonat",                      en: "Sodium Carbonate",                                   ru: "Карбонат натрия" },                           brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 27, sub: "sodyum",  n: { tr: "Sodyum Format",                        en: "Sodium Formate",                                     ru: "Формиат натрия" },                            brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 28, sub: "sodyum",  n: { tr: "Sodyum Sülfhidrat",                    en: "Sodium Sulphhydrate",                                ru: "Гидросульфид натрия" },                       brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 29, sub: "sodyum",  n: { tr: "Sodyum Hidrosülfit",                   en: "Sodium Hydrosulphite",                               ru: "Гидросульфит натрия" },                       brand: "Herkim",   pack: "50 kg bidon",       tag: null },
+  { id: 30, sub: "sodyum",  n: { tr: "Sodyum Metabisülfit (TLG)",            en: "Sodium Metabisulphite (TLG Grade)",                  ru: "Метабисульфит натрия (TLG)" },                brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 31, sub: "sodyum",  n: { tr: "Sodyum Perkarbonat",                   en: "Sodium Percarbonate",                                ru: "Перкарбонат натрия" },                        brand: "Herkim",   pack: "25 kg torba",       tag: "yeni" },
+  { id: 32, sub: "sodyum",  n: { tr: "Sodyum Sülfür",                        en: "Sodium Sulphide",                                    ru: "Сульфид натрия" },                            brand: "Herkim",   pack: "25 kg torba",       tag: null },
 
-  // ---- Binder · İnşaat Boya ----
-  { id: 23, sub: "insaatB", n: { tr: "Akrilik İnşaat Binderi",    en: "Acrylic Construction Binder",ru: "Акриловый биндер" },         brand: "Herkim",      pack: "1000 kg IBC",  tag: "one" },
-  { id: 24, sub: "insaatB", n: { tr: "Stiren-Akrilik Binder",     en: "Styrene-Acrylic Binder",     ru: "Стирол-акриловый биндер" },  brand: "Herkim",      pack: "1000 kg IBC",  tag: null },
-  { id: 25, sub: "insaatB", n: { tr: "Saf Akrilik Emülsiyon",     en: "Pure Acrylic Emulsion",      ru: "Чистая акриловая эмульсия" },brand: "Herkim",      pack: "1000 kg IBC",  tag: null },
-
-  // ---- Binder · Matbaa ----
-  { id: 26, sub: "matbaaB", n: { tr: "Su Bazlı Baskı Binderi",    en: "Water-Based Printing Binder",ru: "Водный печатный биндер" },   brand: "Herkim",      pack: "120 kg varil", tag: null },
-  { id: 27, sub: "matbaaB", n: { tr: "Laminasyon Binderi",        en: "Lamination Binder",          ru: "Ламинирующий биндер" },      brand: "Herkim",      pack: "120 kg varil", tag: null },
-
-  // ---- Binder · Tekstil ----
-  { id: 28, sub: "tekstilB",n: { tr: "Pigment Baskı Binderi",     en: "Pigment Printing Binder",    ru: "Пигментный печатный биндер" },brand: "Herkim",     pack: "120 kg varil", tag: "yeni" },
-  { id: 29, sub: "tekstilB",n: { tr: "Fikse Binderi",             en: "Fixing Binder",              ru: "Фиксирующий биндер" },       brand: "Herkim",      pack: "120 kg varil", tag: null }
+  // ---- Solventler & Endüstriyel Kimyasallar ----
+  { id: 33, sub: "solvent", n: { tr: "Amonyak",                              en: "Ammonia",                                            ru: "Аммиак" },                                    brand: "Herkim",   pack: "30 kg bidon / IBC", tag: null },
+  { id: 34, sub: "solvent", n: { tr: "Butil Asetat",                         en: "Butyl Acetate",                                      ru: "Бутилацетат" },                               brand: "Herkim",   pack: "180 kg varil",      tag: null },
+  { id: 35, sub: "solvent", n: { tr: "Ham Gliserin",                         en: "Crude Glycerine",                                    ru: "Глицерин технический" },                      brand: "Herkim",   pack: "IBC 1250 kg",       tag: null },
+  { id: 36, sub: "solvent", n: { tr: "Dietanolamin (DEA)",                   en: "Diethanolamine (DEA)",                               ru: "Диэтаноламин (DEA)" },                        brand: "Herkim",   pack: "220 kg varil",      tag: null },
+  { id: 37, sub: "solvent", n: { tr: "Magnezyum Klorür (Pul)",               en: "Magnesium Chloride Flakes",                          ru: "Хлорид магния (чешуйки)" },                   brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 38, sub: "solvent", n: { tr: "Metilen Klorür",                       en: "Methylene Chloride",                                 ru: "Метиленхлорид" },                             brand: "Herkim",   pack: "270 kg varil",      tag: null },
+  { id: 39, sub: "solvent", n: { tr: "Polivinil Alkol (PVA)",                en: "Polyvinyl Alcohol (PVA)",                            ru: "Поливиниловый спирт (PVA)" },                 brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 40, sub: "solvent", n: { tr: "Potasyum Klorür",                      en: "Potassium Chloride",                                 ru: "Хлорид калия" },                              brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 41, sub: "solvent", n: { tr: "Soya Lesitini",                        en: "Soya Lecithin",                                      ru: "Соевый лецитин" },                            brand: "Herkim",   pack: "200 kg varil / IBC",tag: "yeni" },
+  { id: 42, sub: "solvent", n: { tr: "Triizobutil Fosfat",                   en: "Triisobutyl Phosphate",                              ru: "Триизобутилфосфат" },                         brand: "Herkim",   pack: "200 kg varil",      tag: null }
 ];
 
 /* Duyurular (üç dilli) */

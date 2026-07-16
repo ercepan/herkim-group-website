@@ -96,17 +96,36 @@ function hgpSeed() {
     activities: [
       { when: "14.07.2026 16:40", who: "Anadolu Tekstil", what: "Yeni sipariş oluşturdu: HG-2026-1044", type: "siparis" },
       { when: "14.07.2026 07:30", who: "Depo", what: "HG-2026-1041 sevkiyata çıktı (SVK-2214)", type: "sevk" },
+      { when: "13.07.2026 11:05", who: "Web", what: "Yeni hesap başvurusu: Yıldız Tekstil San. ve Tic. Ltd. Şti.", type: "talep" },
       { when: "12.07.2026 10:20", who: "Üretim", what: "HG-2026-1042 üretime alındı", type: "uretim" },
       { when: "11.07.2026 09:12", who: "Ayşe Yılmaz", what: "HG-2026-1038 siparişini onayladı", type: "onay" },
       { when: "10.07.2026 14:20", who: "Ayşe Yılmaz", what: "TL-2026-0312 talebini yanıtladı", type: "talep" }
-    ]
+    ],
+    applications: hgpSeedApps(),
+    accounts: [],   // onaylı web hesapları: {email, name, company, initials}
+    customers: []   // onaylı başvurulardan doğan CRM kartları
   };
+}
+
+/* Bekleyen örnek hesap başvurusu (VKN sağlama basamağı geçerli) */
+function hgpSeedApps() {
+  return [{
+    id: "BV-2026-1049", firm: "Yıldız Tekstil San. ve Tic. Ltd. Şti.",
+    taxOffice: "Nilüfer / Bursa", vkn: "8123456786",
+    phone: "+90 224 000 44 55", web: "yildiztekstil.com.tr",
+    address: "NOSAB 216. Sok. No: 12 Nilüfer / Bursa",
+    contact: "Selin Yıldız", email: "satinalma@yildiztekstil.com.tr", mobile: "+90 532 444 55 66",
+    msg: "Sodyum bazlı ürünler ve MEG için düzenli tedarik arıyoruz.",
+    date: "13.07.2026", status: "bekliyor"
+  }];
 }
 
 function hgpGet() {
   var s = null;
   try { s = JSON.parse(localStorage.getItem(HGP_KEY)); } catch (e) {}
   if (!s || !s.orders) { s = hgpSeed(); hgpSave(s); }
+  // Eski depo sürümlerine hesap alanlarını ekle (taşıma)
+  if (!s.applications) { s.applications = hgpSeedApps(); s.accounts = []; s.customers = []; hgpSave(s); }
   // Ana sitedeki iletişim formundan düşen talepleri içeri al (Landing → CRM)
   try {
     var q = JSON.parse(localStorage.getItem(HGP_QUEUE)) || [];
@@ -201,6 +220,78 @@ function hgpAddNote(custName, note, who) {
   var s = hgpGet();
   hgpAct(s, who, custName + " — görüşme notu: " + note, "not");
   hgpSave(s);
+}
+
+/* ---------------- Hesap başvurusu (NGB modeli) ----------------
+   Akış: web formu → başvuru CRM'e düşer → satış VKN/GİB doğrular →
+   onay → müşteri kartı + giriş hesabı oluşur → teklif/sipariş açılır. */
+
+/* Vergi Kimlik No (10 hane) resmî sağlama basamağı denetimi */
+function hgpValidVKN(v) {
+  if (!/^\d{10}$/.test(v)) return false;
+  var sum = 0;
+  for (var i = 0; i < 9; i++) {
+    var d = +v[i];
+    var p = (d + 10 - (i + 1)) % 10;
+    var q = (p * Math.pow(2, 10 - (i + 1))) % 9;
+    if (p !== 0 && q === 0) q = 9;
+    sum += q;
+  }
+  return ((10 - (sum % 10)) % 10) === +v[9];
+}
+
+/* TC Kimlik No (11 hane) sağlama denetimi — şahıs firmaları için */
+function hgpValidTCKN(t) {
+  if (!/^[1-9]\d{10}$/.test(t)) return false;
+  var d = t.split("").map(Number);
+  var odd = d[0] + d[2] + d[4] + d[6] + d[8], even = d[1] + d[3] + d[5] + d[7];
+  if ((((odd * 7 - even) % 10) + 10) % 10 !== d[9]) return false;
+  var sum10 = 0;
+  for (var i = 0; i < 10; i++) sum10 += d[i];
+  return sum10 % 10 === d[10];
+}
+
+/* Vergi No alanı: 10 hane → VKN, 11 hane → TCKN */
+function hgpValidTaxId(x) {
+  var v = (x || "").replace(/\s/g, "");
+  return v.length === 10 ? hgpValidVKN(v) : (v.length === 11 ? hgpValidTCKN(v) : false);
+}
+
+function hgpAddApplication(app) {
+  var s = hgpGet();
+  s.seq += 1;
+  var id = "BV-2026-" + s.seq;
+  s.applications.unshift({
+    id: id, firm: app.firm, taxOffice: app.taxOffice, vkn: app.vkn,
+    phone: app.phone || "—", web: app.web || "", address: app.address || "",
+    contact: app.contact, email: (app.email || "").toLowerCase(), mobile: app.mobile || "",
+    msg: app.msg || "", date: hgpToday(), status: "bekliyor"
+  });
+  hgpAct(s, app.contact || "Web", "Yeni hesap başvurusu: " + app.firm, "talep");
+  hgpSave(s);
+  return id;
+}
+
+function hgpDecideApplication(appId, approve, who) {
+  var s = hgpGet(), a = null;
+  for (var i = 0; i < s.applications.length; i++) if (s.applications[i].id === appId) a = s.applications[i];
+  if (!a || a.status !== "bekliyor") return null;
+  a.status = approve ? "onay" : "red";
+  if (approve) {
+    var initials = (a.contact || "??").split(/\s+/).map(function (w) { return (w[0] || "").toLocaleUpperCase("tr"); }).join("").slice(0, 2);
+    s.accounts.push({ email: a.email, name: a.contact, company: a.firm, initials: initials });
+    s.customers.push({
+      id: "C-1" + String(s.seq).slice(-2), name: a.firm, city: a.taxOffice || "—",
+      contact: a.contact, phone: a.mobile || a.phone, email: a.email,
+      rep: "Ayşe Yılmaz", since: 2026,
+      history: [{ via: "🌐", t: "Web başvurusu onaylandı", n: a.msg || "Hesap aktifleştirildi.", when: hgpToday() }]
+    });
+    hgpAct(s, who, a.firm + " hesap başvurusunu onayladı — hesap aktif", "onay");
+  } else {
+    hgpAct(s, who, a.firm + " hesap başvurusunu reddetti", "genel");
+  }
+  hgpSave(s);
+  return a.status;
 }
 
 /* Demoyu sıfırla */
