@@ -594,8 +594,11 @@
       card.appendChild(el("p", null, pick(d.desc)));
       const meta = el("div", "dc-meta");
       meta.appendChild(el("span", null, pick(d.meta)));
-      const link = el("a", "dc-link", { tr: "Talep et →", en: "Request →", ru: "Запросить →" }[L()]);
-      link.href = "iletisim.html";
+      const link = el("a", "dc-link", d.file
+        ? { tr: "İndir (PDF) ↓", en: "Download (PDF) ↓", ru: "Скачать (PDF) ↓" }[L()]
+        : { tr: "Talep et →", en: "Request →", ru: "Запросить →" }[L()]);
+      link.href = d.file || "iletisim.html";
+      if (d.file) link.setAttribute("download", "");
       meta.appendChild(link); card.appendChild(meta);
       return card;
     }));
