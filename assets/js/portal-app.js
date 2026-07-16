@@ -113,25 +113,25 @@
   /* ---------- Rol yapılandırması ---------- */
   var NAV = {
     musteri: [
-      { v: "dash", t: "⬛ Özet" },
-      { v: "neworder", t: "🛒 Yeni Sipariş" },
-      { v: "orders", t: "📦 Siparişlerim" },
-      { v: "requests", t: "📝 Taleplerim" }
+      { v: "dash", t: "Özet" },
+      { v: "neworder", t: "Yeni Sipariş" },
+      { v: "orders", t: "Siparişlerim" },
+      { v: "requests", t: "Taleplerim" }
     ],
     satis: [
-      { v: "dash", t: "⬛ CRM Özeti" },
-      { v: "orders", t: "✅ Siparişler & Onay", cnt: "onay" },
-      { v: "requests", t: "📥 Gelen Talepler", cnt: "acik" },
-      { v: "customers", t: "🪪 Müşteri Kartları", cnt: "basvuru" }
+      { v: "dash", t: "CRM Özeti" },
+      { v: "orders", t: "Siparişler & Onay", cnt: "onay" },
+      { v: "requests", t: "Gelen Talepler", cnt: "acik" },
+      { v: "customers", t: "Müşteri Kartları", cnt: "basvuru" }
     ],
     depo: [
-      { v: "dash", t: "⬛ Özet" },
-      { v: "ops", t: "🏭 Operasyon Panosu", cnt: "ops" }
+      { v: "dash", t: "Özet" },
+      { v: "ops", t: "Operasyon Panosu", cnt: "ops" }
     ],
     yonetim: [
-      { v: "dash", t: "📊 Dashboard" },
-      { v: "orders", t: "📦 Tüm Siparişler" },
-      { v: "requests", t: "📝 Talepler" }
+      { v: "dash", t: "Dashboard" },
+      { v: "orders", t: "Tüm Siparişler" },
+      { v: "requests", t: "Talepler" }
     ]
   };
   var TITLES = {
@@ -489,7 +489,7 @@
     if (!subj || !det) { toast("Lütfen konu ve detay girin."); return; }
     hgpAddRequest(USER.company, subj, det, USER.name + " (" + USER.company + ")");
     if (typeof hgNotify === "function")
-      hgNotify("📝 Yeni Talep — " + USER.company,
+      hgNotify("Yeni Talep — " + USER.company,
         ["Konu: " + subj, "", det, "", "Talep eden: " + USER.name + " (" + USER.company + ")"], USER.name);
     rf.reset(); rfc.textContent = "0/500";
     toast("Talebiniz satış temsilcinizin CRM kutusuna düştü ✓");
@@ -533,7 +533,7 @@
     panel.id = "apps-panel";
     panel.style.marginBottom = "22px";
     var head = el("div", "p-head");
-    head.appendChild(el("h3", null, "🆕 Bekleyen Hesap Başvuruları (" + pend.length + ")"));
+    head.appendChild(el("h3", null, "Bekleyen Hesap Başvuruları (" + pend.length + ")"));
     head.appendChild(el("span", "mono", "Web sitesinden — firma doğrulaması sizde"));
     panel.appendChild(head);
     pend.forEach(function (a) {
@@ -636,7 +636,7 @@
     });
     if (o.note) {
       var nr = el("div", "dw-item");
-      nr.appendChild(el("b", null, "🗒 Sipariş notu"));
+      nr.appendChild(el("b", null, "Sipariş notu"));
       nr.appendChild(el("span", null, o.note));
       items.appendChild(nr);
     }
@@ -684,13 +684,13 @@
     var notes = s.activities.filter(function (a) { return a.type === "not" && a.what.indexOf(c.name) === 0; });
     notes.forEach(function (n) {
       var r = el("div", "dw-item");
-      r.appendChild(el("b", null, "🗒 " + n.what.split("görüşme notu: ")[1]));
+      r.appendChild(el("b", null, n.what.split("görüşme notu: ")[1]));
       r.appendChild(el("span", null, n.when));
       h.appendChild(r);
     });
     c.history.forEach(function (x) {
       var r = el("div", "dw-item");
-      r.appendChild(el("b", null, x.via + " " + x.t));
+      r.appendChild(el("b", null, "[" + x.via + "] " + x.t));
       r.appendChild(el("span", null, x.when));
       h.appendChild(r);
     });

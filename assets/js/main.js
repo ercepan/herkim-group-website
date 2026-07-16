@@ -195,7 +195,7 @@
       const item = el("div", "bd-item");
       const info = el("div");
       info.appendChild(el("b", null, PNAME(p)));
-      info.appendChild(el("span", "mono", p.pack));
+      info.appendChild(el("span", "mono", p.brand));
       const right = el("div", "bd-right");
       right.appendChild(qtyControl(b, line));
       const rm = el("button", "bd-remove", "×");
@@ -212,13 +212,13 @@
       cta.addEventListener("click", () => { bdView = "confirm"; renderBasket(); });
       body.appendChild(cta);
     } else {
-      cta.textContent = "🔐 " + T("basket.loginToOrder");
+      cta.textContent = T("basket.loginToOrder");
       cta.addEventListener("click", () => {
         if (!window.hkAuth) return;
         window.hkAuth.openLogin(() => { openBasket(); bdView = "confirm"; renderBasket(); });
       });
       body.appendChild(cta);
-      const ap = el("a", "btn btn--ghost btn--sm", "📋 " + T("basket.applyBtn"));
+      const ap = el("a", "btn btn--ghost btn--sm", T("basket.applyBtn"));
       ap.href = "hesap.html";
       ap.style.cssText = "width:100%;justify-content:center;margin-top:10px";
       body.appendChild(ap);
@@ -245,7 +245,7 @@
       const row = el("div", "bd-item");
       const info = el("div");
       info.appendChild(el("b", null, PNAME(p)));
-      info.appendChild(el("span", "mono", line.qty + " × " + p.pack));
+      info.appendChild(el("span", "mono", line.qty + " " + T("order.unit")));
       row.appendChild(info);
       body.appendChild(row);
     });
@@ -277,6 +277,49 @@
     body.appendChild(info2);
   }
 
+  /* Misafir teklif adımı: ad + telefon/e-posta (üyelik gerekmez) */
+  function renderQuoteForm(body) {
+    const back = el("button", null, "← " + T("order.cancel"));
+    back.type = "button";
+    back.style.cssText = "font-family:var(--font-mono);font-size:12px;color:var(--crimson);font-weight:600;margin-bottom:12px";
+    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
+    body.appendChild(back);
+    const h = el("h4", null, T("quote.formTitle"));
+    h.style.cssText = "font-family:var(--font-display);font-weight:700;font-size:17px;margin-bottom:4px";
+    body.appendChild(h);
+    const sub = el("p", null, T("quote.formSub"));
+    sub.style.cssText = "font-size:12.5px;color:var(--ink-3);margin-bottom:14px";
+    body.appendChild(sub);
+    const mk = (id, key) => {
+      const f = el("div", "field");
+      f.style.marginBottom = "10px";
+      const lb = el("label", null, T(key));
+      lb.setAttribute("for", id);
+      const inp = el("input");
+      inp.type = "text"; inp.id = id; inp.maxLength = 80;
+      f.appendChild(lb); f.appendChild(inp);
+      body.appendChild(f);
+      return inp;
+    };
+    const iName = mk("qf-name", "quote.name");
+    const iFirm = mk("qf-firm", "quote.firm");
+    const iCont = mk("qf-contact", "quote.contact");
+    const send = el("button", "btn btn--primary", T("quote.send"));
+    send.style.cssText = "width:100%;justify-content:center;margin-top:8px";
+    send.addEventListener("click", () => {
+      const name = iName.value.trim(), firm = iFirm.value.trim(), cont = iCont.value.trim();
+      if (!name) { toast(T("toast.formErr")); iName.focus(); return; }
+      const digits = (cont.match(/\d/g) || []).length;
+      if (!cont || (cont.indexOf("@") < 1 && digits < 7)) { toast(T("quote.errContact")); iCont.focus(); return; }
+      send.disabled = true;
+      sendQuote(name, firm, cont, () => { send.disabled = false; });
+    });
+    body.appendChild(send);
+    const n = el("p", null, T("basket.note"));
+    n.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
+    body.appendChild(n);
+  }
+
   function placeOrder(noteRaw) {
     const u = window.hkAuth && window.hkAuth.user();
     const b = getBasket();
@@ -288,12 +331,12 @@
     if (!b.length || typeof hgpAddOrder !== "function") return;
     const items = b.map(line => {
       const p = HK_PRODUCTS.find(x => x.id === line.id);
-      return p ? { n: p.n.tr, q: line.qty + " × " + p.pack } : null;
+      return p ? { n: p.n.tr, q: line.qty + " adet" } : null;
     }).filter(Boolean);
     const note = (noteRaw || "").trim().slice(0, 200);
     lastOrderId = hgpAddOrder(u.company, items, u.name, note);
     // Yetkiliye anında bildirim (anahtar girildiyse; sipariş bildirime bağımlı değildir)
-    hgNotify("🛒 Yeni Sipariş " + lastOrderId + " — " + u.company,
+    hgNotify("Yeni Sipariş " + lastOrderId + " — " + u.company,
       ["Sipariş No: " + lastOrderId, "Müşteri: " + u.company, "Veren: " + u.name, ""]
         .concat(items.map(i => "• " + i.n + " — " + i.q))
         .concat(note ? ["", "Not: " + note] : []),
@@ -313,7 +356,7 @@
     p1.style.marginTop = "8px";
     box.appendChild(p1);
     const track = el("a", "btn btn--primary", T("order.track"));
-    track.href = "portal.html#orders";
+    track.href = "siparislerim.html";
     track.style.cssText = "width:100%;justify-content:center;margin-top:18px";
     box.appendChild(track);
     const cont = el("button", "btn btn--ghost btn--sm", T("order.continue"));
@@ -332,6 +375,7 @@
     const body = $("#basket-body");
     if (!body) return;
     if (bdView === "confirm" && (!b.length || !isCust())) bdView = "cart";
+    if (bdView === "quoteform" && isCust()) bdView = "cart";
     if (bdView !== "success" && !b.length) bdView = "cart";
     basketChrome();
     body.replaceChildren();
@@ -353,6 +397,7 @@
       return;
     }
     if (bdView === "confirm") { renderConfirm(body, b); return; }
+    if (bdView === "quoteform") { renderQuoteForm(body); return; }
     renderCart(body, b);
   }
 
@@ -369,24 +414,16 @@
     const b = getBasket();
     const lines = b.map(line => {
       const p = HK_PRODUCTS.find(x => x.id === line.id);
-      return p ? "• " + PNAME(p) + " (" + line.qty + " × " + p.pack + ")" : "";
+      return p ? "• " + PNAME(p) + " (" + line.qty + " " + T("order.unit") + ")" : "";
     }).filter(Boolean);
     const intro = { tr: "Merhaba, aşağıdaki ürünler için fiyat teklifi rica ederim:", en: "Hello, I would like a quote for the following products:", ru: "Здравствуйте, прошу цену на следующие продукты:" }[L()];
     const foot = { tr: "\n\nFirma: \nİlgili kişi: \nTahmini miktar: ", en: "\n\nCompany: \nContact: \nEstimated quantity: ", ru: "\n\nКомпания: \nКонтакт: \nОриент. объём: " }[L()];
     return encodeURIComponent(intro + "\n\n" + lines.join("\n") + foot);
   }
-  /* NGB modeli: teklif kanalları yalnız onaylı müşteri girişine açık */
-  function requireCust() {
-    const u = window.hkAuth && window.hkAuth.user();
-    if (u && u.role === "musteri") return u;
-    toast(T("basket.quoteLogin"));
-    if (window.hkAuth) window.hkAuth.openLogin(() => { openBasket(); renderBasket(); });
-    return null;
-  }
+  /* Teklif istemek üyelik gerektirmez; sipariş vermek onaylı hesap ister. */
   const waBtn = $("#basket-wa");
   if (waBtn) waBtn.addEventListener("click", () => {
     if (!getBasket().length) { toast(T("basket.addFirst")); return; }
-    if (!requireCust()) return;
     window.open("https://wa.me/" + HK.whatsapp + "?text=" + basketMessage(), "_blank", "noopener");
   });
   function quoteMailFallback() {
@@ -397,9 +434,9 @@
     const lines = ["Ad: " + name, "Firma: " + (firm || "—"), "İletişim: " + (contact || "—"), ""]
       .concat(getBasket().map(line => {
         const p = HK_PRODUCTS.find(x => x.id === line.id);
-        return p ? "• " + p.n.tr + " (" + line.qty + " × " + p.pack + ")" : "";
+        return p ? "• " + p.n.tr + " (" + line.qty + " adet)" : "";
       }).filter(Boolean));
-    hgNotify("💬 Teklif Talebi — " + (firm || name), lines, name, contact).then(ok => {
+    hgNotify("Teklif Talebi — " + (firm || name), lines, name, contact).then(ok => {
       if (done) done();
       if (ok) { bdView = "cart"; renderBasket(); toast(T("quote.sentOk")); }
       else quoteMailFallback();
@@ -408,10 +445,11 @@
   const mailBtn = $("#basket-mail");
   if (mailBtn) mailBtn.addEventListener("click", () => {
     if (!getBasket().length) { toast(T("basket.addFirst")); return; }
-    const u = requireCust();
-    if (!u) return;
     if (!HK.web3forms) { quoteMailFallback(); return; }
-    sendQuote(u.name, u.company, u.email || "satinalma@derimderi.com.tr");
+    const u = window.hkAuth && window.hkAuth.user();
+    if (u && u.role === "musteri") { sendQuote(u.name, u.company, u.email || "satinalma@derimderi.com.tr"); return; }
+    bdView = "quoteform"; // misafir: iletişim bilgisi adımı
+    renderBasket();
   });
   const clearBtn = $("#basket-clear");
   if (clearBtn) clearBtn.addEventListener("click", () => { setBasket([]); toast(T("basket.cleared")); });
@@ -433,7 +471,6 @@
 
     const meta = el("div", "ec-meta");
     meta.appendChild(el("span", null, SUB_LABEL(p.sub)));
-    meta.appendChild(el("span", null, p.pack));
     card.appendChild(meta);
 
     const add = el("button", "ec-add", "+");
@@ -488,7 +525,7 @@
     if (tableState.cat !== "all") list = list.filter(p => CAT_OF(p.sub) === tableState.cat);
     if (tableState.q) {
       const q = trLower(tableState.q);
-      list = list.filter(p => trLower([p.n.tr, p.n.en, p.n.ru, p.brand, SUB_LABEL(p.sub), CAT_LABEL(CAT_OF(p.sub)), p.pack].join(" ")).includes(q));
+      list = list.filter(p => trLower([p.n.tr, p.n.en, p.n.ru, p.brand, SUB_LABEL(p.sub), CAT_LABEL(CAT_OF(p.sub))].join(" ")).includes(q));
     }
     list.sort((a, b) => {
       let va, vb;
@@ -496,7 +533,6 @@
       else if (tableSortKey === "cat") { va = CAT_LABEL(CAT_OF(a.sub)); vb = CAT_LABEL(CAT_OF(b.sub)); }
       else if (tableSortKey === "sub") { va = SUB_LABEL(a.sub); vb = SUB_LABEL(b.sub); }
       else if (tableSortKey === "brand") { va = a.brand; vb = b.brand; }
-      else if (tableSortKey === "pack") { va = a.pack; vb = b.pack; }
       else { va = a.id; vb = b.id; }
       if (typeof va === "string") return va.localeCompare(vb, "tr") * tableSortDir;
       return (va - vb) * tableSortDir;
@@ -512,7 +548,6 @@
       tdCat.appendChild(el("span", "cat-pill", CAT_LABEL(CAT_OF(p.sub))));
       tr.appendChild(tdCat);
       tr.appendChild(el("td", "td-cas", p.brand));
-      tr.appendChild(el("td", "td-pack", p.pack));
       const tdDocs = el("td");
       const docs = el("div", "doc-btns");
       const tds = el("a", null, "TDS"); tds.href = "dokumanlar.html"; tds.title = "TDS";
@@ -696,7 +731,7 @@
     };
     const sbtn = cform.querySelector("[type=submit]");
     if (sbtn) sbtn.disabled = true;
-    hgNotify("📥 Web İletişim Formu — " + (firm || name),
+    hgNotify("Web İletişim Formu — " + (firm || name),
       ["Ad: " + name, "Firma: " + (firm || "—"), "Tel: " + (phone || "—"), "Konu: " + (topic || "—"), "", msg],
       name)
       .then(ok => {
@@ -746,7 +781,7 @@
       if (!email || email.indexOf("@") < 1) { toast(T("acct.errMail")); $("#ac-email").focus(); return; }
       if (!$("#ac-kvkk").checked) { toast(T("acct.errKvkk")); return; }
       const id = hgpAddApplication({ firm, taxOffice: tax, vkn, phone, web, address: addr, contact, email, mobile, msg });
-      hgNotify("🆕 Hesap Başvurusu " + id + " — " + firm,
+      hgNotify("Hesap Başvurusu " + id + " — " + firm,
         ["Başvuru No: " + id, "Firma: " + firm, "Vergi D./No: " + tax + " / " + vkn,
          "Yetkili: " + contact, "E-posta: " + email, "Cep: " + mobile,
          "Tel: " + phone, "Adres: " + (addr || "—"), "Web: " + (web || "—")]
@@ -761,6 +796,84 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
+
+  /* ============ 12) Siparişlerim (siparislerim.html) ============ */
+  const moWrap = $("#my-orders");
+  function renderMyOrders() {
+    if (!moWrap) return;
+    const loginBox = $("#mo-login");
+    const u = window.hkAuth && window.hkAuth.user();
+    if (!u || u.role !== "musteri") {
+      moWrap.style.display = "none";
+      if (loginBox) loginBox.style.display = "";
+      return;
+    }
+    if (loginBox) loginBox.style.display = "none";
+    moWrap.style.display = "";
+    moWrap.replaceChildren();
+    const s = hgpGet();
+    const list = s.orders.filter(o => o.customer === u.company);
+    const head = el("p", "mo-scope");
+    head.appendChild(el("span", "mono", u.company));
+    head.appendChild(document.createTextNode(" — " + list.length + " " + T("myord.count")));
+    moWrap.appendChild(head);
+    if (!list.length) {
+      const empty = el("div", "mo-empty");
+      empty.appendChild(el("p", null, T("myord.empty")));
+      const a = el("a", "btn btn--primary btn--sm", T("myord.browse"));
+      a.href = "urunler.html";
+      empty.appendChild(a);
+      moWrap.appendChild(empty);
+      return;
+    }
+    const STEP_T = [T("myord.s0"), T("myord.s1"), T("myord.s2"), T("myord.s3"), T("myord.s4")];
+    const CLS = ["bekliyor", "onay", "uretim", "sevk", "teslim"];
+    list.forEach(o => {
+      const card = el("article", "mo-card");
+      const top = el("div", "mo-head");
+      const left = el("div");
+      left.appendChild(el("b", "mono", o.id));
+      left.appendChild(el("span", null, T("myord.date") + ": " + o.date));
+      top.appendChild(left);
+      top.appendChild(el("span", "ost ost--" + CLS[o.step], STEP_T[o.step]));
+      card.appendChild(top);
+      const items = el("div", "mo-items");
+      o.items.forEach(i => {
+        const r = el("div", "mo-item");
+        r.appendChild(el("span", null, i.n));
+        r.appendChild(el("span", "mono", i.q));
+        items.appendChild(r);
+      });
+      card.appendChild(items);
+      const prog = el("div", "mo-prog");
+      const bar = el("i");
+      bar.style.width = (o.step / 4 * 100) + "%";
+      prog.appendChild(bar);
+      card.appendChild(prog);
+      const tl = el("div", "mo-tl");
+      STEP_T.forEach((st, i) => {
+        const d = el("div", "mo-tl-step" + (i < o.step ? " done" : (i === o.step ? " now" : "")));
+        d.appendChild(el("b", null, st));
+        d.appendChild(el("span", "mono", o.tl[i] || "—"));
+        tl.appendChild(d);
+      });
+      card.appendChild(tl);
+      const metaBits = [];
+      if (o.eta && o.eta !== "—") metaBits.push(T("myord.eta") + ": " + o.eta);
+      if (o.track && o.track !== "—") metaBits.push(T("myord.track") + ": " + o.track);
+      if (o.carrier && o.carrier !== "—") metaBits.push(o.carrier);
+      if (metaBits.length) card.appendChild(el("p", "mo-meta mono", metaBits.join("  ·  ")));
+      if (o.note) card.appendChild(el("p", "mo-note", T("order.note").replace(" (opsiyonel)", "").replace(" (optional)", "").replace(" (необязательно)", "") + ": " + o.note));
+      moWrap.appendChild(card);
+    });
+  }
+  renderMyOrders();
+  const moLoginBtn = $("#mo-login-btn");
+  if (moLoginBtn) moLoginBtn.addEventListener("click", () => {
+    if (window.hkAuth) window.hkAuth.openLogin(() => renderMyOrders());
+  });
+  document.addEventListener("hk:authchange", renderMyOrders);
+  document.addEventListener("hk:langchange", renderMyOrders);
 
   $$("[id^='newsletter-form']").forEach(nf => nf.addEventListener("submit", (e) => {
     e.preventDefault();

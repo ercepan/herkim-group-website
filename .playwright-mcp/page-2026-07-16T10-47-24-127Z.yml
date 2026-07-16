@@ -1,0 +1,724 @@
+- generic [ref=f3e1]:
+  - region "Cookie preferences.":
+    - dialog [ref=f3e3]:
+      - generic [ref=f3e4]:
+        - button "Close" [active] [ref=f3e5] [cursor=pointer]
+        - generic [ref=f3e8]:
+          - heading "This site uses cookies to store information on your computer." [level=1] [ref=f3e9]
+          - paragraph [ref=f3e10]:
+            - paragraph [ref=f3e11]: Some of these cookies are essential to make our site work and others help us to improve by giving us some insight into how the site is being used.
+          - paragraph [ref=f3e13]:
+            - text: For more detailed information, please check our
+            - link "Cookie statement (Opens in a new window)" [ref=f3e14] [cursor=pointer]:
+              - /url: https://www.azelis.com/en/cookie-statement
+              - text: Cookie statement
+              - generic [ref=f3e15]: (Opens in a new window)
+          - button "I Accept" [ref=f3e20] [cursor=pointer]
+          - separator [ref=f3e21]
+          - heading "Necessary Cookies" [level=2] [ref=f3e22]
+          - paragraph [ref=f3e23]:
+            - paragraph [ref=f3e24]: Necessary cookies enable core functionality. The website cannot function properly without these cookies, and can only be disabled by changing your browser preferences.
+          - separator [ref=f3e25]
+          - generic [ref=f3e26]:
+            - generic [ref=f3e27]:
+              - heading "Analytical and statistical" [level=3] [ref=f3e28]
+              - paragraph [ref=f3e29]:
+                - paragraph [ref=f3e30]: These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site. All information these cookies collect is aggregated and therefore anonymous. If you do not allow these cookies we will not know when you have visited our site, and will not be able to monitor its performance.
+              - generic [ref=f3e32] [cursor=pointer]:
+                - checkbox "Analytical and statistical" [checked] [ref=f3e33]
+                - generic [ref=f3e34]: Analytical and statistical
+                - generic [ref=f3e35]: "On"
+                - generic [ref=f3e36]: "Off"
+              - separator [ref=f3e38]
+            - generic [ref=f3e39]:
+              - heading "Marketing and advertising" [level=3] [ref=f3e40]
+              - paragraph [ref=f3e41]:
+                - paragraph [ref=f3e42]: These cookies may be set through our site by our advertising partners. They may be used by those companies to build a profile of your interests and show you relevant adverts on other sites. They do not store directly personal information, but are based on uniquely identifying your browser and internet device. If you do not allow these cookies, you will experience less targeted advertising.
+              - generic [ref=f3e44] [cursor=pointer]:
+                - checkbox "Marketing and advertising" [ref=f3e45]
+                - generic [ref=f3e46]: Marketing and advertising
+                - generic [ref=f3e47]: "On"
+                - generic [ref=f3e48]: "Off"
+              - separator [ref=f3e50]
+          - link "About this tool (Opens in a new window)" [ref=f3e52] [cursor=pointer]:
+            - /url: https://www.civicuk.com/cookie-control
+            - text: About this tool
+            - generic [ref=f3e53]: (Opens in a new window)
+    - button "Set cookie preferences." [expanded] [ref=f3e57] [cursor=pointer]
+  - link "Skip to main content" [ref=f3e63] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f3e65]:
+    - banner [ref=f3e66]:
+      - link "Azelis" [ref=f3e68] [cursor=pointer]:
+        - /url: /en
+      - generic [ref=f3e74]:
+        - generic [ref=f3e75]:
+          - navigation [ref=f3e76]:
+            - heading "Top" [level=2] [ref=f3e77]
+            - list [ref=f3e78]:
+              - listitem [ref=f3e79]:
+                - link "News" [ref=f3e80] [cursor=pointer]:
+                  - /url: /en/news
+              - listitem [ref=f3e81]:
+                - link "Insights" [ref=f3e82] [cursor=pointer]:
+                  - /url: /en/insights
+              - listitem [ref=f3e83]:
+                - link "Working at Azelis" [ref=f3e84] [cursor=pointer]:
+                  - /url: /en/about-azelis/careers/working-at-azelis
+              - listitem [ref=f3e85]:
+                - link "Contact" [ref=f3e86] [cursor=pointer]:
+                  - /url: /en/contact
+          - generic [ref=f3e87]:
+            - generic [ref=f3e88]:
+              - generic [ref=f3e89]: Search
+              - searchbox "Search" [ref=f3e90]
+            - button "Search" [ref=f3e91] [cursor=pointer]
+        - generic [ref=f3e95]:
+          - navigation [ref=f3e96]:
+            - heading "Main navigation" [level=2] [ref=f3e97]
+            - list [ref=f3e98]:
+              - listitem [ref=f3e99]:
+                - link [ref=f3e100] [cursor=pointer]:
+                  - /url: /en/about-azelis
+              - listitem [ref=f3e104]:
+                - link [ref=f3e105] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/regions-and-locations
+              - listitem [ref=f3e109]:
+                - link [ref=f3e110] [cursor=pointer]:
+                  - /url: /en/markets
+              - listitem [ref=f3e114]:
+                - link [ref=f3e115] [cursor=pointer]:
+                  - /url: /en/services
+              - listitem [ref=f3e119]:
+                - link [ref=f3e120] [cursor=pointer]:
+                  - /url: /en/investor-relations
+            - generic:
+              - generic:
+                - list:
+                  - listitem:
+                    - article:
+                      - heading "About Azelis" [level=2]
+                      - generic:
+                        - paragraph: Azelis does much more than move goods. We move markets forward. Breaking new ground in our technical laboratories by combining ingredients with ideas and creating opportunities through innovation.
+                    - list:
+                      - listitem:
+                        - generic: Our company
+                        - list:
+                          - listitem:
+                            - link "Our purpose":
+                              - /url: /en/en/about-azelis/our-purpose
+                          - listitem:
+                            - link "Our values":
+                              - /url: /en/about-azelis/azelis-values
+                          - listitem:
+                            - link "Sustainability":
+                              - /url: /en/sustainability
+                          - listitem:
+                            - link "Awards and Recognitions":
+                              - /url: /en/services/application-labs/innovation/awards
+                          - listitem:
+                            - link "Digitalisation":
+                              - /url: /en/node/2981
+                          - listitem:
+                            - link "Timeline of expansion":
+                              - /url: /en/about-azelis/history
+                          - listitem:
+                            - link "Ethics & compliance":
+                              - /url: /en/ethicsandcompliance
+                          - listitem:
+                            - link "SHEQ":
+                              - /url: /en/about-azelis/corporate-social-responsibility/SHEQ
+                      - listitem:
+                        - generic: Our people
+                        - list:
+                          - listitem:
+                            - link "Leadership & Corporate Governance":
+                              - /url: /en/about-azelis/leadership
+                          - listitem:
+                            - link "Careers":
+                              - /url: /en/about-azelis/careers
+                  - listitem:
+                    - article:
+                      - heading "Our regions" [level=2]
+                      - generic:
+                        - paragraph: With more than 4,100 colleagues and an extensive network of 70+ laboratories and research centres, our global reach is built upon a regional focus on creating formulations that meet specific local demands.
+                    - list:
+                      - listitem:
+                        - link "Americas":
+                          - /url: https://www.azelis.com/en/regions-and-locations/americas
+                      - listitem:
+                        - link "Asia Pacific":
+                          - /url: /en/regions-and-locations/asia-pacific
+                      - listitem:
+                        - link "EMEA":
+                          - /url: /en/regions-and-locations/emea
+                  - listitem:
+                    - article:
+                      - heading "Our markets" [level=2]
+                      - generic:
+                        - paragraph: At Azelis we encourage entrepreneurial thinking in every area of our business. Our innovative zeal is reflected in the outstanding quality and cutting-edge solutions we deliver in Life Sciences and Industrial Chemicals.
+                    - list:
+                      - listitem:
+                        - generic: Life sciences
+                        - list:
+                          - listitem:
+                            - link "Animal Nutrition":
+                              - /url: /en/markets/animal-nutrition
+                          - listitem:
+                            - link "Flavours & Fragrances":
+                              - /url: /en/flavoursandfragrances
+                          - listitem:
+                            - link "Nutraceuticals":
+                              - /url: /en/nutraceuticals
+                          - listitem:
+                            - link "Food & Nutrition":
+                              - /url: /en/markets/food-nutrition
+                          - listitem:
+                            - link "Home Care & Industrial Cleaning":
+                              - /url: /en/markets/homecare-industrial-cleaning
+                          - listitem:
+                            - link "Personal Care":
+                              - /url: /en/markets/personal-care
+                          - listitem:
+                            - link "Pharmaceuticals & Healthcare":
+                              - /url: /en/markets/Pharma
+                          - listitem:
+                            - link "Agricultural & Environmental Solutions":
+                              - /url: /en/markets/life-sciences/Agricultural-Environmental-Solutions
+                      - listitem:
+                        - generic: Industrial Chemicals
+                        - list:
+                          - listitem:
+                            - link "CASE":
+                              - /url: /en/markets/case
+                          - listitem:
+                            - link "Electronics":
+                              - /url: /en/markets/electronics
+                          - listitem:
+                            - link "Essential Chemicals":
+                              - /url: /en/markets/essential-chemicals
+                          - listitem:
+                            - link "Fine Chemicals":
+                              - /url: /en/markets/fine-chemicals
+                          - listitem:
+                            - link "Lubricants & Metalworking Fluids":
+                              - /url: /en/markets/lubricants-metal-working-fluids
+                          - listitem:
+                            - link "Oilfield":
+                              - /url: /en/markets/industrial-chemicals/oilfield
+                          - listitem:
+                            - link "Other Applications":
+                              - /url: /en/markets/other-applications
+                          - listitem:
+                            - link "Advanced Materials & Additives":
+                              - /url: /en/markets/rubber-plastic-additives
+                          - listitem:
+                            - link "Textiles, Leather & Paper":
+                              - /url: /en/markets/textiles-leather-paper
+                      - listitem:
+                        - generic "Our Brands": Our brands
+                  - listitem:
+                    - article:
+                      - heading "Our services" [level=2]
+                      - generic:
+                        - paragraph: Together with our more than 65,000 customers, we provide effective, sustainable and reliable business solutions, developing innovative ways to create value.
+                    - list:
+                      - listitem:
+                        - generic: Services
+                        - list:
+                          - listitem:
+                            - link "Customer Portal":
+                              - /url: https://explore.azelis.com/
+                          - listitem:
+                            - link "Application laboratories":
+                              - /url: /en/applicationlabs
+                          - listitem:
+                            - link "International supply chain":
+                              - /url: /en/services/international-supply-chain
+                          - listitem:
+                            - link "Azelis Turkey Academy":
+                              - /url: https://www.azelis.com/en/node/2755
+                          - listitem:
+                            - link "Sampling service":
+                              - /url: /en/services/sampling-service
+                          - listitem:
+                            - link "REACH customer service":
+                              - /url: /en/services/reach-customer-service
+                  - listitem:
+                    - list:
+                      - listitem:
+                        - link "Azelis's value proposition":
+                          - /url: /en/value-proposition
+                        - list:
+                          - listitem:
+                            - link "Global industry leader":
+                              - /url: https://www.azelis.com/en/value-proposition#a-global-leader-in-the-attractive-specialty-chemicals-and-food-ingredients-distribution-market-led-by-an-experienced-management-team
+                          - listitem:
+                            - link "Leader in innovation, sustainability and digitalization":
+                              - /url: https://www.azelis.com/en/value-proposition#growth-driven-by-leadership-in-innovation-sustainability-and-digitalization
+                          - listitem:
+                            - link "Resilient business model":
+                              - /url: https://www.azelis.com/en/value-proposition#resilient-business-model-with-consistent-organic-and-acquisition-driven-growth
+                      - listitem:
+                        - link "Shareholder information":
+                          - /url: /en/shareholder-corner
+                        - list:
+                          - listitem:
+                            - link "Transparency notifications":
+                              - /url: /en/transparencynotifications
+                          - listitem:
+                            - link "Stock information":
+                              - /url: /en/stock-information
+                          - listitem:
+                            - link "Financial calendar":
+                              - /url: /en/financial-calendar
+                          - listitem:
+                            - link "Share price chart":
+                              - /url: /en/share-price-chart
+                          - listitem:
+                            - link "Shareholder table":
+                              - /url: /en/shareholdertable
+                          - listitem:
+                            - link "Share buyback programme":
+                              - /url: /en/sharebuyback
+                          - listitem:
+                            - link "Authorised capital":
+                              - /url: /en/authorizedcapital
+                      - listitem:
+                        - link "Corporate governance":
+                          - /url: https://www.azelis.com/en/about-azelis/leadership
+                        - list:
+                          - listitem:
+                            - link "Articles of association":
+                              - /url: https://www.azelis.com/en/corporate-governance-downloads#articles_of_association
+                          - listitem:
+                            - link "Shareholders meeting":
+                              - /url: https://www.azelis.com/en/AGM2026
+                          - listitem:
+                            - link "Corporate governance charter":
+                              - /url: https://www.azelis.com/en/corporate-governance-downloads#corporate_governance_charter
+                          - listitem:
+                            - link "Remuneration policy":
+                              - /url: https://www.azelis.com/en/corporate-governance-downloads#remuneration_policy
+                      - listitem:
+                        - link "Reports & presentations":
+                          - /url: /en/reports-and-presentations
+                      - listitem:
+                        - link "Analyst coverage":
+                          - /url: /en/analyst-coverage
+                      - listitem:
+                        - link "Key financials":
+                          - /url: /en/key-financials
+                      - listitem:
+                        - link "IPO corner":
+                          - /url: /en/IPO-corner
+                      - listitem:
+                        - link "Financial news":
+                          - /url: /en/financial-news
+                      - listitem:
+                        - link "Regulated information":
+                          - /url: /en/regulated-information
+                      - listitem:
+                        - link "ESG - Sustainability at Azelis":
+                          - /url: https://www.azelis.com/en/ESG-sustainabilityoverview
+                      - listitem:
+                        - link "Contact":
+                          - /url: /en/media-enquiries
+          - link "Customer portal" [ref=f3e125] [cursor=pointer]:
+            - /url: https://explore.azelis.com/
+    - article [ref=f3e127]:
+      - generic [ref=f3e128]:
+        - figure [ref=f3e129]
+        - generic [ref=f3e130]:
+          - paragraph [ref=f3e131]: Innovation through formulation.
+          - heading "Azelis is the reference innovation service provider in the speciality chemicals and food ingredients industry" [level=1] [ref=f3e132]
+          - generic [ref=f3e133]:
+            - link "Touching the lives of people everywhere" [ref=f3e134] [cursor=pointer]:
+              - /url: https://youtu.be/2AxuVYszgM8?si=DBMI9ISBCXMCPQfG
+            - link "Our commitments to the wider community" [ref=f3e135] [cursor=pointer]:
+              - /url: https://www.azelis.com/en/sustainability
+      - generic [ref=f3e137]:
+        - article [ref=f3e138]:
+          - figure [ref=f3e139]:
+            - generic [ref=f3e140]:
+              - paragraph [ref=f3e141]: .
+              - heading "Innovation" [level=3] [ref=f3e142]
+          - generic [ref=f3e144]:
+            - paragraph [ref=f3e145]: As a speciality distributor of chemicals and food ingredients, we’re now a fully integrated, leading, innovative service provider. With innovation and collaboration at our heart, we believe anything is possible.
+            - list [ref=f3e146]:
+              - listitem [ref=f3e147]:
+                - link "Application laboratories" [ref=f3e148] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/applicationlabs
+              - listitem [ref=f3e149]:
+                - link "Sampling and evaluation" [ref=f3e150] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/services/sampling-service
+              - listitem [ref=f3e151]:
+                - link "REACH compliance management" [ref=f3e152] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/services/reach-customer-service
+              - listitem [ref=f3e153]:
+                - link "International supply chain" [ref=f3e154] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/services/international-supply-chain
+        - article [ref=f3e155]:
+          - figure [ref=f3e156]:
+            - generic [ref=f3e157]:
+              - paragraph [ref=f3e158]: .
+              - heading "Markets" [level=3] [ref=f3e159]
+          - generic [ref=f3e161]:
+            - paragraph [ref=f3e162]: Azelis services fifteen specific markets worldwide, bringing high-quality products, technical expertise and local service support to each. Our international team is united in its hunger and humility. Collaborating across 70+ laboratories to be a benchmark for innovation. A focus for ambitious brands. And a catalyst that helps our customers to solve challenges and improve lives.
+            - list [ref=f3e163]:
+              - listitem [ref=f3e164]:
+                - link "Life Sciences" [ref=f3e165] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/markets
+              - listitem [ref=f3e166]:
+                - link "Industrial Chemicals" [ref=f3e167] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/markets
+      - generic [ref=f3e169]:
+        - article [ref=f3e170]:
+          - figure [ref=f3e171]:
+            - generic [ref=f3e172]:
+              - paragraph [ref=f3e173]: .
+              - heading "Customer Portal" [level=3] [ref=f3e174]
+          - generic [ref=f3e175]:
+            - generic [ref=f3e176]:
+              - paragraph [ref=f3e177]: The Azelis Customer Portal is a connected experience that inspires you with trends and inspirational content for your selected markets, linking you to formulations, products, and related documentation. From one digital experience you can order samples, request quotes and reorder products from Azelis.
+              - paragraph [ref=f3e178]:
+                - text: Register at
+                - link "Explore.Azelis.com" [ref=f3e179] [cursor=pointer]:
+                  - /url: https://explore.azelis.com/
+            - link "Visit the Customer Portal" [ref=f3e180] [cursor=pointer]:
+              - /url: https://explore.azelis.com/
+        - article [ref=f3e181]:
+          - figure [ref=f3e182]:
+            - generic [ref=f3e183]:
+              - paragraph [ref=f3e184]: .
+              - heading "Sustainability" [level=3] [ref=f3e185]
+          - generic [ref=f3e187]:
+            - paragraph [ref=f3e188]:
+              - text: At Azelis, we are committed to maintaining high human, environmental and ethical values. That is only possible thanks to the cooperation of local communities, industry bodies, authorities, and/or regulators, and with you.
+              - emphasis [ref=f3e189]
+            - list [ref=f3e190]:
+              - listitem [ref=f3e191]:
+                - link "Our sustainability programme" [ref=f3e192] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/sustainability
+              - listitem [ref=f3e193]:
+                - link "Our 2025 Integrated Report" [ref=f3e194] [cursor=pointer]:
+                  - /url: /sites/default/files/uploads/Azelis%20Group%20NV%20-%20Integrated%20Report%202025.pdf
+              - listitem [ref=f3e195]:
+                - link "Our sustainability policies" [ref=f3e196] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/sustdownloadsandcontacts
+      - generic [ref=f3e199]:
+        - generic [ref=f3e200]: Employment Opportunities
+        - generic [ref=f3e201]: Working at Azelis
+        - generic [ref=f3e202]:
+          - paragraph [ref=f3e203]: We embrace change as an invaluable opportunity to grow, learn and become even better at what we do. As do our people. Azelis currently employs more than 4,100 talented individuals in 64 countries. And counting.
+          - paragraph [ref=f3e204]
+        - link "Working at Azelis" [ref=f3e205] [cursor=pointer]:
+          - /url: https://www.azelis.com/en/about-azelis/careers/working-at-azelis
+        - link "Talent Mobility" [ref=f3e206] [cursor=pointer]:
+          - /url: /en/about-azelis/our-people/careers/talent-mobility-stories
+      - generic [ref=f3e208]:
+        - generic [ref=f3e209]:
+          - article [ref=f3e211]:
+            - link "Azelis receives approval of science-based emissions reduction targets from the SBTi" [ref=f3e212] [cursor=pointer]:
+              - /url: /en/news/azelis-receives-approval-of-science-based-emissions-reduction-targets-from-sbti
+            - figure [ref=f3e213]
+            - generic [ref=f3e214]:
+              - paragraph [ref=f3e215]: News
+              - heading "Azelis receives approval of science-based emissions reduction targets from the SBTi" [level=2] [ref=f3e216]
+          - generic [ref=f3e218]:
+            - article [ref=f3e219]:
+              - 'link "Q1 2026 results: Strong cash generation in volatile markets" [ref=f3e220] [cursor=pointer]':
+                - /url: /en/news/q1-2026-results-strong-cash-generation-volatile-markets-0
+              - generic [ref=f3e221]: News
+              - 'heading "Q1 2026 results: Strong cash generation in volatile markets" [level=2] [ref=f3e222]'
+            - article [ref=f3e223]:
+              - 'link "Full-year 2025 results: Azelis delivers strong cash flow growth in challenging markets" [ref=f3e224] [cursor=pointer]':
+                - /url: /en/news/full-year-2025-results-azelis-delivers-strong-cash-flow-growth-challenging-markets-0
+              - generic [ref=f3e225]: News
+              - 'heading "Full-year 2025 results: Azelis delivers strong cash flow growth in challenging markets" [level=2] [ref=f3e226]'
+        - link "More news" [ref=f3e230] [cursor=pointer]:
+          - /url: /en/news
+      - generic [ref=f3e231]:
+        - generic [ref=f3e232]:
+          - heading "We are Azelis" [level=2] [ref=f3e233]
+          - paragraph [ref=f3e234]: Together with our 65,000+ customers we provide effective, sustainable and reliable business solutions, developing innovative ways to create value. We are Azelis.
+        - generic [ref=f3e235]:
+          - generic [ref=f3e236]:
+            - heading "Work with us" [level=3] [ref=f3e237]
+            - generic [ref=f3e238]:
+              - paragraph [ref=f3e239]: We currently employ more than 4,100 people across the world in 64 countries. We value highly competent, forward-looking people.
+              - paragraph [ref=f3e240]:
+                - text: Are you looking to work for a highly dynamic and innovative company where you can unleash your talent?
+                - link "Then you’re in the right place." [ref=f3e241] [cursor=pointer]:
+                  - /url: https://www.azelis.com/en/about-azelis/careers/working-at-azelis
+            - link "Discover our career opportunities" [ref=f3e242] [cursor=pointer]:
+              - /url: /en/about-azelis/careers/working-at-azelis
+          - generic [ref=f3e243]:
+            - heading "Corporate social responsibility" [level=3] [ref=f3e244]
+            - generic [ref=f3e245]:
+              - paragraph [ref=f3e246]: We take our responsibilities seriously and work with employees and stakeholders to reduce the environmental impact of our work and to improve the social value in what we do, wherever we get the opportunity.
+              - paragraph [ref=f3e247]:
+                - emphasis [ref=f3e248]:
+                  - strong [ref=f3e250]: Against slavery and human trafficking
+              - paragraph [ref=f3e251]: We are committed to ensuring modern slavery does not take place within our business or supply chains.
+            - link "Learn more" [ref=f3e252] [cursor=pointer]:
+              - /url: https://www.azelis.com/en/anti-slavery-and-human-trafficking-statement
+      - generic [ref=f3e253]:
+        - generic [ref=f3e254]: We provide high quality raw materials, sourced from leading global manufacturers. Our technical team can provide you with sampling, formulation and expertise.
+        - heading "Industrial Chemicals" [level=2] [ref=f3e255]
+        - list [ref=f3e256]:
+          - listitem [ref=f3e257]:
+            - generic [ref=f3e258]:
+              - figure [ref=f3e259]:
+                - img "Rubber Flooring Race Track" [ref=f3e260]
+              - heading [level=2] [ref=f3e261]:
+                - link "Advanced Materials & Additives" [ref=f3e262] [cursor=pointer]:
+                  - /url: /en/markets/rubber-plastic-additives
+          - listitem [ref=f3e263]:
+            - generic [ref=f3e264]:
+              - figure [ref=f3e265]:
+                - img "woman using paint coating" [ref=f3e266]
+              - heading [level=2] [ref=f3e267]:
+                - link "CASE" [ref=f3e268] [cursor=pointer]:
+                  - /url: /en/markets/case
+          - listitem [ref=f3e269]:
+            - generic [ref=f3e270]:
+              - figure [ref=f3e271]:
+                - img "man fixing solar panels" [ref=f3e272]
+              - heading [level=2] [ref=f3e273]:
+                - link "Electronics" [ref=f3e274] [cursor=pointer]:
+                  - /url: /en/markets/electronics
+          - listitem [ref=f3e275]:
+            - generic [ref=f3e276]:
+              - figure [ref=f3e277]:
+                - img "Essential Chemicals" [ref=f3e278]
+              - heading [level=2] [ref=f3e279]:
+                - link "Essential Chemicals" [ref=f3e280] [cursor=pointer]:
+                  - /url: /en/markets/essential-chemicals
+          - listitem [ref=f3e281]:
+            - generic [ref=f3e282]:
+              - figure [ref=f3e283]:
+                - img "Woman in Lab with Fine Chemicals" [ref=f3e284]
+              - heading [level=2] [ref=f3e285]:
+                - link "Fine Chemicals" [ref=f3e286] [cursor=pointer]:
+                  - /url: /en/markets/fine-chemicals
+          - listitem [ref=f3e287]:
+            - generic [ref=f3e288]:
+              - figure [ref=f3e289]:
+                - img "Car Driving into the Sunset" [ref=f3e290]
+              - heading [level=2] [ref=f3e291]:
+                - link "Lubricants & Metal Working Fluids" [ref=f3e292] [cursor=pointer]:
+                  - /url: /en/markets/lubricants-metal-working-fluids
+          - listitem [ref=f3e293]:
+            - generic [ref=f3e294]:
+              - figure [ref=f3e295]
+              - heading [level=2] [ref=f3e296]:
+                - link "Oilfield" [ref=f3e297] [cursor=pointer]:
+                  - /url: /en/markets/industrial-chemicals/oilfield
+          - listitem [ref=f3e298]:
+            - generic [ref=f3e299]:
+              - figure [ref=f3e300]:
+                - img "City Skyline with Chemically Treated Water" [ref=f3e301]
+              - heading [level=2] [ref=f3e302]:
+                - link "Other Applications" [ref=f3e303] [cursor=pointer]:
+                  - /url: /en/markets/other-applications
+          - listitem [ref=f3e304]:
+            - generic [ref=f3e305]:
+              - figure [ref=f3e306]:
+                - img "Leather with Tools and Scissors" [ref=f3e307]
+              - heading [level=2] [ref=f3e308]:
+                - link "Textiles, Leather & Paper" [ref=f3e309] [cursor=pointer]:
+                  - /url: /en/markets/textiles-leather-paper
+        - heading "Life Sciences" [level=2] [ref=f3e310]
+        - list [ref=f3e311]:
+          - listitem [ref=f3e312]:
+            - generic [ref=f3e313]:
+              - figure [ref=f3e314]:
+                - img "Farmer Collecting Crops for Harvest" [ref=f3e315]
+              - heading [level=2] [ref=f3e316]:
+                - link "Agricultural & Environmental Solutions" [ref=f3e317] [cursor=pointer]:
+                  - /url: /en/markets/life-sciences/Agricultural-Environmental-Solutions
+          - listitem [ref=f3e318]:
+            - generic [ref=f3e319]:
+              - figure [ref=f3e320]:
+                - img "sheep and lamb in field" [ref=f3e321]
+              - heading [level=2] [ref=f3e322]:
+                - link "Animal Nutrition" [ref=f3e323] [cursor=pointer]:
+                  - /url: /en/markets/animal-nutrition
+          - listitem [ref=f3e324]:
+            - generic [ref=f3e325]:
+              - figure [ref=f3e326]:
+                - img "kids eating" [ref=f3e327]
+              - heading [level=2] [ref=f3e328]:
+                - link "Food & Nutrition" [ref=f3e329] [cursor=pointer]:
+                  - /url: /en/markets/food-nutrition
+          - listitem [ref=f3e330]:
+            - generic [ref=f3e331]:
+              - figure [ref=f3e332]:
+                - img "Industrial Cleaning at the Dry Cleaners" [ref=f3e333]
+              - heading [level=2] [ref=f3e334]:
+                - link "Home Care & Industrial Cleaning" [ref=f3e335] [cursor=pointer]:
+                  - /url: /en/markets/homecare-industrial-cleaning
+          - listitem [ref=f3e336]:
+            - generic [ref=f3e337]:
+              - figure [ref=f3e338]:
+                - img "woman putting on cream 1" [ref=f3e339]
+              - heading [level=2] [ref=f3e340]:
+                - link "Personal Care" [ref=f3e341] [cursor=pointer]:
+                  - /url: /en/markets/personal-care
+          - listitem [ref=f3e342]:
+            - generic [ref=f3e343]:
+              - figure [ref=f3e344]:
+                - img "Doctor Putting Medicine into Syringe" [ref=f3e345]
+              - heading [level=2] [ref=f3e346]:
+                - link "Pharmaceuticals & Healthcare" [ref=f3e347] [cursor=pointer]:
+                  - /url: /en/markets/Pharma
+      - list [ref=f3e349]:
+        - listitem [ref=f3e350]:
+          - generic [ref=f3e351]:
+            - generic [ref=f3e352]: Active in
+            - generic [ref=f3e354]: countries
+        - listitem [ref=f3e355]:
+          - generic [ref=f3e356]:
+            - generic [ref=f3e357]: Dedicated to a market segment
+            - generic [ref=f3e358]: +
+            - generic [ref=f3e359]: labs
+        - listitem [ref=f3e360]:
+          - generic [ref=f3e361]:
+            - generic [ref=f3e362]: Worldwide
+            - generic [ref=f3e364]: customers
+    - contentinfo [ref=f3e365]:
+      - generic [ref=f3e366]:
+        - navigation [ref=f3e367]:
+          - heading "About Azelis" [level=2] [ref=f3e368]
+          - list [ref=f3e369]:
+            - listitem [ref=f3e370]:
+              - link "Our mission" [ref=f3e371] [cursor=pointer]:
+                - /url: /en/en/about-azelis/our-purpose
+            - listitem [ref=f3e372]:
+              - link "Our values" [ref=f3e373] [cursor=pointer]:
+                - /url: /en/about-azelis/azelis-values
+            - listitem [ref=f3e374]:
+              - link "Awards" [ref=f3e375] [cursor=pointer]:
+                - /url: /en/services/application-labs/innovation/awards
+            - listitem [ref=f3e376]:
+              - link "Careers" [ref=f3e377] [cursor=pointer]:
+                - /url: /en/about-azelis/careers
+            - listitem [ref=f3e378]:
+              - link "Sustainability" [ref=f3e379] [cursor=pointer]:
+                - /url: https://www.azelis.com/en/sustainability
+            - listitem [ref=f3e380]:
+              - link "History" [ref=f3e381] [cursor=pointer]:
+                - /url: /en/about-azelis/history
+            - listitem [ref=f3e382]:
+              - link "Leadership" [ref=f3e383] [cursor=pointer]:
+                - /url: /en/about-azelis/leadership
+        - navigation [ref=f3e384]:
+          - heading "Services" [level=2] [ref=f3e385]
+          - list [ref=f3e386]:
+            - listitem [ref=f3e387]:
+              - link "Application laboratories" [ref=f3e388] [cursor=pointer]:
+                - /url: https://www.azelis.com/en/services/application-laboratories
+            - listitem [ref=f3e389]:
+              - link "International supply chain" [ref=f3e390] [cursor=pointer]:
+                - /url: /en/services/international-supply-chain
+            - listitem [ref=f3e391]:
+              - link "Sampling service" [ref=f3e392] [cursor=pointer]:
+                - /url: /en/services/sampling-service
+            - listitem [ref=f3e393]:
+              - link "Customer Portal" [ref=f3e394] [cursor=pointer]:
+                - /url: https://explore.azelis.com/
+            - listitem [ref=f3e395]:
+              - link "REACH customer service" [ref=f3e396] [cursor=pointer]:
+                - /url: /en/services/reach-customer-service
+        - navigation [ref=f3e397]:
+          - heading "Markets" [level=2] [ref=f3e398]
+          - list [ref=f3e399]:
+            - listitem [ref=f3e400]:
+              - generic [ref=f3e401]: Life Sciences
+              - list [ref=f3e402]:
+                - listitem [ref=f3e403]:
+                  - link "Animal Nutrition" [ref=f3e404] [cursor=pointer]:
+                    - /url: /en/markets/animal-nutrition
+                - listitem [ref=f3e405]:
+                  - link "Food & Nutrition" [ref=f3e406] [cursor=pointer]:
+                    - /url: /en/markets/food-nutrition
+                - listitem [ref=f3e407]:
+                  - link "Home Care & Industrial Cleaning" [ref=f3e408] [cursor=pointer]:
+                    - /url: /en/markets/homecare-industrial-cleaning
+                - listitem [ref=f3e409]:
+                  - link "Personal Care" [ref=f3e410] [cursor=pointer]:
+                    - /url: /en/markets/personal-care
+                - listitem [ref=f3e411]:
+                  - link "Pharmaceuticals & Healthcare" [ref=f3e412] [cursor=pointer]:
+                    - /url: /en/markets/Pharma
+                - listitem [ref=f3e413]:
+                  - link "Agricultural & Environmental Solutions" [ref=f3e414] [cursor=pointer]:
+                    - /url: /en/markets/life-sciences/Agricultural-Environmental-Solutions
+            - listitem [ref=f3e415]:
+              - generic [ref=f3e416]: Industrial Chemicals
+              - list [ref=f3e417]:
+                - listitem [ref=f3e418]:
+                  - link "CASE" [ref=f3e419] [cursor=pointer]:
+                    - /url: /en/markets/case
+                - listitem [ref=f3e420]:
+                  - link "Electronics" [ref=f3e421] [cursor=pointer]:
+                    - /url: /en/markets/electronics
+                - listitem [ref=f3e422]:
+                  - link "Essential Chemicals" [ref=f3e423] [cursor=pointer]:
+                    - /url: /en/markets/essential-chemicals
+                - listitem [ref=f3e424]:
+                  - link "Fine Chemicals" [ref=f3e425] [cursor=pointer]:
+                    - /url: /en/markets/fine-chemicals
+                - listitem [ref=f3e426]:
+                  - link "Lubricants & Metal Working Fluids" [ref=f3e427] [cursor=pointer]:
+                    - /url: /en/markets/lubricants-metal-working-fluids
+                - listitem [ref=f3e428]:
+                  - link "Other Applications" [ref=f3e429] [cursor=pointer]:
+                    - /url: /en/markets/other-applications
+                - listitem [ref=f3e430]:
+                  - link "Advanced Materials & Additives" [ref=f3e431] [cursor=pointer]:
+                    - /url: /en/markets/rubber-plastic-additives
+                - listitem [ref=f3e432]:
+                  - link "Textiles, Leather & Paper" [ref=f3e433] [cursor=pointer]:
+                    - /url: /en/markets/textiles-leather-paper
+                - listitem [ref=f3e434]:
+                  - link "Oilfield" [ref=f3e435] [cursor=pointer]:
+                    - /url: /en/markets/industrial-chemicals/oilfield
+        - navigation [ref=f3e436]:
+          - heading "Investors" [level=2] [ref=f3e437]
+          - list [ref=f3e438]:
+            - listitem [ref=f3e439]:
+              - link "Financial Calendar" [ref=f3e440] [cursor=pointer]:
+                - /url: /en/financial-calendar
+            - listitem [ref=f3e441]:
+              - link "Financial News" [ref=f3e442] [cursor=pointer]:
+                - /url: /en/financial-news
+            - listitem [ref=f3e443]:
+              - link "Reports & Presentations" [ref=f3e444] [cursor=pointer]:
+                - /url: /en/reports-and-presentations
+        - generic [ref=f3e445]: Innovation through formulation
+      - generic [ref=f3e450]:
+        - generic [ref=f3e451]: Copyright © 2026. All rights reserved.
+        - navigation [ref=f3e452]:
+          - heading "Legal menu" [level=2] [ref=f3e453]
+          - list [ref=f3e454]:
+            - listitem [ref=f3e455]:
+              - link "Cookie statement" [ref=f3e456] [cursor=pointer]:
+                - /url: /en/cookie-statement
+            - listitem [ref=f3e457]:
+              - link "Privacy statement" [ref=f3e458] [cursor=pointer]:
+                - /url: /en/privacy-statement
+            - listitem [ref=f3e459]:
+              - link "Terms & Conditions" [ref=f3e460] [cursor=pointer]:
+                - /url: /en/terms-conditions
+        - list [ref=f3e461]:
+          - listitem [ref=f3e462]:
+            - link "Facebook" [ref=f3e463] [cursor=pointer]:
+              - /url: https://www.facebook.com/azelisgroup/
+          - listitem [ref=f3e469]:
+            - link "LinkedIn" [ref=f3e470] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/azelis
+          - listitem [ref=f3e477]:
+            - link "Twitter" [ref=f3e478] [cursor=pointer]:
+              - /url: https://twitter.com/azelisgroup

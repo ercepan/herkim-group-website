@@ -1010,3 +1010,83 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 @media (max-width: 460px) {
   .sector-grid, .element-grid, .doc-grid, .news-grid, .cert-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   KURUMSAL RAFİNERİ KATMANI — premium sadeleştirme
+   Emsal analizi (BASF · Clariant · LANXESS · Brenntag · IMCD):
+   nötr zemin + yumuşak koyu gri metin, tek vurgu renginin %5-10
+   disiplini, ince kesimli büyük başlıklar, keskin köşe, kalın
+   çerçeve yerine ince çizgi ve zarif derinlik. Emoji yok.
+   ============================================================ */
+:root {
+  --shadow-offset: 0 1px 2px rgba(27, 18, 22, 0.05), 0 18px 44px rgba(27, 18, 22, 0.09);
+  --shadow-offset-sm: 0 1px 2px rgba(27, 18, 22, 0.05), 0 8px 22px rgba(27, 18, 22, 0.07);
+}
+body { color: #372E33; }
+.display { font-weight: 560; font-stretch: 104%; }
+h1.display { font-weight: 500; }
+.display b, .display strong { font-weight: 720; }
+
+.btn {
+  border-width: 1px;
+  border-color: rgba(27, 18, 22, 0.30);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: none;
+}
+.btn:hover { box-shadow: var(--shadow-offset-sm); }
+.btn--primary { border-color: var(--crimson-deep); }
+.btn--dark { border-color: var(--ink); }
+.icon-btn { border-width: 1px; }
+
+.hero-watermark { -webkit-text-stroke: 1px rgba(163, 28, 60, 0.07); }
+
+.element-card, .doc-card, .news-card, .cust-card, .search-panel, .auth-panel, .user-pop {
+  border-width: 1px;
+  border-color: var(--line);
+}
+.element-card:hover { transform: translateY(-3px); }
+.auth-panel { box-shadow: var(--shadow-offset); }
+.basket-drawer { border-left: 1px solid var(--line); }
+.bd-foot { border-top: 1px solid var(--line); }
+.bd-head { border-bottom-width: 1px; }
+
+/* ---------- Siparişlerim (ana sitede müşteri takibi) ---------- */
+.mo-scope { font-size: 13px; color: var(--ink-3); margin-bottom: 16px; }
+.mo-scope .mono { color: var(--ink); font-weight: 600; }
+.mo-empty { text-align: center; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); padding: 48px 24px; }
+.mo-empty p { color: var(--ink-2); margin-bottom: 16px; }
+.mo-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-offset-sm); padding: 22px 24px; margin-bottom: 18px; }
+.mo-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mo-head b.mono { font-size: 15px; letter-spacing: 0.02em; }
+.mo-head span { display: block; font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.ost { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em; padding: 5px 12px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+.ost--bekliyor { color: #92400E; background: #FEF6E7; border-color: #F3DFB8; }
+.ost--onay    { color: #1D4ED8; background: #EFF4FE; border-color: #C7D8F9; }
+.ost--uretim  { color: #7C2D9C; background: #F8F0FC; border-color: #E5CCF0; }
+.ost--sevk    { color: #0E7490; background: #ECFBFF; border-color: #BEE9F2; }
+.ost--teslim  { color: #15803D; background: #F0FAF3; border-color: #C6E8D2; }
+.mo-items { border-top: 1px solid var(--line-soft); margin-top: 14px; }
+.mo-item { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: 14px; }
+.mo-item .mono { color: var(--ink-3); font-size: 12.5px; }
+.mo-prog { height: 4px; background: var(--paper-3); border-radius: 999px; margin: 16px 0 14px; overflow: hidden; }
+.mo-prog i { display: block; height: 100%; background: var(--crimson); border-radius: 999px; transition: width 0.4s var(--ease-out); }
+.mo-tl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.mo-tl-step { border-top: 2px solid var(--line); padding-top: 8px; }
+.mo-tl-step b { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
+.mo-tl-step span { font-size: 10.5px; color: var(--ink-3); opacity: 0.8; }
+.mo-tl-step.done, .mo-tl-step.now { border-top-color: var(--crimson); }
+.mo-tl-step.done b { color: var(--ink); }
+.mo-tl-step.now b { color: var(--crimson); }
+.mo-meta { margin-top: 14px; font-size: 11.5px; color: var(--ink-3); }
+.mo-note { margin-top: 10px; font-size: 13px; color: var(--ink-2); background: var(--paper-2); border: 1px solid var(--line-soft); border-radius: 3px; padding: 9px 12px; }
+@media (max-width: 640px) { .mo-tl { grid-template-columns: repeat(2, 1fr); } }
+
+/* Rafineri 2: distribütör emsalleri (Brenntag/IMCD/Azelis ölçümleri) —
+   ılımlı hero ölçeği, zıplamayan butonlar, fısıltı düzeyinde doku */
+h1.display { font-size: clamp(2.3rem, 4.6vw, 3.55rem); }
+h2.display { font-size: clamp(1.7rem, 3.4vw, 2.5rem); }
+.btn:hover { transform: none; }
+.btn:active { transform: none; box-shadow: none; }
+body::before { opacity: 0.028; }
+.hero-ctas .btn--primary { padding-inline: 30px; }

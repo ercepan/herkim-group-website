@@ -1,0 +1,267 @@
+- generic [ref=e9]:
+  - banner [ref=e10]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - link [ref=e29] [cursor=pointer]:
+            - /url: /
+            - img "Home Page" [ref=e32]
+          - button "IMCD Group IMCD Group" [ref=e41] [cursor=pointer]:
+            - generic "IMCD Group" [ref=e42]
+            - generic [ref=e49]: IMCD Group
+        - generic [ref=e59]:
+          - generic [ref=e60]:
+            - generic [ref=e61]: Search
+            - combobox "Search" [ref=e62]
+          - button "Search" [ref=e65] [cursor=pointer]
+        - button "MyIMCD" [ref=e75] [cursor=pointer]
+      - separator [ref=e80]
+      - generic [ref=e88]:
+        - list [ref=e89]:
+          - listitem [ref=e90]:
+            - link "About IMCD" [ref=e91] [cursor=pointer]:
+              - /url: /about-us
+          - listitem [ref=e93]:
+            - link "Business Groups" [ref=e94] [cursor=pointer]:
+              - /url: /business-groups
+          - listitem [ref=e96]:
+            - link "Investor Relations" [ref=e97] [cursor=pointer]:
+              - /url: /investors
+          - listitem [ref=e99]:
+            - link "Careers" [ref=e100] [cursor=pointer]:
+              - /url: /careers
+          - listitem [ref=e102]:
+            - link "Media" [ref=e103] [cursor=pointer]:
+              - /url: /media-centre
+        - list [ref=e105]:
+          - listitem [ref=e106]:
+            - link "IMCD Countries" [ref=e107] [cursor=pointer]:
+              - /url: /worldwide
+          - listitem [ref=e109]:
+            - link "Contact" [ref=e110] [cursor=pointer]:
+              - /url: /contact-us
+  - main [ref=e114]:
+    - generic [ref=e122]:
+      - generic [ref=e128]:
+        - generic [ref=e131]:
+          - generic [ref=e132]:
+            - generic [ref=e136]:
+              - generic [ref=e137]: IMCD reports EBITA of EUR 130 million in the first three months of 2026
+              - generic [ref=e138]: IMCD N.V. announces its first three months 2026 results.
+              - link [ref=e142] [cursor=pointer]:
+                - /url: https://www.imcdgroup.com/media-centre/press-releases/MCB6GPGIVLYBCK5PXMXDFQENAORI
+            - generic [ref=e152]:
+              - generic [ref=e153]: IMCD takes the next steps in its decarbonisation journey and commits to set SBTi near-term targets
+              - generic [ref=e154]: In recent years, IMCD has strengthened its carbon footprint visibility, building a solid foundation to develop near-term emissions targets aligned with SBTi guidelines.
+              - link [ref=e158] [cursor=pointer]:
+                - /url: /media-centre/press-releases/imcd-takes-the-next-steps-in-its-decarbonisation-journey-and-commits-to-set-sbti-MCGVXOP5QTVVFZJC556JECW6HHB4
+            - generic [ref=e168]:
+              - generic [ref=e169]: IMCD releases 2025 Annual Report
+              - generic [ref=e170]: The report offers the Company’s stakeholders a comprehensive view of IMCD’s performance in 2025.
+              - link [ref=e174] [cursor=pointer]:
+                - /url: https://www.imcdgroup.com/media-centre/press-releases/MCDIHIL3HWDZC27KHQHKSZTXIWGM
+          - button "Next item" [ref=e182] [cursor=pointer]
+        - generic [ref=e206]:
+          - generic [ref=e207]:
+            - heading "Welcome to a world of opportunity" [level=1] [ref=e208]
+            - heading "IMCD is a global leader in the distribution and formulation of speciality chemicals and ingredients, providing solutions to its partners." [level=5] [ref=e209]
+          - button "Find out more" [ref=e212] [cursor=pointer]
+      - generic [ref=e223]:
+        - generic [ref=e227]:
+          - generic [ref=e228]:
+            - heading "Our strategy for growth" [level=2] [ref=e229]
+            - generic [ref=e230]: As a responsible distributor of speciality chemicals, our strategy for growth is underpinned by balancing the needs of our people, the environment, and the communities within which we operate.
+          - button "Learn more" [ref=e234] [cursor=pointer]
+        - generic [ref=e243]:
+          - generic [ref=e244]:
+            - heading "Global expertise" [level=2] [ref=e245]
+            - generic [ref=e246]: We have established technical centres for our key market segments. We understand that complex and international markets require first-class knowledge and support. Discover more about our 80+ technical centres.
+          - button "Learn more" [ref=e250] [cursor=pointer]
+        - generic [ref=e258]:
+          - generic [ref=e259]: IMCD at glance
+          - generic [ref=e261]:
+            - generic [ref=e263] [cursor=pointer]:
+              - heading "60" [level=5] [ref=e264]
+              - paragraph [ref=e265]: Countries
+            - generic [ref=e273] [cursor=pointer]:
+              - heading "8" [level=5] [ref=e274]
+              - paragraph [ref=e275]: Business Groups
+            - generic [ref=e283] [cursor=pointer]:
+              - heading "80+" [level=5] [ref=e284]
+              - paragraph [ref=e285]: Technical centres
+            - generic [ref=e293] [cursor=pointer]:
+              - heading "5000+" [level=5] [ref=e294]
+              - paragraph [ref=e295]: Employees
+        - generic [ref=e303]:
+          - generic [ref=e305]:
+            - heading "More about IMCD Group" [level=2] [ref=e306]
+            - generic [ref=e307]: IMCD is creating a world of opportunity as a global leader in the distribution, sales and formulation of speciality chemicals and ingredients.
+          - generic [ref=e308]:
+            - generic [ref=e313] [cursor=pointer]:
+              - generic [ref=e314]: Careers
+              - generic [ref=e316]: Do you want to work for a growing and expertise-driven company? Then we’d love to hear from you!
+              - link "Join our team" [ref=e320]:
+                - /url: /careers
+            - generic [ref=e333] [cursor=pointer]:
+              - generic [ref=e334]: Media Centre
+              - generic [ref=e336]: Our press releases and media gallery, all in one place.
+              - link "Visit Media" [ref=e340]:
+                - /url: /media-centre
+            - generic [ref=e353] [cursor=pointer]:
+              - generic [ref=e354]: Investors
+              - generic [ref=e356]: Browse our reports, press releases, key figures, financial calendar and much more.
+              - link "Take a look" [ref=e360]:
+                - /url: /investors
+            - generic [ref=e373] [cursor=pointer]:
+              - generic [ref=e374]: Sustainability
+              - generic [ref=e376]: At IMCD Group, sustainability is embedded in our core activities, profitability and success.
+              - link "Read more" [ref=e380]:
+                - /url: /about-us/sustainability
+  - contentinfo [ref=e389]:
+    - generic [ref=e396]:
+      - generic [ref=e399]:
+        - link [ref=e405] [cursor=pointer]:
+          - /url: /
+          - img "Home Page" [ref=e408]
+        - button "Close cookie banner" [ref=e412] [cursor=pointer]
+        - generic [ref=e416]:
+          - paragraph [ref=e417]: This website uses cookies to improve your user experience
+          - paragraph [ref=e418]: We use cookies for a variety of purposes, such as website functionality and helping target our marketing activities. Click "accept" to accept our cookies. You can change the cookie settings by clicking "change settings".
+          - button "Change setting" [ref=e420] [cursor=pointer]
+        - generic [ref=e421]:
+          - button "Accept all" [ref=e423] [cursor=pointer]
+          - button "Decline All" [ref=e425] [cursor=pointer]
+      - generic [ref=e427]:
+        - generic [ref=e428]:
+          - generic [ref=e429]:
+            - link [ref=e435] [cursor=pointer]:
+              - /url: /
+              - img "Home Page" [ref=e438]
+            - button "IMCD Group IMCD Group" [ref=e445] [cursor=pointer]:
+              - generic "IMCD Group" [ref=e446]
+              - generic [ref=e453]: IMCD Group
+          - generic [ref=e455]:
+            - paragraph [ref=e457]: About IMCD
+            - navigation "Group - About IMCD Navigation" [ref=e461]:
+              - list [ref=e462]:
+                - listitem [ref=e463]:
+                  - link "About Us" [ref=e465] [cursor=pointer]:
+                    - /url: /about-us
+                - listitem [ref=e467]:
+                  - link "Global Expertise" [ref=e469] [cursor=pointer]:
+                    - /url: /about-us/global-expertise
+                - listitem [ref=e471]:
+                  - link "Global Presence" [ref=e473] [cursor=pointer]:
+                    - /url: /worldwide
+                - listitem [ref=e475]:
+                  - link "Sustainability" [ref=e477] [cursor=pointer]:
+                    - /url: /about-us/sustainability
+                - listitem [ref=e479]:
+                  - link "Regulatory & Quality" [ref=e481] [cursor=pointer]:
+                    - /url: /about-us/regulatory-and-quality
+                - listitem [ref=e483]:
+                  - link "Supply Chain" [ref=e485] [cursor=pointer]:
+                    - /url: /about-us/supply-chain
+                - listitem [ref=e487]:
+                  - link "Careers" [ref=e489] [cursor=pointer]:
+                    - /url: /careers
+          - generic [ref=e492]:
+            - paragraph [ref=e494]: Business Groups
+            - navigation "Group - Business Groups Navigation" [ref=e498]:
+              - list [ref=e499]:
+                - listitem [ref=e500]:
+                  - link "Advanced Materials" [ref=e502] [cursor=pointer]:
+                    - /url: /business-groups/advanced-materials
+                - listitem [ref=e504]:
+                  - link "Beauty & Personal Care" [ref=e506] [cursor=pointer]:
+                    - /url: /business-groups/beauty-and-personal-care
+                - listitem [ref=e508]:
+                  - link "Coatings & Construction" [ref=e510] [cursor=pointer]:
+                    - /url: /business-groups/coatings-and-construction
+                - listitem [ref=e512]:
+                  - link "Food & Nutrition" [ref=e514] [cursor=pointer]:
+                    - /url: /business-groups/food-and-nutrition
+                - listitem [ref=e516]:
+                  - link "Home Care and I&I" [ref=e518] [cursor=pointer]:
+                    - /url: /business-groups/home-care-and-i-and-i
+                - listitem [ref=e520]:
+                  - link "Industrial Solutions" [ref=e522] [cursor=pointer]:
+                    - /url: /business-groups/industrial-solutions
+                - listitem [ref=e524]:
+                  - link "Lubricants & Energy" [ref=e526] [cursor=pointer]:
+                    - /url: /business-groups/lubricants-and-energy
+                - listitem [ref=e528]:
+                  - link "Pharmaceuticals" [ref=e530] [cursor=pointer]:
+                    - /url: /business-groups/pharmaceuticals
+          - generic [ref=e533]:
+            - paragraph [ref=e535]: Investors
+            - navigation "Group - Investors Navigation" [ref=e539]:
+              - list [ref=e540]:
+                - listitem [ref=e541]:
+                  - link "Investor News" [ref=e543] [cursor=pointer]:
+                    - /url: /investors/investor-news
+                - listitem [ref=e545]:
+                  - link "Shareholder Information" [ref=e547] [cursor=pointer]:
+                    - /url: /investors/shareholder-information
+                - listitem [ref=e549]:
+                  - link "Financial Results" [ref=e551] [cursor=pointer]:
+                    - /url: /investors/reports-and-presentations
+                - listitem [ref=e553]:
+                  - link "Corporate Governance" [ref=e555] [cursor=pointer]:
+                    - /url: /investors/corporate-governance
+                - listitem [ref=e557]:
+                  - link "Debt Investor Relations" [ref=e559] [cursor=pointer]:
+                    - /url: /investors/debt-investor-relations
+                - listitem [ref=e561]:
+                  - link "Financial Calendar" [ref=e563] [cursor=pointer]:
+                    - /url: /investors/shareholder-information/financial-calendar
+                - listitem [ref=e565]:
+                  - link "Contact" [ref=e567] [cursor=pointer]:
+                    - /url: /investors/contact
+          - generic [ref=e570]:
+            - paragraph [ref=e572]: More IMCD
+            - navigation "Group - More IMCD Navigation" [ref=e576]:
+              - list [ref=e577]:
+                - listitem [ref=e578]:
+                  - link "Contact Information" [ref=e580] [cursor=pointer]:
+                    - /url: /contact-us
+                - listitem [ref=e582]:
+                  - link "More about MyIMCD" [ref=e584] [cursor=pointer]:
+                    - /url: /myimcd
+                - listitem [ref=e586]:
+                  - link "Media Centre" [ref=e588] [cursor=pointer]:
+                    - /url: /media-centre
+            - paragraph [ref=e592]: Follow our journey
+            - generic [ref=e595]:
+              - paragraph
+              - generic [ref=e596]:
+                - link [ref=e598] [cursor=pointer]:
+                  - /url: https://www.instagram.com/imcdgroup/
+                  - img "Instagram" [ref=e599]
+                - link [ref=e601] [cursor=pointer]:
+                  - /url: https://www.linkedin.com/company/imcd-group
+                  - img "LinkedIn" [ref=e602]
+                - link [ref=e604] [cursor=pointer]:
+                  - /url: https://www.youtube.com/c/imcdstories
+                  - img "YouTube" [ref=e605]
+                - link [ref=e607] [cursor=pointer]:
+                  - /url: https://twitter.com/IMCDComms
+                  - img "Twitter" [ref=e608]
+        - paragraph [ref=e613]: © 2026 IMCD. All Rights Reserved
+        - navigation "Group - Bottom Navigation" [ref=e619]:
+          - list [ref=e620]:
+            - listitem [ref=e621]:
+              - link "Sales Conditions" [ref=e623] [cursor=pointer]:
+                - /url: /sales-conditions
+            - listitem [ref=e625]:
+              - link "Privacy Statement" [ref=e627] [cursor=pointer]:
+                - /url: /privacy-statement
+            - listitem [ref=e629]:
+              - link "Cookie Statement" [ref=e631] [cursor=pointer]:
+                - /url: /cookie-statement
+            - listitem [ref=e633]:
+              - link "Security Policy" [ref=e635] [cursor=pointer]:
+                - /url: /security-policy
+            - listitem [ref=e637]:
+              - link "Job Applicant Privacy Notice" [ref=e639] [cursor=pointer]:
+                - /url: /imcd-job-applicant-privacy-notice

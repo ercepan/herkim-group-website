@@ -1,0 +1,16 @@
+[    2514ms] Error: Bootstrap's JavaScript requires at least jQuery v1.9.1 but less than v4.0.0
+    at https://www.azelis.com/themes/custom/itr_theme/vendor/bootstrap-rfs/dist/js/bootstrap.min.js?ti42c7:6:55261
+    at https://www.azelis.com/themes/custom/itr_theme/vendor/bootstrap-rfs/dist/js/bootstrap.min.js?ti42c7:6:55350
+    at https://www.azelis.com/themes/custom/itr_theme/vendor/bootstrap-rfs/dist/js/bootstrap.min.js?ti42c7:6:200
+    at https://www.azelis.com/themes/custom/itr_theme/vendor/bootstrap-rfs/dist/js/bootstrap.min.js?ti42c7:6:236
+[    2516ms] [LOG] SyntaxError: Unexpected token '<'
+    at new Function (<anonymous>)
+    at ccEval (https://www.azelis.com/modules/contrib/civicccookiecontrol/js/cookieControlSettings.js?ti42c7:47:28)
+    at https://www.azelis.com/modules/contrib/civicccookiecontrol/js/cookieControlSettings.js?ti42c7:27:54
+    at Array.forEach (<anonymous>)
+    at HTMLDocument.<anonymous> (https://www.azelis.com/modules/contrib/civicccookiecontrol/js/cookieControlSettings.js?ti42c7:25:48)
+    at T.each (https://www.azelis.com/core/assets/vendor/jquery/jquery.min.js?v=4.0.0:2:2869)
+    at T.fn.init.each (https://www.azelis.com/core/assets/vendor/jquery/jquery.min.js?v=4.0.0:2:1379)
+    at Object.attach (https://www.azelis.com/modules/contrib/civicccookiecontrol/js/cookieControlSettings.js?ti42c7:15:32)
+    at https://www.azelis.com/core/misc/drupal.js?v=11.3.12:166:24
+    at Array.forEach (<anonymous>) @ https://www.azelis.com/modules/contrib/civicccookiecontrol/js/cookieControlSettings.js?ti42c7:48

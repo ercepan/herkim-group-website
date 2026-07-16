@@ -70,7 +70,7 @@
     renderAccount();
     emit();
     const u = user();
-    if (window.hkToast && u) window.hkToast(T("auth.welcome") + ", " + u.name + " 👋");
+    if (window.hkToast && u) window.hkToast(T("auth.welcome") + ", " + u.name + ".");
     if (cb) setTimeout(cb, 60);
   }
 
@@ -122,14 +122,14 @@
     head.appendChild(el("span", null, u.company));
     pop.appendChild(head);
     if (u.role === "musteri") {
-      const a1 = el("a", null, "📦 " + T("auth.myOrders"));
-      a1.href = "portal.html#orders";
+      const a1 = el("a", null, T("auth.myOrders"));
+      a1.href = "siparislerim.html";
       pop.appendChild(a1);
+      const a2 = el("a", null, T("auth.newOrder"));
+      a2.href = "urunler.html";
+      pop.appendChild(a2);
     }
-    const a2 = el("a", null, "⬛ " + T("auth.goPortal"));
-    a2.href = "portal.html";
-    pop.appendChild(a2);
-    const out = el("button", "up-item", "⏻ " + T("auth.logout"));
+    const out = el("button", "up-item", T("auth.logout"));
     out.type = "button";
     out.addEventListener("click", () => { pop.classList.remove("open"); logout(); });
     pop.appendChild(out);
@@ -219,13 +219,6 @@
     aa.href = "hesap.html";
     apply.appendChild(aa);
     demo.appendChild(apply);
-    const staff = el("p");
-    staff.style.cssText = "margin-top:6px;font-size:12.5px;color:var(--ink-3)";
-    staff.appendChild(document.createTextNode(T("auth.staff") + " "));
-    const sa = el("a", "accent", T("auth.staffLink"));
-    sa.href = "portal.html";
-    staff.appendChild(sa);
-    demo.appendChild(staff);
     panel.appendChild(demo);
 
     overlay.appendChild(panel);

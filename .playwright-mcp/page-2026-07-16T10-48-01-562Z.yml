@@ -1,0 +1,215 @@
+- generic [ref=f5e3]:
+  - banner:
+    - generic:
+      - generic [ref=f5e6]:
+        - link [ref=f5e8] [cursor=pointer]:
+          - /url: /en-us/
+          - img "Brenntag Logo" [ref=f5e9]
+        - generic [ref=f5e10]:
+          - generic [ref=f5e11]: United States
+          - navigation [ref=f5e12]:
+            - link "Contact us" [ref=f5e13] [cursor=pointer]:
+              - /url: /en-us/contact.html
+            - link "Career" [ref=f5e14] [cursor=pointer]:
+              - /url: /en-us/career/
+            - link "Learn more on our corporate website (opens in a new tab)" [ref=f5e15] [cursor=pointer]:
+              - /url: https://corporate.brenntag.com/en/
+              - text: Corporate
+            - button "United States (English)" [ref=f5e16] [cursor=pointer]
+        - button "Log in" [ref=f5e22] [cursor=pointer]
+      - navigation "Global" [ref=f5e25]:
+        - link "Products" [ref=f5e26] [cursor=pointer]:
+          - /url: /en-us/products/
+        - link "Industries" [ref=f5e28] [cursor=pointer]:
+          - /url: /en-us/industries/
+        - link "Services" [ref=f5e30] [cursor=pointer]:
+          - /url: /en-us/services/
+        - link "Sustainability" [ref=f5e32] [cursor=pointer]:
+          - /url: /en-us/sustainability/
+        - link "About" [ref=f5e34] [cursor=pointer]:
+          - /url: /en-us/about/
+  - generic [ref=f5e43]:
+    - generic [ref=f5e47]:
+      - generic [ref=f5e48]:
+        - heading "Welcome to Brenntag in the United States" [level=1] [ref=f5e49]
+        - generic [ref=f5e50]: Brenntag North America is a subsidiary of Brenntag SE, the global market leader in chemical and ingredients distribution. We offer comprehensive solutions as well as individual chemical products throughout North America.
+      - button "Learn more about us" [ref=f5e54] [cursor=pointer]
+    - generic [ref=f5e58]:
+      - generic [ref=f5e59]:
+        - heading "Everything you need in chemicals and ingredients" [level=2] [ref=f5e60]
+        - paragraph [ref=f5e61]: Our focus industries
+      - list [ref=f5e62]:
+        - listitem [ref=f5e63]:
+          - img "Electric car,car Electric" [ref=f5e64]
+          - link "Batteries" [ref=f5e65] [cursor=pointer]:
+            - /url: /en-us/industries/batteries/
+        - listitem [ref=f5e67]:
+          - img "close-up shot of red lipsticks of different shades on white tabletop" [ref=f5e68]
+          - link "Beauty & Personal Care" [ref=f5e69] [cursor=pointer]:
+            - /url: /en-us/industries/beauty-and-personal-care/
+        - listitem [ref=f5e71]:
+          - img "Paintbrush on open tins with pigments" [ref=f5e72]
+          - link "CASE & Construction" [ref=f5e73] [cursor=pointer]:
+            - /url: /en-us/industries/case-and-construction/
+        - listitem [ref=f5e75]:
+          - img "Wind turbines" [ref=f5e76]
+          - link "Energy Services" [ref=f5e77] [cursor=pointer]:
+            - /url: /en-us/industries/energy-services/
+        - listitem [ref=f5e79]:
+          - img "Attractive family loads laundry in washer appliance in kitchen at home. Asian senior elderly mom and daughter put dirty clothes to washing machine with her beagle dog. Domestic-House keeping concept." [ref=f5e80]
+          - link "Home Care, Institutional & Industrial Cleaning" [ref=f5e81] [cursor=pointer]:
+            - /url: /en-us/industries/cleaning/
+        - listitem [ref=f5e83]:
+          - img "Healthy vegan chickpea burger" [ref=f5e84]
+          - link "Food & Nutrition" [ref=f5e85] [cursor=pointer]:
+            - /url: /en-us/industries/food-and-nutrition/
+        - listitem [ref=f5e87]:
+          - img "Lubricants" [ref=f5e88]
+          - link "Lubricants" [ref=f5e89] [cursor=pointer]:
+            - /url: /en-us/industries/lubricants/
+        - listitem [ref=f5e91]:
+          - img "Close up of bubles in a translucent liquid" [ref=f5e92]
+          - link "Water Treatment" [ref=f5e93] [cursor=pointer]:
+            - /url: /en-us/industries/water-treatment/
+      - button "View all industries" [ref=f5e96] [cursor=pointer]
+    - generic [ref=f5e102]:
+      - heading "More topics" [level=2] [ref=f5e104]
+      - generic [ref=f5e105]:
+        - generic [ref=f5e106]:
+          - img "Serious chemist analyzing chemical in test tube" [ref=f5e108]
+          - generic [ref=f5e109]:
+            - generic [ref=f5e110]:
+              - heading "Browse products online" [level=3] [ref=f5e111]
+              - generic [ref=f5e112]: Brenntag offers a comprehensive product portfolio of industrial and specialty chemicals and ingredients. Find here our product overview.
+              - generic [ref=f5e113]: Please contact us for individual solutions.
+            - button "Start exploring" [ref=f5e115] [cursor=pointer]
+        - generic [ref=f5e116]:
+          - img "buildings and green" [ref=f5e118]
+          - generic [ref=f5e119]:
+            - generic [ref=f5e120]:
+              - heading "Sustainability @ Brenntag" [level=3] [ref=f5e121]
+              - generic [ref=f5e122]: For many years now, sustainability issues such as health, safety and environmental protection, resource efficiency and full compliance with laws and regulations have been deeply embedded within our company.
+            - button "Find out more" [ref=f5e124] [cursor=pointer]
+        - generic [ref=f5e125]:
+          - img "Brenntag, Labor, Reagenzglas, Reagenzgläser, Laboratory, Test Tubes, Test Tube Rack, Equipment" [ref=f5e127]
+          - generic [ref=f5e128]:
+            - generic [ref=f5e129]:
+              - heading "From ideas to market-ready solutions" [level=3] [ref=f5e130]
+              - generic [ref=f5e131]: Our Innovation & Application Centers combine expert application know-how, a broad portfolio and state-of-the-art equipment to co-develop sustainable formulations, prototypes, process optimizations and testing/regulatory support across industries.
+            - button "Explore more" [ref=f5e133] [cursor=pointer]
+    - generic [ref=f5e138]:
+      - generic [ref=f5e141]:
+        - img "Youtube Thumbnail" [ref=f5e142]
+        - generic [ref=f5e143]:
+          - generic [ref=f5e144]: To view our YouTube videos you must accept 'Targeting cookies'. Displaying this content may result in YouTube processing personal data or placing cookies on your device.
+          - generic [ref=f5e145]:
+            - button "Cookies Settings" [ref=f5e146] [cursor=pointer]
+            - link "Watch on YouTube" [ref=f5e148] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=Q2rDLFE4STM
+      - generic [ref=f5e150]:
+        - generic [ref=f5e151]:
+          - generic [ref=f5e152]: Connecting with products, knowledge and innovation
+          - heading "We are Brenntag" [level=2] [ref=f5e153]
+        - generic [ref=f5e154]:
+          - generic [ref=f5e155]: Brenntag is the global market leader in full-line range of chemical and ingredient products and value-added services.
+          - generic [ref=f5e156]: Watch our image video and learn more about our values, our commitment and our passion to provide you with the best services and solutions in a variety of industries.
+    - generic [ref=f5e161]:
+      - figure [ref=f5e163]:
+        - img "Support" [ref=f5e164]
+      - generic [ref=f5e165]:
+        - generic [ref=f5e166]:
+          - generic [ref=f5e167]: We're here for you
+          - heading "Service Excellence" [level=2] [ref=f5e168]
+        - generic [ref=f5e169]: Our customers really appreciate how easy it is to do business with us. We’re committed to creating powerful business partnerships – with every customer, every day.
+        - button "Read more" [ref=f5e172] [cursor=pointer]
+    - generic [ref=f5e178]:
+      - figure [ref=f5e180]
+      - generic [ref=f5e182]:
+        - generic [ref=f5e183]:
+          - generic [ref=f5e184]: Platinum Sponsor of
+          - heading "The Alliance for Chemical Distribution" [level=2] [ref=f5e185]
+        - generic [ref=f5e186]:
+          - generic [ref=f5e187]: We're proud to be a Platinum Sponsor of the Alliance for Chemical Distribution (ACD). This badge showcases our support for ACD and our commitment to being certified for Responsible Distribution, an industry wide commitment to product stewardship and responsible distribution in every phase of chemical storage, handling, transportation and disposal.
+          - generic [ref=f5e188]: Discover more about ACD's mission, vision and commitment Responsible Distribution.
+        - button "Visit ACD" [ref=f5e190] [cursor=pointer]
+  - contentinfo [ref=f5e192]:
+    - generic [ref=f5e193]:
+      - generic [ref=f5e194]:
+        - generic [ref=f5e195]: First class service
+        - paragraph [ref=f5e196]: We are committed to creating a best-in-class customer experience
+      - button "Learn more about Brenntag's commitment to creating a best-in-class customer experience" [ref=f5e198] [cursor=pointer]:
+        - generic [ref=f5e199]: Learn more
+    - generic [ref=f5e200]:
+      - generic [ref=f5e201]:
+        - generic [ref=f5e202]:
+          - link [ref=f5e204] [cursor=pointer]:
+            - /url: /en-us/
+            - img "Brenntag Logo" [ref=f5e205]
+          - generic [ref=f5e206]:
+            - paragraph [ref=f5e207]: © 2026 - Brenntag North America LLC
+            - generic [ref=f5e208]:
+              - paragraph [ref=f5e209]: 5083 Pottsville Pike
+              - paragraph
+              - paragraph [ref=f5e210]: Reading, PA, 19605
+              - paragraph [ref=f5e211]: United States
+        - generic [ref=f5e213]:
+          - paragraph [ref=f5e214]: More about Brenntag
+          - list [ref=f5e215]:
+            - listitem [ref=f5e216]:
+              - link "About us" [ref=f5e217] [cursor=pointer]:
+                - /url: /en-us/about/
+            - listitem [ref=f5e219]:
+              - link "Community Involvement" [ref=f5e220] [cursor=pointer]:
+                - /url: /en-us/community-involvement/
+            - listitem [ref=f5e222]:
+              - link "Products" [ref=f5e223] [cursor=pointer]:
+                - /url: /en-us/products/
+            - listitem [ref=f5e225]:
+              - link "Learn more on our corporate website (opens in a new tab)" [ref=f5e226] [cursor=pointer]:
+                - /url: https://corporate.brenntag.com/en/
+                - generic [ref=f5e227]: Corporate
+        - generic [ref=f5e229]:
+          - paragraph [ref=f5e230]: How can we help you?
+          - list [ref=f5e231]:
+            - listitem [ref=f5e232]:
+              - link "Media" [ref=f5e233] [cursor=pointer]:
+                - /url: /en-us/media/
+            - listitem [ref=f5e235]:
+              - link "Career" [ref=f5e236] [cursor=pointer]:
+                - /url: /en-us/career/
+            - listitem [ref=f5e238]:
+              - link "Locations" [ref=f5e239] [cursor=pointer]:
+                - /url: /en-us/locations.html
+            - listitem [ref=f5e241]:
+              - link "Contact us" [ref=f5e242] [cursor=pointer]:
+                - /url: /en-us/contact.html
+            - listitem [ref=f5e244]:
+              - link "Supplier Portal" [ref=f5e245] [cursor=pointer]:
+                - /url: /en-us/services/supplier-portal/
+        - generic [ref=f5e248]:
+          - paragraph [ref=f5e249]: Connect with us
+          - generic [ref=f5e250]:
+            - link "LinkedIn" [ref=f5e251] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/brenntag
+            - link "Youtube" [ref=f5e255] [cursor=pointer]:
+              - /url: https://youtube.com/c/BrenntagGlobal
+            - link "Facebook" [ref=f5e259] [cursor=pointer]:
+              - /url: https://www.facebook.com/BrenntagGlobal
+            - link "X" [ref=f5e263] [cursor=pointer]:
+              - /url: https://x.com/Brenntag
+      - generic [ref=f5e267]:
+        - navigation [ref=f5e270]:
+          - link "Privacy Policy" [ref=f5e272] [cursor=pointer]:
+            - /url: /en-us/privacy-policy.html
+          - link "Compliance" [ref=f5e274] [cursor=pointer]:
+            - /url: /en-us/compliance/
+          - link "Terms & Conditions" [ref=f5e276] [cursor=pointer]:
+            - /url: /en-us/terms-and-conditions.html
+          - link "Transportation Charge" [ref=f5e278] [cursor=pointer]:
+            - /url: /en-us/transportation-charge/
+          - link "Imprint" [ref=f5e280] [cursor=pointer]:
+            - /url: /en-us/imprint.html
+          - link "Go to sitemap" [ref=f5e282] [cursor=pointer]:
+            - /url: /en-us/sitemap.html
+            - text: Sitemap
+        - button [ref=f5e283] [cursor=pointer]

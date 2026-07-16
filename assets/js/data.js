@@ -51,61 +51,61 @@ const HK_SUBS = {
 };
 
 /* Ürünler — resmî Herkim Group ürün listesi (Temmuz 2026 flyer).
-   n: ad (tr/en/ru), brand: marka/menşei, pack: ambalaj, tag: "yeni"|"one"|null */
+   n: ad (tr/en/ru), brand: marka/menşei, tag: "yeni"|"one"|null */
 const HK_PRODUCTS = [
   // ---- Asitler ----
-  { id: 1,  sub: "asit",    n: { tr: "Asetik Asit",                          en: "Acetic Acid",                                        ru: "Уксусная кислота" },                          brand: "Herkim",   pack: "30 kg bidon / IBC", tag: null },
-  { id: 2,  sub: "asit",    n: { tr: "Akrilik Asit",                         en: "Acrylic Acid",                                       ru: "Акриловая кислота" },                         brand: "Herkim",   pack: "200 kg varil",      tag: null },
-  { id: 3,  sub: "asit",    n: { tr: "Sitrik Asit Monohidrat",               en: "Citric Acid Monohydrate",                            ru: "Лимонная кислота моногидрат" },               brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 4,  sub: "asit",    n: { tr: "HEDP (Hidroksietiliden Difosfonik Asit)", en: "HEDP (Hydroxyethylidene Diphosphonic Acid)",      ru: "HEDP (оксиэтилидендифосфоновая кислота)" },   brand: "Herkim",   pack: "30 kg bidon",       tag: null },
-  { id: 5,  sub: "asit",    n: { tr: "Formik Asit %85",                      en: "Formic Acid 85%",                                    ru: "Муравьиная кислота 85%" },                    brand: "Luxi",     pack: "35 kg bidon / IBC", tag: "one" },
-  { id: 6,  sub: "asit",    n: { tr: "Oksalik Asit",                         en: "Oxalic Acid",                                        ru: "Щавелевая кислота" },                         brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 7,  sub: "asit",    n: { tr: "Fosforik Asit %85",                    en: "Phosphoric Acid 85%",                                ru: "Ортофосфорная кислота 85%" },                 brand: "Herkim",   pack: "35 kg bidon / IBC", tag: null },
-  { id: 8,  sub: "asit",    n: { tr: "Sülfürik Asit",                        en: "Sulphuric Acid",                                     ru: "Серная кислота" },                            brand: "Herkim",   pack: "IBC / dökme",       tag: null },
+  { id: 1,  sub: "asit",    n: { tr: "Asetik Asit",                          en: "Acetic Acid",                                        ru: "Уксусная кислота" },                          brand: "Herkim", tag: null },
+  { id: 2,  sub: "asit",    n: { tr: "Akrilik Asit",                         en: "Acrylic Acid",                                       ru: "Акриловая кислота" },                         brand: "Herkim",      tag: null },
+  { id: 3,  sub: "asit",    n: { tr: "Sitrik Asit Monohidrat",               en: "Citric Acid Monohydrate",                            ru: "Лимонная кислота моногидрат" },               brand: "Herkim",       tag: null },
+  { id: 4,  sub: "asit",    n: { tr: "HEDP (Hidroksietiliden Difosfonik Asit)", en: "HEDP (Hydroxyethylidene Diphosphonic Acid)",      ru: "HEDP (оксиэтилидендифосфоновая кислота)" },   brand: "Herkim",       tag: null },
+  { id: 5,  sub: "asit",    n: { tr: "Formik Asit %85",                      en: "Formic Acid 85%",                                    ru: "Муравьиная кислота 85%" },                    brand: "Luxi", tag: "one" },
+  { id: 6,  sub: "asit",    n: { tr: "Oksalik Asit",                         en: "Oxalic Acid",                                        ru: "Щавелевая кислота" },                         brand: "Herkim",       tag: null },
+  { id: 7,  sub: "asit",    n: { tr: "Fosforik Asit %85",                    en: "Phosphoric Acid 85%",                                ru: "Ортофосфорная кислота 85%" },                 brand: "Herkim", tag: null },
+  { id: 8,  sub: "asit",    n: { tr: "Sülfürik Asit",                        en: "Sulphuric Acid",                                     ru: "Серная кислота" },                            brand: "Herkim",       tag: null },
 
   // ---- Alkoller & Glikoller ----
-  { id: 9,  sub: "alkol",   n: { tr: "Butil Glikol",                         en: "Butyl Glycol",                                       ru: "Бутилгликоль" },                              brand: "Herkim",   pack: "180 kg varil",      tag: null },
-  { id: 10, sub: "alkol",   n: { tr: "İzopropil Alkol (IPA)",                en: "IPA (Isopropyl Alcohol)",                            ru: "Изопропиловый спирт (IPA)" },                 brand: "Herkim",   pack: "160 kg varil",      tag: null },
-  { id: 11, sub: "alkol",   n: { tr: "Monoetilen Glikol (MEG)",              en: "MEG (Monoethylene Glycol)",                          ru: "Моноэтиленгликоль (MEG)" },                   brand: "Herkim",   pack: "230 kg varil / IBC",tag: "one" },
-  { id: 12, sub: "alkol",   n: { tr: "Monopropilen Glikol (MPG)",            en: "Mono Propylene Glycol (MPG)",                        ru: "Монопропиленгликоль (MPG)" },                 brand: "Herkim",   pack: "215 kg varil",      tag: null },
+  { id: 9,  sub: "alkol",   n: { tr: "Butil Glikol",                         en: "Butyl Glycol",                                       ru: "Бутилгликоль" },                              brand: "Herkim",      tag: null },
+  { id: 10, sub: "alkol",   n: { tr: "İzopropil Alkol (IPA)",                en: "IPA (Isopropyl Alcohol)",                            ru: "Изопропиловый спирт (IPA)" },                 brand: "Herkim",      tag: null },
+  { id: 11, sub: "alkol",   n: { tr: "Monoetilen Glikol (MEG)",              en: "MEG (Monoethylene Glycol)",                          ru: "Моноэтиленгликоль (MEG)" },                   brand: "Herkim",tag: "one" },
+  { id: 12, sub: "alkol",   n: { tr: "Monopropilen Glikol (MPG)",            en: "Mono Propylene Glycol (MPG)",                        ru: "Монопропиленгликоль (MPG)" },                 brand: "Herkim",      tag: null },
 
   // ---- Amonyum Bazlı Ürünler ----
-  { id: 13, sub: "amonyum", n: { tr: "Amonyum Bikarbonat",                   en: "Ammonium Bicarbonate",                               ru: "Бикарбонат аммония" },                        brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 14, sub: "amonyum", n: { tr: "Amonyum Klorür",                       en: "Ammonium Chloride",                                  ru: "Хлорид аммония" },                            brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 15, sub: "amonyum", n: { tr: "Amonyum Sülfat",                       en: "Ammonium Sulphate",                                  ru: "Сульфат аммония" },                           brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 13, sub: "amonyum", n: { tr: "Amonyum Bikarbonat",                   en: "Ammonium Bicarbonate",                               ru: "Бикарбонат аммония" },                        brand: "Herkim",       tag: null },
+  { id: 14, sub: "amonyum", n: { tr: "Amonyum Klorür",                       en: "Ammonium Chloride",                                  ru: "Хлорид аммония" },                            brand: "Herkim",       tag: null },
+  { id: 15, sub: "amonyum", n: { tr: "Amonyum Sülfat",                       en: "Ammonium Sulphate",                                  ru: "Сульфат аммония" },                           brand: "Herkim",       tag: null },
 
   // ---- Deri & Tabaklama ----
-  { id: 16, sub: "deri",    n: { tr: "Mimoza Tozu",                          en: "Mimosa Powder",                                      ru: "Порошок мимозы" },                            brand: "Tanac",    pack: "25 kg torba",       tag: "one" },
-  { id: 17, sub: "deri",    n: { tr: "Kebrako (Quebracho)",                  en: "Quebracho",                                          ru: "Квебрахо" },                                  brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 18, sub: "deri",    n: { tr: "Saviotan A (Astrenjan)",               en: "Saviotan A (Astringent)",                            ru: "Saviotan A (вяжущий)" },                      brand: "Saviotan", pack: "25 kg torba",       tag: null },
-  { id: 19, sub: "deri",    n: { tr: "Saviotan RS (Tatlandırılmış)",         en: "Saviotan RS (Sweetened)",                            ru: "Saviotan RS (подслащённый)" },                brand: "Saviotan", pack: "25 kg torba",       tag: null },
-  { id: 20, sub: "deri",    n: { tr: "Tara Tozu",                            en: "Tara Powder",                                        ru: "Порошок тары" },                              brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 21, sub: "deri",    n: { tr: "Valeks (Palamut Ekstraktı)",           en: "Valex (Valonia Extract)",                            ru: "Валекс (экстракт валлонеи)" },                brand: "Valex",    pack: "25 kg torba",       tag: null },
+  { id: 16, sub: "deri",    n: { tr: "Mimoza Tozu",                          en: "Mimosa Powder",                                      ru: "Порошок мимозы" },                            brand: "Tanac",       tag: "one" },
+  { id: 17, sub: "deri",    n: { tr: "Kebrako (Quebracho)",                  en: "Quebracho",                                          ru: "Квебрахо" },                                  brand: "Herkim",       tag: null },
+  { id: 18, sub: "deri",    n: { tr: "Saviotan A (Astrenjan)",               en: "Saviotan A (Astringent)",                            ru: "Saviotan A (вяжущий)" },                      brand: "Saviotan",       tag: null },
+  { id: 19, sub: "deri",    n: { tr: "Saviotan RS (Tatlandırılmış)",         en: "Saviotan RS (Sweetened)",                            ru: "Saviotan RS (подслащённый)" },                brand: "Saviotan",       tag: null },
+  { id: 20, sub: "deri",    n: { tr: "Tara Tozu",                            en: "Tara Powder",                                        ru: "Порошок тары" },                              brand: "Herkim",       tag: null },
+  { id: 21, sub: "deri",    n: { tr: "Valeks (Palamut Ekstraktı)",           en: "Valex (Valonia Extract)",                            ru: "Валекс (экстракт валлонеи)" },                brand: "Valex",       tag: null },
 
   // ---- Sodyum Bazlı Kimyasallar ----
-  { id: 22, sub: "sodyum",  n: { tr: "Kostik Soda",                          en: "Caustic Soda",                                       ru: "Каустическая сода" },                         brand: "Herkim",   pack: "25 kg torba",       tag: "one" },
-  { id: 23, sub: "sodyum",  n: { tr: "Nanocon (Povercon) — Sodyum Naftalin Sülfonat (Açık Renk)", en: "Nanocon (Povercon) — Sodium Naphthalene Sulfonate (Light Colour)", ru: "Nanocon (Povercon) — нафталинсульфонат натрия (светлый)" }, brand: "Povercon", pack: "25 kg torba", tag: null },
-  { id: 24, sub: "sodyum",  n: { tr: "Povercon 100 — Sodyum Naftalin Sülfonat", en: "Povercon 100 — Sodium Naphthalene Sulfonate",     ru: "Povercon 100 — нафталинсульфонат натрия" },   brand: "Povercon", pack: "25 kg torba",       tag: "yeni" },
-  { id: 25, sub: "sodyum",  n: { tr: "Sodyum Bikarbonat",                    en: "Sodium Bicarbonate",                                 ru: "Бикарбонат натрия" },                         brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 26, sub: "sodyum",  n: { tr: "Sodyum Karbonat",                      en: "Sodium Carbonate",                                   ru: "Карбонат натрия" },                           brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 27, sub: "sodyum",  n: { tr: "Sodyum Format",                        en: "Sodium Formate",                                     ru: "Формиат натрия" },                            brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 28, sub: "sodyum",  n: { tr: "Sodyum Sülfhidrat",                    en: "Sodium Sulphhydrate",                                ru: "Гидросульфид натрия" },                       brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 29, sub: "sodyum",  n: { tr: "Sodyum Hidrosülfit",                   en: "Sodium Hydrosulphite",                               ru: "Гидросульфит натрия" },                       brand: "Herkim",   pack: "50 kg bidon",       tag: null },
-  { id: 30, sub: "sodyum",  n: { tr: "Sodyum Metabisülfit (TLG)",            en: "Sodium Metabisulphite (TLG Grade)",                  ru: "Метабисульфит натрия (TLG)" },                brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 31, sub: "sodyum",  n: { tr: "Sodyum Perkarbonat",                   en: "Sodium Percarbonate",                                ru: "Перкарбонат натрия" },                        brand: "Herkim",   pack: "25 kg torba",       tag: "yeni" },
-  { id: 32, sub: "sodyum",  n: { tr: "Sodyum Sülfür",                        en: "Sodium Sulphide",                                    ru: "Сульфид натрия" },                            brand: "Herkim",   pack: "25 kg torba",       tag: null },
+  { id: 22, sub: "sodyum",  n: { tr: "Kostik Soda",                          en: "Caustic Soda",                                       ru: "Каустическая сода" },                         brand: "Herkim",       tag: "one" },
+  { id: 23, sub: "sodyum",  n: { tr: "Nanocon (Povercon) — Sodyum Naftalin Sülfonat (Açık Renk)", en: "Nanocon (Povercon) — Sodium Naphthalene Sulfonate (Light Colour)", ru: "Nanocon (Povercon) — нафталинсульфонат натрия (светлый)" }, brand: "Povercon", tag: null },
+  { id: 24, sub: "sodyum",  n: { tr: "Povercon 100 — Sodyum Naftalin Sülfonat", en: "Povercon 100 — Sodium Naphthalene Sulfonate",     ru: "Povercon 100 — нафталинсульфонат натрия" },   brand: "Povercon",       tag: "yeni" },
+  { id: 25, sub: "sodyum",  n: { tr: "Sodyum Bikarbonat",                    en: "Sodium Bicarbonate",                                 ru: "Бикарбонат натрия" },                         brand: "Herkim",       tag: null },
+  { id: 26, sub: "sodyum",  n: { tr: "Sodyum Karbonat",                      en: "Sodium Carbonate",                                   ru: "Карбонат натрия" },                           brand: "Herkim",       tag: null },
+  { id: 27, sub: "sodyum",  n: { tr: "Sodyum Format",                        en: "Sodium Formate",                                     ru: "Формиат натрия" },                            brand: "Herkim",       tag: null },
+  { id: 28, sub: "sodyum",  n: { tr: "Sodyum Sülfhidrat",                    en: "Sodium Sulphhydrate",                                ru: "Гидросульфид натрия" },                       brand: "Herkim",       tag: null },
+  { id: 29, sub: "sodyum",  n: { tr: "Sodyum Hidrosülfit",                   en: "Sodium Hydrosulphite",                               ru: "Гидросульфит натрия" },                       brand: "Herkim",       tag: null },
+  { id: 30, sub: "sodyum",  n: { tr: "Sodyum Metabisülfit (TLG)",            en: "Sodium Metabisulphite (TLG Grade)",                  ru: "Метабисульфит натрия (TLG)" },                brand: "Herkim",       tag: null },
+  { id: 31, sub: "sodyum",  n: { tr: "Sodyum Perkarbonat",                   en: "Sodium Percarbonate",                                ru: "Перкарбонат натрия" },                        brand: "Herkim",       tag: "yeni" },
+  { id: 32, sub: "sodyum",  n: { tr: "Sodyum Sülfür",                        en: "Sodium Sulphide",                                    ru: "Сульфид натрия" },                            brand: "Herkim",       tag: null },
 
   // ---- Solventler & Endüstriyel Kimyasallar ----
-  { id: 33, sub: "solvent", n: { tr: "Amonyak",                              en: "Ammonia",                                            ru: "Аммиак" },                                    brand: "Herkim",   pack: "30 kg bidon / IBC", tag: null },
-  { id: 34, sub: "solvent", n: { tr: "Butil Asetat",                         en: "Butyl Acetate",                                      ru: "Бутилацетат" },                               brand: "Herkim",   pack: "180 kg varil",      tag: null },
-  { id: 35, sub: "solvent", n: { tr: "Ham Gliserin",                         en: "Crude Glycerine",                                    ru: "Глицерин технический" },                      brand: "Herkim",   pack: "IBC 1250 kg",       tag: null },
-  { id: 36, sub: "solvent", n: { tr: "Dietanolamin (DEA)",                   en: "Diethanolamine (DEA)",                               ru: "Диэтаноламин (DEA)" },                        brand: "Herkim",   pack: "220 kg varil",      tag: null },
-  { id: 37, sub: "solvent", n: { tr: "Magnezyum Klorür (Pul)",               en: "Magnesium Chloride Flakes",                          ru: "Хлорид магния (чешуйки)" },                   brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 38, sub: "solvent", n: { tr: "Metilen Klorür",                       en: "Methylene Chloride",                                 ru: "Метиленхлорид" },                             brand: "Herkim",   pack: "270 kg varil",      tag: null },
-  { id: 39, sub: "solvent", n: { tr: "Polivinil Alkol (PVA)",                en: "Polyvinyl Alcohol (PVA)",                            ru: "Поливиниловый спирт (PVA)" },                 brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 40, sub: "solvent", n: { tr: "Potasyum Klorür",                      en: "Potassium Chloride",                                 ru: "Хлорид калия" },                              brand: "Herkim",   pack: "25 kg torba",       tag: null },
-  { id: 41, sub: "solvent", n: { tr: "Soya Lesitini",                        en: "Soya Lecithin",                                      ru: "Соевый лецитин" },                            brand: "Herkim",   pack: "200 kg varil / IBC",tag: "yeni" },
-  { id: 42, sub: "solvent", n: { tr: "Triizobutil Fosfat",                   en: "Triisobutyl Phosphate",                              ru: "Триизобутилфосфат" },                         brand: "Herkim",   pack: "200 kg varil",      tag: null }
+  { id: 33, sub: "solvent", n: { tr: "Amonyak",                              en: "Ammonia",                                            ru: "Аммиак" },                                    brand: "Herkim", tag: null },
+  { id: 34, sub: "solvent", n: { tr: "Butil Asetat",                         en: "Butyl Acetate",                                      ru: "Бутилацетат" },                               brand: "Herkim",      tag: null },
+  { id: 35, sub: "solvent", n: { tr: "Ham Gliserin",                         en: "Crude Glycerine",                                    ru: "Глицерин технический" },                      brand: "Herkim",       tag: null },
+  { id: 36, sub: "solvent", n: { tr: "Dietanolamin (DEA)",                   en: "Diethanolamine (DEA)",                               ru: "Диэтаноламин (DEA)" },                        brand: "Herkim",      tag: null },
+  { id: 37, sub: "solvent", n: { tr: "Magnezyum Klorür (Pul)",               en: "Magnesium Chloride Flakes",                          ru: "Хлорид магния (чешуйки)" },                   brand: "Herkim",       tag: null },
+  { id: 38, sub: "solvent", n: { tr: "Metilen Klorür",                       en: "Methylene Chloride",                                 ru: "Метиленхлорид" },                             brand: "Herkim",      tag: null },
+  { id: 39, sub: "solvent", n: { tr: "Polivinil Alkol (PVA)",                en: "Polyvinyl Alcohol (PVA)",                            ru: "Поливиниловый спирт (PVA)" },                 brand: "Herkim",       tag: null },
+  { id: 40, sub: "solvent", n: { tr: "Potasyum Klorür",                      en: "Potassium Chloride",                                 ru: "Хлорид калия" },                              brand: "Herkim",       tag: null },
+  { id: 41, sub: "solvent", n: { tr: "Soya Lesitini",                        en: "Soya Lecithin",                                      ru: "Соевый лецитин" },                            brand: "Herkim",tag: "yeni" },
+  { id: 42, sub: "solvent", n: { tr: "Triizobutil Fosfat",                   en: "Triisobutyl Phosphate",                              ru: "Триизобутилфосфат" },                         brand: "Herkim",      tag: null }
 ];
 
 /* Duyurular (üç dilli) */

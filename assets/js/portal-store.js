@@ -28,9 +28,9 @@ var HGP_CUSTOMERS = [
     contact: "Mehmet Kaya", phone: "+90 532 000 11 22", email: "satinalma@derimderi.com.tr",
     rep: "Ayşe Yılmaz", since: 2011,
     history: [
-      { via: "📞", t: "Telefon — sevkiyat planı",        n: "Temmuz sevkiyatları ve yeni sezon ihtiyaçları konuşuldu.", when: "09.07.2026" },
-      { via: "💬", t: "WhatsApp — miktar teyidi",        n: "HG-2026-1041 miktar artışı teyit edildi.",                 when: "02.07.2026" },
-      { via: "🏭", t: "Saha ziyareti — teknik servis",   n: "Finisaj hattında uygulama optimizasyonu yapıldı.",         when: "24.06.2026" }
+      { via: "TEL", t: "Telefon — sevkiyat planı",        n: "Temmuz sevkiyatları ve yeni sezon ihtiyaçları konuşuldu.", when: "09.07.2026" },
+      { via: "WA", t: "WhatsApp — miktar teyidi",        n: "HG-2026-1041 miktar artışı teyit edildi.",                 when: "02.07.2026" },
+      { via: "SAHA", t: "Saha ziyareti — teknik servis",   n: "Finisaj hattında uygulama optimizasyonu yapıldı.",         when: "24.06.2026" }
     ]
   },
   {
@@ -38,8 +38,8 @@ var HGP_CUSTOMERS = [
     contact: "Zeynep Arslan", phone: "+90 533 000 33 44", email: "satinalma@anadolutekstil.com",
     rep: "Ayşe Yılmaz", since: 2017,
     history: [
-      { via: "✉️", t: "E-posta — fiyat listesi",         n: "Temmuz fiyat listesi iletildi.",                            when: "01.07.2026" },
-      { via: "📞", t: "Telefon — numune geri bildirimi", n: "PB-70 numunesi beğenildi; deneme siparişi planlanıyor.",    when: "27.06.2026" }
+      { via: "E-POSTA", t: "E-posta — fiyat listesi",         n: "Temmuz fiyat listesi iletildi.",                            when: "01.07.2026" },
+      { via: "TEL", t: "Telefon — numune geri bildirimi", n: "PB-70 numunesi beğenildi; deneme siparişi planlanıyor.",    when: "27.06.2026" }
     ]
   },
   {
@@ -47,7 +47,7 @@ var HGP_CUSTOMERS = [
     contact: "Ali Vural", phone: "+90 535 000 55 66", email: "satinalma@megaboya.com.tr",
     rep: "Ayşe Yılmaz", since: 2020,
     history: [
-      { via: "🏭", t: "Saha ziyareti — yeni hat",        n: "Yeni üretim hattı için binder ihtiyacı görüşüldü.",          when: "18.06.2026" }
+      { via: "SAHA", t: "Saha ziyareti — yeni hat",        n: "Yeni üretim hattı için binder ihtiyacı görüşüldü.",          when: "18.06.2026" }
     ]
   }
 ];
@@ -284,7 +284,7 @@ function hgpDecideApplication(appId, approve, who) {
       id: "C-1" + String(s.seq).slice(-2), name: a.firm, city: a.taxOffice || "—",
       contact: a.contact, phone: a.mobile || a.phone, email: a.email,
       rep: "Ayşe Yılmaz", since: 2026,
-      history: [{ via: "🌐", t: "Web başvurusu onaylandı", n: a.msg || "Hesap aktifleştirildi.", when: hgpToday() }]
+      history: [{ via: "WEB", t: "Web başvurusu onaylandı", n: a.msg || "Hesap aktifleştirildi.", when: hgpToday() }]
     });
     hgpAct(s, who, a.firm + " hesap başvurusunu onayladı — hesap aktif", "onay");
   } else {
