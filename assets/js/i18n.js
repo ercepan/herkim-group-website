@@ -112,6 +112,8 @@ const HK_I18N = {
     "btn.quoteForm": "Teklif Formu",
     "btn.whatsappLine": "WhatsApp Hattı",
     "btn.bySector": "Sektöre göre ürünler",
+    "btn.allSectors": "Hizmet verdiğimiz sektörler",
+    "btn.allPrinciples": "Altı ilkemizin tamamı",
     "btn.downloadDocs": "Belgeleri indirin",
     "btn.requestDoc": "Doküman Talep Et",
     "btn.openBasket": "Teklif Sepetini Aç",
@@ -268,6 +270,7 @@ const HK_I18N = {
     /* Anasayfa — bölüm başlıkları */
     "home.sectors.kicker": "01 — Hizmet Verdiğimiz Sektörler",
     "home.sectors.title": "Deri ve tekstilin\nkimya çözüm ortağı.",
+    "home.sectors.lead": "Deri ve tekstilden inşaat boyasına, matbaadan binder üretimine — sekiz sanayi kolunda proses kimyasalı tedarik ediyoruz.",
     "home.products.kicker": "02 — Ürün Portföyü",
     "home.products.title": "Öne çıkan ürünler\nve ürün gruplarımız.",
     "home.products.note": "* Kartlardaki + ile ürünleri teklif sepetinize ekleyin; tek seferde fiyat teklifi isteyin.",
@@ -281,6 +284,8 @@ const HK_I18N = {
     "home.stats.brands": "Ana kategori",
     "home.stats.sub3": "Ana ürün grubu",
     "home.about.kicker": "05 — Kurumsal",
+    "corp.about.kicker": "01 — Hakkımızda",
+    "corp.history.kicker": "04 — Tarihçe",
     "home.about.title": "Biz kimiz?",
     "home.about.lead": "Herkim Kimya, 1975 yılında İstanbul Kazlıçeşme deri sanayi bölgesinde kuruldu. Kuruluşundan bu yana deri ve tekstil sektörüne komple kimyasal ürün ve teknik destek sağlamaktadır.",
     "home.about.li1": "Geniş ürün gamı ve stoklu tedarik",
@@ -473,6 +478,8 @@ const HK_I18N = {
     "srv.teknik.t": "Teknik Servis",
     "srv.teknik.d": "Uygulama sorunlarında saha desteği; deneyimli kimya mühendislerimizle yanınızdayız.",
     "srv.stat.services": "Hizmet alanı",
+    "srv.sectors.kicker": "02 — Hizmet Verdiğimiz Sektörler",
+    "srv.sectors.title": "Sekiz sanayi kolunda\nproses kimyası.",
 
     /* Ürün kataloğu ve ürün listesi tablosu */
     "cat.how.kicker": "Nasıl çalışır?",
@@ -576,6 +583,8 @@ const HK_I18N = {
     "btn.quoteForm": "Quote Form",
     "btn.whatsappLine": "WhatsApp Line",
     "btn.bySector": "Products by sector",
+    "btn.allSectors": "Industries we serve",
+    "btn.allPrinciples": "All six principles",
     "btn.downloadDocs": "Download documents",
     "btn.requestDoc": "Request a Document",
     "btn.openBasket": "Open Quote Basket",
@@ -732,6 +741,7 @@ const HK_I18N = {
     /* Anasayfa — bölüm başlıkları */
     "home.sectors.kicker": "01 — Industries We Serve",
     "home.sectors.title": "The chemistry partner\nfor leather and textiles.",
+    "home.sectors.lead": "From leather and textiles to construction paint, from printing to binder production — we supply process chemicals to eight industrial sectors.",
     "home.products.kicker": "02 — Product Portfolio",
     "home.products.title": "Featured products\nand our product groups.",
     "home.products.note": "* Add products to your quote basket with the + button; request a single combined quote.",
@@ -745,6 +755,8 @@ const HK_I18N = {
     "home.stats.brands": "Main categories",
     "home.stats.sub3": "Core product groups",
     "home.about.kicker": "05 — Corporate",
+    "corp.about.kicker": "01 — About Us",
+    "corp.history.kicker": "04 — History",
     "home.about.title": "Who are we?",
     "home.about.lead": "Herkim Kimya was founded in 1975 in Istanbul's Kazlıçeşme leather district. Since its founding, it has provided the leather and textile sector with complete chemical products and technical support.",
     "home.about.li1": "Broad product range and stocked supply",
@@ -937,6 +949,8 @@ const HK_I18N = {
     "srv.teknik.t": "Technical Service",
     "srv.teknik.d": "Field support for application issues; our experienced chemical engineers are by your side.",
     "srv.stat.services": "Service areas",
+    "srv.sectors.kicker": "02 — Industries We Serve",
+    "srv.sectors.title": "Process chemistry across\neight industrial sectors.",
 
     /* Ürün kataloğu ve ürün listesi tablosu */
     "cat.how.kicker": "How it works",
@@ -1040,6 +1054,8 @@ const HK_I18N = {
     "btn.quoteForm": "Форма запроса",
     "btn.whatsappLine": "Линия WhatsApp",
     "btn.bySector": "Продукция по отраслям",
+    "btn.allSectors": "Отрасли, которым мы служим",
+    "btn.allPrinciples": "Все шесть принципов",
     "btn.downloadDocs": "Скачать документы",
     "btn.requestDoc": "Запросить документ",
     "btn.openBasket": "Открыть корзину запроса",
@@ -1196,6 +1212,7 @@ const HK_I18N = {
     /* Anasayfa — bölüm başlıkları */
     "home.sectors.kicker": "01 — Отрасли, которым мы служим",
     "home.sectors.title": "Химический партнёр\nкожи и текстиля.",
+    "home.sectors.lead": "От кожи и текстиля до строительных красок, от печати до производства биндеров — мы поставляем химию процессов восьми отраслям промышленности.",
     "home.products.kicker": "02 — Портфель продукции",
     "home.products.title": "Избранные продукты\nи наши товарные группы.",
     "home.products.note": "* Добавляйте продукты в корзину кнопкой +; запросите единую цену за всё сразу.",
@@ -1209,6 +1226,8 @@ const HK_I18N = {
     "home.stats.brands": "Основные категории",
     "home.stats.sub3": "Основные группы",
     "home.about.kicker": "05 — О компании",
+    "corp.about.kicker": "01 — О нас",
+    "corp.history.kicker": "04 — История",
     "home.about.title": "Кто мы?",
     "home.about.lead": "Herkim Kimya основана в 1975 году в кожевенном районе Казлычешме в Стамбуле. С момента основания компания обеспечивает кожевенную и текстильную отрасль полным ассортиментом химии и технической поддержкой.",
     "home.about.li1": "Широкий ассортимент и складские запасы",
@@ -1401,6 +1420,8 @@ const HK_I18N = {
     "srv.teknik.t": "Техническая служба",
     "srv.teknik.d": "Полевая поддержка при вопросах применения; наши опытные инженеры-химики рядом с вами.",
     "srv.stat.services": "Направлений услуг",
+    "srv.sectors.kicker": "02 — Отрасли, которым мы служим",
+    "srv.sectors.title": "Химия процессов\nв восьми отраслях.",
 
     /* Ürün kataloğu ve ürün listesi tablosu */
     "cat.how.kicker": "Как это работает",

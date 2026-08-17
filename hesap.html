@@ -145,19 +145,21 @@
 
         <!-- Süreç şeridi -->
         <div class="reveal in" style="border:2px solid var(--ink);border-radius:var(--radius);background:var(--white);box-shadow:var(--shadow-offset);padding:22px 24px;margin-bottom:34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px">
-          <div><b class="mono accent">1</b><p style="font-size:13.5px;margin-top:4px" data-i18n="acct.s1">Formu doldurun — vergi numaranız anında biçim denetiminden geçer.</p></div>
-          <div><b class="mono accent">2</b><p style="font-size:13.5px;margin-top:4px" data-i18n="acct.s2">Satış ekibimiz firmanızı resmî kayıtlardan doğrular.</p></div>
-          <div><b class="mono accent">3</b><p style="font-size:13.5px;margin-top:4px" data-i18n="acct.s3">Onayla birlikte hesabınız açılır, e-posta ile bilgilendirilirsiniz.</p></div>
-          <div><b class="mono accent">4</b><p style="font-size:13.5px;margin-top:4px" data-i18n="acct.s4">Girişinizle fiyat teklifi isteyin, sipariş verin, portaldan takip edin.</p></div>
+          <div><b class="mono accent">1</b><p style="font-size:var(--fs-small);margin-top:4px" data-i18n="acct.s1">Formu doldurun — vergi numaranız anında biçim denetiminden geçer.</p></div>
+          <div><b class="mono accent">2</b><p style="font-size:var(--fs-small);margin-top:4px" data-i18n="acct.s2">Satış ekibimiz firmanızı resmî kayıtlardan doğrular.</p></div>
+          <div><b class="mono accent">3</b><p style="font-size:var(--fs-small);margin-top:4px" data-i18n="acct.s3">Onayla birlikte hesabınız açılır, e-posta ile bilgilendirilirsiniz.</p></div>
+          <div><b class="mono accent">4</b><p style="font-size:var(--fs-small);margin-top:4px" data-i18n="acct.s4">Girişinizle fiyat teklifi isteyin, sipariş verin, portaldan takip edin.</p></div>
         </div>
 
         <!-- Başarı paneli -->
         <div id="acct-ok" style="display:none;text-align:center;border:2px solid #15803D;border-radius:var(--radius);background:#F0FAF3;box-shadow:var(--shadow-offset);padding:44px 28px">
+          <!-- 26px ÖLÇEK DIŞIDIR ve bilinçlidir: bu bir metin değil, 62px'lik daireye
+               ortalanmış onay glifidir; ölçü tipografi ölçeğine değil kutuya bağlıdır. -->
           <div style="width:62px;height:62px;margin:0 auto 14px;border-radius:50%;border:3px solid #15803D;color:#15803D;display:grid;place-items:center;font-size:26px;font-weight:800">✓</div>
-          <h2 class="display" style="font-size:24px" data-i18n="acct.okTitle">Başvurunuz alındı!</h2>
-          <p class="mono" style="margin:10px 0 4px;color:var(--ink-3);font-size:12px" data-i18n="acct.okNo">Başvuru No</p>
-          <p class="mono accent" style="font-size:20px;font-weight:600" id="acct-ok-no">—</p>
-          <p style="max-width:460px;margin:14px auto 0;color:var(--ink-2);font-size:14.5px" data-i18n="acct.okBody">Firma bilgileriniz doğrulandıktan sonra hesabınız aktifleştirilir ve e-posta ile bilgilendirilirsiniz.</p>
+          <h2 class="display" style="font-size:var(--fs-h3)" data-i18n="acct.okTitle">Başvurunuz alındı!</h2>
+          <p class="mono" style="margin:10px 0 4px;color:var(--ink-3);font-size:var(--fs-label)" data-i18n="acct.okNo">Başvuru No</p>
+          <p class="mono accent" style="font-size:var(--fs-h4);font-weight:600" id="acct-ok-no">—</p>
+          <p style="max-width:460px;margin:14px auto 0;color:var(--ink-2);font-size:var(--fs-small)" data-i18n="acct.okBody">Firma bilgileriniz doğrulandıktan sonra hesabınız aktifleştirilir ve e-posta ile bilgilendirilirsiniz.</p>
           <a class="btn btn--primary" href="urunler.html" style="margin-top:22px" data-i18n="acct.okBtn">Ürünlere Göz Atın</a>
         </div>
 
@@ -213,11 +215,11 @@
           </div>
 
           <div class="field field--full" style="gap:10px">
-            <label style="display:flex;align-items:flex-start;gap:9px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--ink-2);cursor:pointer">
+            <label style="display:flex;align-items:flex-start;gap:9px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:var(--fs-small);color:var(--ink-2);cursor:pointer">
               <input type="checkbox" id="ac-kvkk" style="margin-top:3px;accent-color:var(--crimson)">
               <span><span data-i18n="acct.kvkk">Aydınlatma Metni'ni okudum, kişisel verilerimin işlenmesini onaylıyorum.</span> <a class="accent" href="kvkk.html" target="_blank" rel="noopener noreferrer"><b data-i18n="acct.kvkkLink">Metni aç ↗</b></a></span>
             </label>
-            <label style="display:flex;align-items:flex-start;gap:9px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--ink-2);cursor:pointer">
+            <label style="display:flex;align-items:flex-start;gap:9px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:var(--fs-small);color:var(--ink-2);cursor:pointer">
               <input type="checkbox" id="ac-eti" style="margin-top:3px;accent-color:var(--crimson)">
               <span data-i18n="acct.eti">Kampanya ve duyurular için ticari elektronik ileti almayı kabul ediyorum. (opsiyonel)</span>
             </label>
@@ -227,7 +229,7 @@
             <button type="submit" class="btn btn--primary" data-i18n="acct.submit">Başvuru Yap</button>
             <button type="button" class="btn btn--ghost" id="ac-demo" data-i18n="acct.demoFill">Demo verisiyle doldur</button>
           </div>
-          <p class="field--full muted mono" style="font-size:12px;border:1.5px dashed var(--line);border-radius:3px;padding:11px 14px" data-i18n="acct.note">Başvurular satış ekibimizce vergi kaydı üzerinden doğrulanır; onay sonrası giriş bilgileriniz e-posta ile iletilir.</p>
+          <p class="field--full muted mono" style="font-size:var(--fs-small);border:1.5px dashed var(--line);border-radius:3px;padding:11px 14px" data-i18n="acct.note">Başvurular satış ekibimizce vergi kaydı üzerinden doğrulanır; onay sonrası giriş bilgileriniz e-posta ile iletilir.</p>
         </form>
 
       </div>
