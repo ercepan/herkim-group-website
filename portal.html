@@ -2,6 +2,15 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <!-- Güvenlik: İçerik Güvenliği Politikası (CSP). Tarayıcı yalnızca aşağıda izin verilen
+       kaynakları yükler; XSS ve veri sızdırma yüzeyini daraltır. YENİ bir dış origin (font, API,
+       iframe, görsel) eklerken BURAYA da eklenmezse istek sessizce engellenir. Aynı politika 11
+       HTML dosyasının hepsinde birebir aynıdır; değişiklik hepsine uygulanmalıdır.
+       Not: meta ile verilen CSP'de frame-ancestors, report-uri, report-to ve sandbox yok sayılır;
+       bunlar HTTP başlığı gerektirir ve GitHub Pages özel başlık gönderemez. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://img.youtube.com; connect-src 'self' https://open.er-api.com https://api.web3forms.com; frame-src https://www.google.com https://maps.google.com https://www.youtube-nocookie.com; form-action 'self'; base-uri 'none'; object-src 'none'; manifest-src 'self'">
+  <!-- Dış sitelere giderken tam URL değil yalnızca origin sızsın (HTTPS -> HTTP'de hiç sızmasın). -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Müşteri Portalı — Herkim Kimya</title>
   <meta name="description" content="Herkim Kimya Portalı: sipariş verme, sipariş/teslimat takibi, talepler, müşteri kartı ve yönetim görünürlüğü — uçtan uca tek akış. Demo.">
@@ -14,6 +23,10 @@
   <link rel="stylesheet" href="assets/css/portal.css">
 </head>
 <body class="pt-body">
+
+  <!-- Erişilebilirlik: içeriğe atlama bağlantısı. Odaklanmadıkça görünmez (.skip-link).
+       Başlıktaki 15+ bağlantıyı klavye ile teker teker geçmeyi önler. -->
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">İçeriğe geç</a>
 
   <!-- ================= GİRİŞ ================= -->
   <div id="login-view">
@@ -92,7 +105,7 @@
         </div>
       </aside>
 
-      <main class="main">
+      <main class="main" id="main">
         <div class="topline">
           <div>
             <div class="crumb">HERKİM · TEK AKIŞ PORTALI · <span id="scope">—</span></div>

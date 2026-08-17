@@ -3,6 +3,54 @@
    Estetik: Rafine endüstriyel / laboratuvar-editoryal
    Palet: Crimson (#A31C3C) + mürekkep + sıcak kâğıt
    Tipografi: Archivo (display) / IBM Plex Sans (metin) / IBM Plex Mono (teknik)
+
+   ------------------------------------------------------------
+   İÇİNDEKİLER
+   Dosya uzun; aradığınız bölüme gitmek için başlık metnini aratın.
+   Sıra, dosyadaki gerçek bölüm yorumlarının sırasıdır.
+
+     01  Reset
+     02  Tipografi yardımcıları
+     03  Butonlar
+     04  Üst bilgi bandı (döviz + iletişim)
+     05  Site başlığı
+     06  Mobil menü
+     07  Sayfa kahramanı (hero)
+     08  Kayan bant (marquee)
+     09  Tanıtım videosu
+     10  Bölüm iskeleti
+     11  Sektör kartları
+     12  Ürün "element" kartları
+     13  Çalışma prensipleri
+     14  İstatistik bandı (koyu)
+     15  Kurumsal önizleme / zaman çizelgesi
+     16  Doküman merkezi kartları
+     17  Duyuru kartları
+     18  Motto bandı
+     19  İletişim CTA
+     20  Form
+     21  Alt bilgi
+     22  Alt sayfa başlığı
+     23  Ürün tablosu
+     24  Teklif sepeti çekmecesi
+     25  Arama katmanı
+     26  SSS akordeon
+     27  Sertifika kartları
+     28  Marka kiti
+     29  Yüzen ögeler
+     30  Bildirim (toast)
+     31  Çerez bildirimi
+     32  Müşteri girişi & sipariş sepeti
+     33  Görünürlük animasyonları
+     34  Duyarlı düzen
+     35  KURUMSAL RAFİNERİ KATMANI  ← geçersiz kılma katmanı
+     36  Siparişlerim (ana sitede müşteri takibi)
+     37  Rafineri 2 (distribütör emsalleri)
+
+   UYARI: 35 ve 37 numaralı bloklar, yukarıdaki temel kuralların bir
+   kısmını bilinçli olarak geçersiz kılar. Bir kuralı düzenlediğinizde
+   ekranda değişiklik göremiyorsanız önce o iki bloğa bakın; hangi
+   seçicileri ezdikleri 35 numaralı bloğun başındaki listede yazılıdır.
    ============================================================ */
 
 :root {
@@ -12,7 +60,13 @@
   --crimson-soft: #F6E3E8;
   --ink: #1B1216;
   --ink-2: #43333A;
-  --ink-3: #7A6A70;
+  /* WCAG AA: eski #7A6A70, --paper-2 zemininde 4.34:1 ile eşiğin altında
+     kalıyordu. 5 birim koyulaştırıldı; artık --paper-2 üzerinde 4.67:1,
+     --paper üzerinde 5.10:1, beyaz üzerinde 5.48:1. */
+  --ink-3: #75656B;
+  /* Gövde metni mürekkebi: saf --ink yerine yumuşatılmış ton. Değer
+     rafineri katmanında sabit hex olarak duruyordu, buraya taşındı. */
+  --ink-body: #372E33;
   --paper: #FAF6F1;
   --paper-2: #F2ECE3;
   --paper-3: #E9E1D5;
@@ -21,6 +75,15 @@
   --line-soft: rgba(27, 18, 22, 0.09);
   --ok: #2E6B4F;
 
+  /* Saydam tonlar: dosyada 40+ yerde elle yazılan rgba değerleri aslında
+     bu iki rengin saydam hâlidir —
+       rgba(250, 246, 241, a) = --paper   (koyu zemin üstünde açık metin)
+       rgba( 27,  18,  22, a) = --ink     (açık zemin üstünde çizgi/gölge)
+     Değişken içine alınmadılar; çünkü rgb kanallarını var() ile ayrıştıran
+     modern söz dizimi (relative color) kurumsal sitenin desteklemesi
+     gereken tarayıcı yelpazesinde hâlâ güvenli değil. Yeni bir saydam ton
+     yazarken bu iki üçlüyü kullanın, gözle yakın başka bir gri seçmeyin. */
+
   --font-display: "Archivo", "Arial Black", sans-serif;
   --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", "Courier New", monospace;
@@ -28,8 +91,9 @@
   --wrap: 1240px;
   --gutter: clamp(20px, 4vw, 48px);
   --radius: 3px;
-  --shadow-offset: 5px 5px 0 rgba(27, 18, 22, 0.9);
-  --shadow-offset-sm: 3px 3px 0 rgba(27, 18, 22, 0.9);
+  /* --shadow-offset / --shadow-offset-sm: 35 numaralı rafineri katmanında
+     yeniden tanımlanır (sert ofset gölge yerine yumuşak derinlik).
+     Buradaki eski sert değerler tamamen ezildiği için kaldırıldı. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -40,7 +104,7 @@ body {
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.65;
-  color: var(--ink);
+  color: var(--ink-body);
   background: var(--paper);
   overflow-x: hidden;
 }
@@ -57,7 +121,8 @@ body::before {
   content: "";
   position: fixed; inset: 0;
   pointer-events: none; z-index: 2000;
-  opacity: 0.05;
+  /* opacity: 37 numaralı "Rafineri 2" bloğunda 0.028'e düşürülür;
+     buradaki eski 0.05 değeri tamamen ezildiği için kaldırıldı. */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
 
@@ -69,7 +134,30 @@ body::before {
 
 .wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: var(--gutter); }
 
+/* İçeriğe atlama bağlantısı — 11 sayfanın da <body> içindeki ilk odaklanabilir
+   ögesi. Klavye kullanıcısı ilk TAB'da başlıktaki 15+ bağlantıyı atlayıp doğrudan
+   <main id="main"> ögesine geçer. Ekranda YALNIZCA odaklanınca görünür: gizlemek
+   için display:none KULLANILMAZ, çünkü o zaman odak sırasından da çıkar. */
+.skip-link {
+  position: absolute; top: -100px; left: var(--gutter); z-index: 200;
+  background: var(--crimson); color: var(--white);
+  padding: 10px 18px; border-radius: 2px;
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.04em;
+  transition: top 0.18s var(--ease-out);
+}
+.skip-link:focus { top: 10px; }
+
 /* ---------- Tipografi yardımcıları ---------- */
+/* NOKTALI İ UYARISI — text-transform: uppercase hakkında.
+   Bu dosyadaki büyütme kuralları (.kicker, .hstat span, .stat-cell span,
+   .field label, .footer h4, .page-hero .crumbs, .ci-row b ...) Türkçe
+   metnin üstüne biniyor. Tarayıcılar text-transform'u <html lang> ile
+   uyguladığı için lang="tr" iken "İletişim" doğru şekilde "İLETİŞİM"
+   olur; ölçüldü ve doğrulandı. Yani bu kuralların güvenliği TAMAMEN
+   lang="tr" özniteliğine bağlı — i18n.js dil değiştirirken
+   document.documentElement.lang'i güncellemeye devam etmeli.
+   YENİ kurala uppercase EKLEMEYİN; büyük harf gerekiyorsa metni
+   kaynakta (HTML/i18n) büyük yazın. */
 .kicker {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -83,16 +171,16 @@ body::before {
 }
 .kicker::before { content: ""; width: 34px; height: 2px; background: var(--crimson); }
 
+/* font-weight / font-stretch: 35 numaralı katmanda ince kesime çekilir
+   (560 / %104). h1 ve h2 punto skalası da 37 numaralı blokta yeniden
+   yazılır. Buradaki eski değerler tamamen ezildiği için kaldırıldı;
+   yalnız h3 hâlâ burada belirlenir. */
 .display {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-stretch: 112%;
   line-height: 1.02;
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
-h1.display { font-size: clamp(2.5rem, 6.2vw, 4.7rem); }
-h2.display { font-size: clamp(1.9rem, 4.2vw, 3.1rem); }
 h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 
 .lead { font-size: clamp(1.02rem, 1.6vw, 1.2rem); color: var(--ink-2); max-width: 62ch; }
@@ -101,22 +189,25 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .accent { color: var(--crimson); }
 
 /* ---------- Butonlar ---------- */
+/* DİKKAT: buton görünümünün büyük kısmı 35 ve 37 numaralı katmanlarda
+   son hâlini alır. Oradan gelenler: kenarlık kalınlığı/rengi, yazı
+   ağırlığı, harf aralığı, gölge ve hover/active davranışı. Buradaki
+   `border` kısayolu yalnız `solid` stilini yaşatır — kalınlık ve renk
+   35'te ezilir; kısayolu bozmamak için olduğu gibi bırakıldı. */
 .btn {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 14px 26px;
   font-family: var(--font-display);
-  font-weight: 700; font-size: 15px; font-stretch: 105%;
-  letter-spacing: 0.02em;
+  font-size: 15px; font-stretch: 105%;
   border: 2px solid var(--ink);
   border-radius: var(--radius);
   background: var(--paper);
   color: var(--ink);
-  box-shadow: var(--shadow-offset-sm);
   transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out), background 0.18s, color 0.18s;
   white-space: nowrap;
 }
-.btn:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-offset); }
-.btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 rgba(27,18,22,0.9); }
+/* .btn:hover ve .btn:active kuralları 35/37 numaralı katmanlarda tümüyle
+   yeniden yazıldığı için buradaki eski "zıplayan" sürümleri kaldırıldı. */
 .btn--primary { background: var(--crimson); border-color: var(--crimson-deep); color: var(--white); }
 .btn--primary:hover { background: var(--crimson-hot); }
 .btn--dark { background: var(--ink); color: var(--paper); }
@@ -141,7 +232,9 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .tb-rates .rate b { color: var(--crimson-hot); font-weight: 500; }
 .tb-rates .rate .up { color: #6FBF92; }
 .tb-rates .rate .down { color: #E4738D; }
-.tb-note { color: rgba(250,246,241,0.45); font-size: 11px; }
+/* WCAG AA: 0.45 saydamlık --ink zemininde 4.28:1 veriyordu (11px metin
+   için eşik 4.5:1). 0.48'e çıkarıldı → 4.70:1. */
+.tb-note { color: rgba(250,246,241,0.48); font-size: 11px; }
 .tb-links { display: flex; gap: 18px; align-items: center; white-space: nowrap; }
 .tb-links a:hover { color: var(--crimson-hot); }
 .tb-lang { display: inline-flex; border: 1px solid rgba(250,246,241,0.25); border-radius: 2px; overflow: hidden; }
@@ -234,15 +327,21 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .burger { display: none; }
 
 /* ---------- Mobil menü ---------- */
+/* Kapalıyken yalnız translateX ile kenara itmek yetmiyordu: panel hâlâ
+   "visible" sayıldığı için klavye sekmesi görünmez bağlantıların içinde
+   dolaşıyor, ekran okuyucu da menüyü iki kez okuyordu. .search-overlay ve
+   .drawer-overlay ile aynı kalıp uygulandı; visibility geçişi süreyi
+   paylaşır, böylece panel kayarak çıkarken görünür kalır. */
 .mobile-nav {
   position: fixed; inset: 0; z-index: 90;
   background: var(--ink); color: var(--paper);
   padding: 90px var(--gutter) 40px;
   transform: translateX(100%);
-  transition: transform 0.35s var(--ease-out);
+  visibility: hidden;
+  transition: transform 0.35s var(--ease-out), visibility 0.35s;
   overflow-y: auto;
 }
-.mobile-nav.open { transform: translateX(0); }
+.mobile-nav.open { transform: translateX(0); visibility: visible; }
 .mobile-nav a { display: block; padding: 14px 0; font-family: var(--font-display); font-weight: 700; font-size: 24px; border-bottom: 1px solid rgba(250,246,241,0.12); }
 .mobile-nav a:hover { color: var(--crimson-hot); }
 .mobile-nav .sub { font-family: var(--font-body); font-size: 16px; font-weight: 500; padding: 10px 0 10px 18px; color: rgba(250,246,241,0.75); }
@@ -277,7 +376,8 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   font-family: var(--font-display); font-weight: 800; font-stretch: 120%;
   font-size: clamp(120px, 22vw, 300px);
   color: transparent;
-  -webkit-text-stroke: 1px rgba(163, 28, 60, 0.12);
+  /* -webkit-text-stroke: 35 numaralı katmanda 0.07 saydamlığa iner;
+     buradaki eski 0.12 değeri tamamen ezildiği için kaldırıldı. */
   letter-spacing: -0.02em;
   pointer-events: none; user-select: none;
   line-height: 1;
@@ -300,7 +400,8 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   font-size: clamp(1.7rem, 3.4vw, 2.6rem);
   color: var(--crimson); line-height: 1;
 }
-.hstat span { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+/* ">" gerekçesi için .stat-cell > span kuralındaki nota bakın (aynı tuzak). */
+.hstat > span { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
 
 /* ---------- Kayan bant (marquee) ---------- */
 .marquee {
@@ -338,7 +439,11 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .section--dark { background: var(--ink); color: var(--paper); }
 .section--crimson { background: var(--crimson); color: var(--white); }
 
-.sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; margin-bottom: clamp(34px, 5vw, 56px); }
+/* flex-wrap: başlık + yandaki metin/CTA dar ekranda tek satıra sığmıyor,
+   sarma olmadan sağdaki öge ekranın dışına taşıyordu. Satır arası boşluk
+   sütun boşluğundan küçük tutuldu (18px / 28px), alt alta düşünce
+   aradaki boşluk gereksiz büyümesin. */
+.sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 28px; margin-bottom: clamp(34px, 5vw, 56px); }
 .sec-head .display { margin-top: 16px; }
 .sec-no {
   position: absolute; top: 26px; right: var(--gutter);
@@ -411,7 +516,9 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   z-index: 0;
 }
 .element-card:hover::before { transform: scaleY(1); }
-.element-card:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-offset); }
+/* transform: 35 numaralı katmanda translateY(-3px) ile yeniden yazılır;
+   buradaki eski çapraz kayma tamamen ezildiği için kaldırıldı. */
+.element-card:hover { box-shadow: var(--shadow-offset); }
 .element-card > * { position: relative; z-index: 1; }
 .element-card:hover { color: var(--white); }
 .element-card:hover .ec-cas, .element-card:hover .ec-meta { color: rgba(255,255,255,0.75); }
@@ -482,7 +589,12 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 }
 .stat-cell b i { font-style: normal; font-size: 0.46em; vertical-align: 0.28em; color: var(--crimson-hot); font-weight: 800; margin-left: 2px; }
 .hstat b i { font-style: normal; font-size: 0.5em; vertical-align: 0.22em; color: var(--crimson); font-weight: 800; margin-left: 1px; }
-.stat-cell span { display: block; margin-top: 10px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,246,241,0.6); }
+/* ÇOCUK BİRLEŞTİRİCİSİ (>) ŞART — sayıyı DEĞİL yalnızca etiketi biçimlendirir.
+   Yapı: .stat-cell > b > span[data-count] + i   ve   .stat-cell > span (etiket).
+   ">" olmadan bu kural <b> içindeki sayı span'ini de yakalıyordu: sayı 64px
+   yerine 12px, soluk gri ve display:block oluyor, "+" işareti de alt satıra
+   düşüyordu. Aynı tuzak .hstat için de geçerli. */
+.stat-cell > span { display: block; margin-top: 10px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,246,241,0.6); }
 
 /* ---------- Kurumsal önizleme / zaman çizelgesi ---------- */
 .about-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
@@ -527,21 +639,9 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .doc-card .dc-meta { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); display: flex; justify-content: space-between; border-top: 1px solid var(--line-soft); padding-top: 12px; }
 .doc-card .dc-link { font-weight: 700; color: var(--crimson); font-size: 14px; display: inline-flex; gap: 8px; align-items: center; }
 
-/* ---------- Duyuru kartları ---------- */
-.news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.news-card {
-  background: var(--white);
-  border: 1.5px solid var(--line);
-  border-left: 5px solid var(--crimson);
-  border-radius: var(--radius);
-  padding: 24px;
-  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), border-color 0.2s;
-}
-.news-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-offset); border-color: var(--ink); border-left-color: var(--crimson); }
-.news-card time { font-family: var(--font-mono); font-size: 12px; color: var(--crimson); letter-spacing: 0.08em; }
-.news-card h3 { font-family: var(--font-display); font-weight: 700; font-stretch: 106%; font-size: 18.5px; margin: 8px 0 8px; line-height: 1.25; }
-.news-card p { font-size: 14.5px; color: var(--ink-2); }
-.news-card .nc-tag { float: right; font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); border: 1px solid var(--line); padding: 2px 8px; border-radius: 99px; }
+/* Duyuru kartları (.news-grid / .news-card / .nc-tag) KALDIRILDI: hiçbir sayfada
+   duyuru bölümü yok, HK_NEWS verisi ve renderNews() de birlikte silindi. Duyuru
+   bölümü geri gelirse stiller .doc-card kalıbından türetilebilir. */
 
 /* ---------- Motto bandı ---------- */
 .motto-band { text-align: center; position: relative; overflow: hidden; }
@@ -614,7 +714,9 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   border-radius: var(--radius) 0 0 var(--radius);
   padding: 11px 14px; color: var(--paper); font-size: 14px;
 }
-.footer-news input::placeholder { color: rgba(250,246,241,0.4); }
+/* WCAG AA: 0.40 saydamlık, alanın kendi zemini (%7 kâğıt + mürekkep)
+   üzerinde 3.52:1 veriyordu. 0.50'ye çıkarıldı → 4.68:1. */
+.footer-news input::placeholder { color: rgba(250,246,241,0.5); }
 .footer-news button {
   background: var(--crimson); color: var(--white);
   padding: 11px 18px; font-weight: 700; font-size: 14px;
@@ -710,16 +812,19 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   transition: opacity 0.25s, visibility 0.25s;
 }
 .drawer-overlay.open { opacity: 1; visibility: visible; }
+/* visibility: .mobile-nav ile aynı gerekçe — kapalı sepet çekmecesindeki
+   düğmeler odak sırasından çıksın. border-left 35 numaralı katmanda
+   yeniden yazıldığı için buradaki eski 2px'lik hâli kaldırıldı. */
 .basket-drawer {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 96;
   width: min(440px, 100vw);
   background: var(--paper);
-  border-left: 2px solid var(--ink);
   transform: translateX(100%);
-  transition: transform 0.32s var(--ease-out);
+  visibility: hidden;
+  transition: transform 0.32s var(--ease-out), visibility 0.32s;
   display: flex; flex-direction: column;
 }
-.basket-drawer.open { transform: translateX(0); }
+.basket-drawer.open { transform: translateX(0); visibility: visible; }
 .bd-head { display: flex; justify-content: space-between; align-items: center; padding: 22px 24px; border-bottom: 2px solid var(--ink); background: var(--white); }
 .bd-head h3 { font-family: var(--font-display); font-weight: 800; font-stretch: 110%; font-size: 20px; }
 .bd-head .mono { font-size: 11px; color: var(--ink-3); }
@@ -732,7 +837,8 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .bd-item .mono { font-size: 11.5px; color: var(--ink-3); }
 .bd-item .bd-remove { color: var(--crimson); font-size: 18px; font-weight: 700; padding: 4px 8px; }
 .bd-item .bd-remove:hover { background: var(--crimson-soft); border-radius: 2px; }
-.bd-foot { padding: 20px 24px; border-top: 2px solid var(--ink); background: var(--white); display: flex; flex-direction: column; gap: 10px; }
+/* border-top 35 numaralı katmanda 1px var(--line) olarak yeniden yazılır. */
+.bd-foot { padding: 20px 24px; background: var(--white); display: flex; flex-direction: column; gap: 10px; }
 .bd-foot .btn { justify-content: center; }
 .bd-note { font-size: 12px; color: var(--ink-3); text-align: center; }
 
@@ -766,6 +872,12 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   border: 0; border-bottom: 1.5px solid var(--line);
 }
 .search-panel input:focus { outline: none; }
+/* Odak göstergesi geri getirildi: yukarıdaki outline:none klavyeyle
+   gezinen kullanıcıyı tamamen köre bırakıyordu. .search-panel'de
+   overflow:hidden olduğu için dışa taşan çerçeve kırpılır; bu yüzden
+   outline içeri alındı. Yalnız :focus-visible'da çıkar, fareyle
+   tıklamada görünmez. */
+.search-panel input:focus-visible { outline: 2px solid var(--crimson); outline-offset: -2px; }
 .search-results { max-height: 46vh; overflow-y: auto; }
 .search-results a {
   display: flex; justify-content: space-between; align-items: center; gap: 14px;
@@ -905,11 +1017,11 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s;
 }
 .auth-overlay.open { opacity: 1; visibility: visible; }
+/* box-shadow 35 numaralı katmanda var(--shadow-offset) ile yeniden yazılır. */
 .auth-panel {
   position: relative;
   width: min(420px, 100%); background: var(--white);
   border: 2px solid var(--ink); border-radius: var(--radius);
-  box-shadow: 8px 8px 0 rgba(163, 28, 60, 0.85);
   padding: 30px 28px;
   transform: translateY(-12px); transition: transform 0.25s var(--ease-out);
 }
@@ -991,14 +1103,14 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   .stat-cell:nth-child(3) { border-left: 0; }
   .stat-cell { border-top: 1px solid rgba(250,246,241,0.16); }
   .stat-cell:nth-child(-n+2) { border-top: 0; }
-  .doc-grid, .news-grid, .logo-tiles { grid-template-columns: 1fr 1fr; }
+  .doc-grid, .logo-tiles { grid-template-columns: 1fr 1fr; }
   .principle { grid-template-columns: 60px 1fr; }
   .principle p { grid-column: 2; }
   .sec-no { font-size: 64px; top: 18px; }
   .tb-links .tb-hide { display: none; }
 }
 @media (max-width: 640px) {
-  .sector-grid, .element-grid, .doc-grid, .news-grid, .cert-grid, .form-grid, .logo-tiles { grid-template-columns: 1fr 1fr; }
+  .sector-grid, .element-grid, .doc-grid, .cert-grid, .form-grid, .logo-tiles { grid-template-columns: 1fr 1fr; }
   .element-grid { grid-template-columns: 1fr 1fr; }
   .swatch-row { grid-template-columns: 1fr 1fr; }
   .field--full { grid-column: 1 / -1; }
@@ -1006,9 +1118,22 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
   .footer-main { grid-template-columns: 1fr; }
   .tb-rates .rate:nth-child(n+3) { display: none; }
   .brand-name span { letter-spacing: 0.28em; }
+  /* KRİTİK: telefonda başlık satırı (logo + kelime markası + 4 ikon
+     düğmesi) 465px istiyordu; hamburger 403-445px arasına düşüp ekranın
+     dışında kalıyor, body'deki overflow-x:hidden yüzünden kaydırarak da
+     ulaşılamıyordu — yani ana menü erişilemez oluyordu. Telefonda yalnız
+     logo işareti bırakıldı; hamburger artık 284-326px arasında duruyor,
+     yani 326px ve üzeri her ekranda tamamen görünür (360/375/390/393/414
+     dahil bütün güncel telefonlar). Yalnız 320px'lik çok eski cihazlarda
+     sağdan 6px kırpılır; düğmenin 36px'i hâlâ dokunulabilir durumda.
+     Daha da yer gerekirse bu blokta .site-header .wrap gap'ini küçültün.
+     Seçici bilerek .site-header ile sınırlandı:
+     .brand-name alt bilgide ve portal.css'te (.lg-side, .sb) de kullanılır,
+     oralarda gizlenmemeli. */
+  .site-header .brand-name { display: none; }
 }
 @media (max-width: 460px) {
-  .sector-grid, .element-grid, .doc-grid, .news-grid, .cert-grid { grid-template-columns: 1fr; }
+  .sector-grid, .element-grid, .doc-grid, .cert-grid { grid-template-columns: 1fr; }
 }
 
 /* ============================================================
@@ -1017,12 +1142,48 @@ h3.display { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
    nötr zemin + yumuşak koyu gri metin, tek vurgu renginin %5-10
    disiplini, ince kesimli büyük başlıklar, keskin köşe, kalın
    çerçeve yerine ince çizgi ve zarif derinlik. Emoji yok.
+
+   ------------------------------------------------------------
+   BU KATMAN NEYİ EZİYOR — ÖNCE BURAYI OKUYUN
+   Aşağıdaki kurallar dosyanın başındaki temel kuralların üstüne yazar.
+   Yukarıda bir değeri değiştirip ekranda sonuç göremiyorsanız sebebi
+   büyük ihtimalle burasıdır. Tamamen ölü kalan eski bildirimler
+   temizlendi; aşağıda kalanlar ise KISMEN ezdikleri için duruyor:
+
+     :root ............ --shadow-offset, --shadow-offset-sm
+                        (temel :root'taki sert ofset gölgeler silindi)
+     .display ......... font-weight, font-stretch
+     .btn ............. border-width + border-color (border kısayolunun
+                        yalnız `solid` kısmı 03. bölümden gelir),
+                        font-weight, letter-spacing, box-shadow
+     .btn:hover ....... box-shadow  (+ 37. blokta transform)
+     .btn--primary .... border-color — .btn'in buradaki border-color'ı
+                        03. bölümdeki .btn--primary bildirimini ezdiği
+                        için crimson-deep burada yeniden söyleniyor
+     .btn--ghost ...... DİKKAT: 03. bölümdeki border-color ve box-shadow
+                        bildirimleri buradaki .btn tarafından eziliyor,
+                        yani ghost varyantı artık ayrı bir kenarlık
+                        rengi taşımıyor. Tasarım kararı ekibe ait;
+                        davranış korunsun diye dokunulmadı.
+     .icon-btn ........ border-width (stil ve renk 05. bölümde kalır)
+     .hero-watermark .. -webkit-text-stroke
+     .element-card, .doc-card, .cust-card, .search-panel,
+     .auth-panel, .user-pop ... border-width + border-color
+     .element-card:hover ... transform
+     .auth-panel ...... box-shadow
+     .basket-drawer ... border-left
+     .bd-foot ......... border-top
+     .bd-head ......... border-bottom-width (stil ve renk 24. bölümde kalır)
+
+   37 numaralı "Rafineri 2" bloğu ayrıca h1.display / h2.display punto
+   skalasını, .btn:hover + .btn:active transformlarını, body::before
+   dokusunu ve .hero-ctas .btn--primary iç boşluğunu belirler.
    ============================================================ */
 :root {
   --shadow-offset: 0 1px 2px rgba(27, 18, 22, 0.05), 0 18px 44px rgba(27, 18, 22, 0.09);
   --shadow-offset-sm: 0 1px 2px rgba(27, 18, 22, 0.05), 0 8px 22px rgba(27, 18, 22, 0.07);
 }
-body { color: #372E33; }
+/* body rengi artık :root'taki --ink-body belirtecinden geliyor. */
 .display { font-weight: 560; font-stretch: 104%; }
 h1.display { font-weight: 500; }
 .display b, .display strong { font-weight: 720; }
@@ -1041,7 +1202,7 @@ h1.display { font-weight: 500; }
 
 .hero-watermark { -webkit-text-stroke: 1px rgba(163, 28, 60, 0.07); }
 
-.element-card, .doc-card, .news-card, .cust-card, .search-panel, .auth-panel, .user-pop {
+.element-card, .doc-card, .cust-card, .search-panel, .auth-panel, .user-pop {
   border-width: 1px;
   border-color: var(--line);
 }

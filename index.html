@@ -2,6 +2,15 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <!-- Güvenlik: İçerik Güvenliği Politikası (CSP). Tarayıcı yalnızca aşağıda izin verilen
+       kaynakları yükler; XSS ve veri sızdırma yüzeyini daraltır. YENİ bir dış origin (font, API,
+       iframe, görsel) eklerken BURAYA da eklenmezse istek sessizce engellenir. Aynı politika 11
+       HTML dosyasının hepsinde birebir aynıdır; değişiklik hepsine uygulanmalıdır.
+       Not: meta ile verilen CSP'de frame-ancestors, report-uri, report-to ve sandbox yok sayılır;
+       bunlar HTTP başlığı gerektirir ve GitHub Pages özel başlık gönderemez. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://img.youtube.com; connect-src 'self' https://open.er-api.com https://api.web3forms.com; frame-src https://www.google.com https://maps.google.com https://www.youtube-nocookie.com; form-action 'self'; base-uri 'none'; object-src 'none'; manifest-src 'self'">
+  <!-- Dış sitelere giderken tam URL değil yalnızca origin sızsın (HTTPS -> HTTP'de hiç sızmasın). -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Herkim Kimya — Deri & Tekstil Kimyasalları · 1975'ten beri</title>
   <meta name="description" content="Herkim Kimya; 1975'ten beri deri ve tekstil sanayisine kimyasal tedarik eder. Binder, altkat, finisaj, dolap boyaları ve teknik destek.">
@@ -61,10 +70,20 @@
 </head>
 <body>
 
-  <!-- ===== Üst bilgi bandı ===== -->
+  <!-- Erişilebilirlik: içeriğe atlama bağlantısı. Odaklanmadıkça görünmez (.skip-link).
+       Başlıktaki 15+ bağlantıyı klavye ile teker teker geçmeyi önler. -->
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">İçeriğe geç</a>
+
+  <!-- ===== ORTAK BAŞLIK (üst bant + site başlığı + mobil menü) =====
+       DİKKAT: Bu blok index.html, kurumsal.html, urunler.html, urun-listesi.html, hizmetler.html,
+       dokumanlar.html, iletisim.html, hesap.html, siparislerim.html ve kvkk.html dosyalarında
+       kopyalanmıştır. Derleme adımı olmadığı için senkronu sağlayan tek şey bu nottur:
+       burada yapılan her değişiklik on dosyanın hepsine aynen uygulanmalıdır.
+       Sayfaya özgü tek farklar: aktif menü ögesindeki class="active" ve kurumsal.html'de
+       sayfa içi #çapa bağlantıları. -->
   <div class="topbar">
     <div class="wrap">
-      <div class="tb-rates" aria-label="Döviz kurları">
+      <div class="tb-rates" role="group" data-i18n-aria="a11y.rates" aria-label="Döviz kurları">
         <span class="rate">USD/TRY <b id="rate-usd">—</b></span>
         <span class="rate">EUR/TRY <b id="rate-eur">—</b></span>
         <span class="tb-note" id="rate-note">indikatif</span>
@@ -72,11 +91,11 @@
       <div class="tb-links">
         <a class="tb-hide" href="tel:4445658">444 56 58</a>
         <a class="tb-hide" href="mailto:info@herkimgroup.com">info@herkimgroup.com</a>
-        <a class="tb-hide tb-group" href="https://www.herkimgroup.com" target="_blank" rel="noopener">herkimgroup.com ↗</a>
-        <span class="tb-lang" role="group" aria-label="Dil / Language / Язык">
-          <button type="button" data-lang="tr" class="on">TR</button>
-          <button type="button" data-lang="en">EN</button>
-          <button type="button" data-lang="ru">RU</button>
+        <a class="tb-hide tb-group" href="https://www.herkimgroup.com" target="_blank" rel="noopener noreferrer">herkimgroup.com ↗</a>
+        <span class="tb-lang" role="group" data-i18n-aria="a11y.lang" aria-label="Dil / Language / Язык">
+          <button type="button" data-lang="tr" class="on" aria-pressed="true">TR</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+          <button type="button" data-lang="ru" aria-pressed="false">RU</button>
         </span>
       </div>
     </div>
@@ -96,7 +115,7 @@
         <span class="brand-name"><b>HERKİM</b><span>KİMYA</span></span>
       </a>
 
-      <nav aria-label="Ana menü">
+      <nav data-i18n-aria="a11y.mainNav" aria-label="Ana menü">
         <ul class="nav">
           <li><a href="index.html" class="active" data-i18n="nav.home">Anasayfa</a></li>
           <li>
@@ -130,14 +149,14 @@
       </nav>
 
       <div class="header-actions">
-        <button class="icon-btn" data-open-search data-i18n-title="search.iconLabel" data-i18n-aria="search.iconLabel" title="Ara" aria-label="Ara">
+        <button class="icon-btn" data-open-search aria-controls="search-overlay" aria-expanded="false" data-i18n-title="search.iconLabel" data-i18n-aria="search.iconLabel" title="Site içi arama" aria-label="Site içi arama">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
         </button>
-        <button class="icon-btn" data-open-basket data-i18n-title="basket.title" data-i18n-aria="basket.title" title="Teklif sepeti" aria-label="Teklif sepeti">
+        <button class="icon-btn" data-open-basket aria-controls="basket-drawer" aria-expanded="false" data-i18n-title="basket.title" data-i18n-aria="basket.title" title="Teklif Sepeti" aria-label="Teklif Sepeti">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l1 4H8l1-4zM6 7h12l-1.2 12.6a1.5 1.5 0 0 1-1.5 1.4H8.7a1.5 1.5 0 0 1-1.5-1.4L6 7z"/></svg>
           <span class="count basket-count" style="display:none">0</span>
         </button>
-        <button class="icon-btn burger" data-i18n-aria="nav.openMenu" aria-label="Menüyü aç">
+        <button class="icon-btn burger" aria-controls="mobile-nav" aria-expanded="false" data-i18n-aria="nav.openMenu" aria-label="Menüyü aç">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
       </div>
@@ -145,7 +164,7 @@
   </header>
 
   <!-- ===== Mobil menü ===== -->
-  <div class="mobile-nav" aria-label="Mobil menü">
+  <div class="mobile-nav" id="mobile-nav" role="dialog" data-i18n-aria="a11y.mobileMenu" aria-label="Mobil menü">
     <button class="mn-close" data-i18n="nav.close">KAPAT ×</button>
     <a href="index.html" data-i18n="nav.home">Anasayfa</a>
     <a href="kurumsal.html" data-i18n="nav.corporate">Kurumsal</a>
@@ -157,7 +176,7 @@
     <a href="iletisim.html" data-i18n="nav.contact">İletişim</a>
   </div>
 
-  <main>
+  <main id="main">
     <!-- ===== Kahraman ===== -->
     <section class="hero">
       <div class="hero-watermark" aria-hidden="true">HK</div>
@@ -195,7 +214,9 @@
               </g>
             </g>
             <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#7A6A70">
-              <text x="30" y="330">EST. 1975</text><text x="320" y="330">54 YIL / YRS</text><text x="30" y="40">HK-KİMYA</text>
+              <!-- Yıl sayısı main.js tarafından HK_COMPANY.founded'dan türetilir (bkz. HK_YEARS).
+                   Buraya elle sayı YAZMAYIN; her yıl başında yanlış olur. -->
+              <text x="30" y="330">EST. 1975</text><text x="320" y="330"><tspan data-hk-years>51</tspan> YIL / YRS</text><text x="30" y="40">HK-KİMYA</text>
             </g>
           </svg>
         </div>
@@ -203,10 +224,10 @@
 
       <div class="hero-strip reveal in reveal-d4">
         <div class="wrap">
-          <div class="hstat"><b><span data-count="54">0</span><i>+</i></b><span data-i18n="home.stat.years">Yıllık tecrübe</span></div>
-          <div class="hstat"><b><span data-count="12">0</span></b><span data-i18n="home.stat.points">Satış noktası</span></div>
-          <div class="hstat"><b><span data-count="6">0</span></b><span data-i18n="home.stat.brands">Ana kategori</span></div>
-          <div class="hstat"><b><span data-count="42">0</span></b><span data-i18n="home.stat.groups">Ürün çeşidi</span></div>
+          <div class="hstat"><b><span data-count="54">54</span><i>+</i></b><span data-i18n="home.stat.years">Yıllık tecrübe</span></div>
+          <div class="hstat"><b><span data-count="12">12</span></b><span data-i18n="home.stat.points">Satış noktası</span></div>
+          <div class="hstat"><b><span data-count="6">6</span></b><span data-i18n="home.stat.brands">Ana kategori</span></div>
+          <div class="hstat"><b><span data-count="42">42</span></b><span data-i18n="home.stat.groups">Ürün çeşidi</span></div>
         </div>
       </div>
     </section>
@@ -353,9 +374,9 @@ olduğunda anlamlıdır.</h2>
         </div>
         <div class="stats-grid reveal">
           <div class="stat-cell"><b>1975</b><span data-i18n="tl.1975.t">Kuruluş</span></div>
-          <div class="stat-cell"><b><span data-count="54">0</span><i>+</i></b><span data-i18n="home.stats.years">Yıllık tecrübe</span></div>
-          <div class="stat-cell"><b><span data-count="12">0</span></b><span data-i18n="home.stats.points">Satış noktası</span></div>
-          <div class="stat-cell"><b><span data-count="6">0</span></b><span data-i18n="home.stats.brands">Ana kategori</span></div>
+          <div class="stat-cell"><b><span data-count="54">54</span><i>+</i></b><span data-i18n="home.stats.years">Yıllık tecrübe</span></div>
+          <div class="stat-cell"><b><span data-count="12">12</span></b><span data-i18n="home.stats.points">Satış noktası</span></div>
+          <div class="stat-cell"><b><span data-count="6">6</span></b><span data-i18n="home.stats.brands">Ana kategori</span></div>
         </div>
       </div>
     </section>
@@ -451,7 +472,11 @@ yakınız.</h2>
     </section>
   </main>
 
-  <!-- ===== Alt bilgi ===== -->
+  <!-- ===== ORTAK ALT BİLGİ =====
+       DİKKAT: Bu blok index.html, kurumsal.html, urunler.html, urun-listesi.html, hizmetler.html,
+       dokumanlar.html, iletisim.html, hesap.html, siparislerim.html ve kvkk.html dosyalarında
+       kopyalanmıştır; burada yapılan değişiklik on dosyanın hepsine uygulanmalıdır.
+       Sayfaya özgü tek fark: .footer-cta bloğunun metni/düğmesi (bazı sayfalarda hiç yoktur). -->
   <footer class="footer">
     <div class="footer-cta">
       <div class="wrap">
@@ -504,7 +529,7 @@ yakınız.</h2>
         <h4 data-i18n="foot.companies">Grup &amp; İştirakler</h4>
         <div class="footer-ent">
           <div class="ent"><b data-i18n="foot.ent1">Herkim Kimya San. ve Tic.</b><span data-i18n="foot.ent1s">Merkez · Tuzla / İstanbul</span></div>
-          <div class="ent"><b><a href="https://www.herkimgroup.com" target="_blank" rel="noopener" style="color:inherit" data-i18n="foot.ent2">Herkim Group</a></b><span data-i18n="foot.ent2s">herkimgroup.com</span></div>
+          <div class="ent"><b><a href="https://www.herkimgroup.com" target="_blank" rel="noopener noreferrer" style="color:inherit" data-i18n="foot.ent2">Herkim Group</a></b><span data-i18n="foot.ent2s">herkimgroup.com</span></div>
           <div class="ent"><b data-i18n="foot.ent3">Uzmanlık Alanları</b><span data-i18n="foot.ent3s">Deri · Tekstil · Binder Kimyasalları</span></div>
         </div>
       </div>
@@ -512,10 +537,9 @@ yakınız.</h2>
     <div class="footer-bottom">
       <div class="wrap">
         <p data-i18n="foot.rights">© 2026 Herkim Kimya — Tüm hakları saklıdır.</p>
-        <nav>
+        <nav data-i18n-aria="a11y.footerNav" aria-label="Yasal bağlantılar">
           <a href="kvkk.html" data-i18n="foot.kvkk">KVKK Aydınlatma</a>
           <a href="kvkk.html#cerez" data-i18n="foot.cookie">Çerez Politikası</a>
-          
         </nav>
       </div>
     </div>
@@ -523,7 +547,7 @@ yakınız.</h2>
 
   <!-- ===== Teklif sepeti ===== -->
   <div class="drawer-overlay"></div>
-  <aside class="basket-drawer" aria-label="Teklif sepeti">
+  <aside class="basket-drawer" id="basket-drawer" role="dialog" data-i18n-aria="basket.title" aria-label="Teklif Sepeti">
     <div class="bd-head">
       <div><h3 data-i18n="basket.title">Teklif Sepeti</h3><span class="mono" data-i18n="basket.sub">Fiyatlar teklifle netleşir</span></div>
       <button class="bd-close" data-i18n="nav.close">KAPAT ×</button>
@@ -538,7 +562,7 @@ yakınız.</h2>
   </aside>
 
   <!-- ===== Arama ===== -->
-  <div class="search-overlay">
+  <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" data-i18n-aria="a11y.searchDialog" aria-label="Site içi arama">
     <div class="search-panel">
       <input type="text" id="site-search" data-i18n-ph="search.ph" placeholder="Ürün adı veya kategori arayın…" aria-label="Arama">
       <div class="search-results" id="search-results"></div>

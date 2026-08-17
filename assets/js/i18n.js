@@ -1,10 +1,54 @@
 /* ============================================================
    HERKİM — Çok Dilli Sözlük ve Motor (TR / EN / RU)
-   Kullanım:
-     <span data-i18n="nav.home">Anasayfa</span>          → textContent
-     <h1 data-i18n-br="home.hero.title">...</h1>          → çok satırlı (\n = <br>)
-     <input data-i18n-ph="search.ph">                     → placeholder
-     <a data-i18n-title="..." data-i18n-aria="...">        → title / aria-label
+
+   ------------------------------------------------------------
+   1) YENİ ANAHTAR NASIL EKLENİR? (üç blok kuralı)
+   ------------------------------------------------------------
+   Anahtarı ÜÇ bloğa birden (tr, en, ru), AYNI GRUBUN İÇİNE ve AYNI SATIR
+   SIRASINA ekleyin. Üç blok yan yana diff alındığında satır satır örtüşmelidir;
+   bu dosyanın en değerli özelliği bu paralellik, korumak zorunludur.
+     - Eksik bir dil = kullanıcı o dilde Türkçe yedeği görür (hkT tr'ye düşer).
+     - Hiç olmayan anahtar = ekranda ham anahtar metni ("a11y.skip") görünür.
+   Bir anahtarı silerken de üç blokta birden silin ve önce depo genelinde arayın
+   (11 *.html içindeki data-i18n* öznitelikleri + assets/js içindeki T/hkT çağrıları).
+
+   ------------------------------------------------------------
+   2) HTML ÖZNİTELİKLERİ — hangisi neyi yazar?
+   ------------------------------------------------------------
+     <span data-i18n="nav.home">Anasayfa</span>            → textContent
+     <h1 data-i18n-br="home.hero.title">...</h1>           → çok satırlı (\n = <br>)
+     <input data-i18n-ph="search.ph">                      → placeholder
+     <a data-i18n-title="contact.mapTitle">                → title
+     <nav data-i18n-aria="a11y.mainNav">                   → aria-label
+   Bir öğe birden fazla öznitelik taşıyabilir (ör. hem -title hem -aria).
+   HTML'deki metin yalnızca yedektir; gerçek metin buradaki değerdir.
+
+   JS tarafında: main.js/site-auth.js içinde T("anahtar"), doğrudan hkT("anahtar").
+   Anahtarları ASLA string birleştirmeyle üretmeyin (T("sub." + x) gibi) — o zaman
+   hangi anahtarın canlı olduğu grep ile kanıtlanamaz ve ölü anahtar temizliği çöker.
+
+   ------------------------------------------------------------
+   3) GRUPLAR (üç blokta da aynı sırada, aynı başlıklarla)
+   ------------------------------------------------------------
+     Genel / dil · Erişilebilirlik · Üst bar · Üst menü · Ürün kategorileri ·
+     Ortak düğmeler · Site içi arama · Teklif/sipariş sepeti · Sipariş akışı ·
+     Siparişlerim · Müşteri girişi · Misafir teklif formu · Hesap başvurusu ·
+     Portal · Anasayfa (hero) · Anasayfa (bölümler) · Sektör kartları ·
+     İlke ve değerler · Alt bilgi · Çerez bildirimi · Toast metinleri ·
+     E-posta yedeği · WhatsApp · İletişim bilgisi · Tarihçe · Sayfa başlıkları ·
+     Misyon & vizyon · Kalite · SSS · Hizmetler · Ürün kataloğu/tablo ·
+     Doküman merkezi · Teklif & iletişim formu · KVKK
+
+   ------------------------------------------------------------
+   4) METİN YAZARKEN
+   ------------------------------------------------------------
+     - Emoji yok; kurumsal ton. ✓ ✗ → ↓ ↗ × gibi tipografik işaretler serbest.
+     - Bilinmeyen veri (fiyat, ambalaj, sertifika) uydurulmaz; "sipariş onayında
+       netleşir" dili kullanılır.
+     - Türkçe metinlerde büyük harf gerekiyorsa kaynakta büyük yazın; CSS
+       text-transform:uppercase Türkçe "i" harfini bozar.
+     - {n} / {s} gibi yer tutucular üç dilde de aynen korunmalıdır.
+
    Dil tercihi localStorage("hk_lang") içinde saklanır.
    Güvenlik: innerHTML kullanılmaz; tüm metinler textContent/textNode ile yazılır.
    ============================================================ */
@@ -15,12 +59,22 @@ const HK_LANG_NAMES = { tr: "Türkçe", en: "English", ru: "Русский" };
 const HK_I18N = {
   /* ---------------- TÜRKÇE ---------------- */
   tr: {
+    /* Genel / dil */
     "meta.langName": "Türkçe",
 
-    "top.rateNote": "indikatif",
-    "top.phone": "+90 216 394 11 25",
-    "top.email": "info@herkimgroup.com",
+    /* Erişilebilirlik — hepsi data-i18n-aria ile aria-label olur */
+    "a11y.skip": "İçeriğe geç",
+    "a11y.mainNav": "Ana menü",
+    "a11y.mobileMenu": "Mobil menü",
+    "a11y.lang": "Dil seçimi",
+    "a11y.rates": "Güncel döviz kurları",
+    "a11y.searchDialog": "Site içi arama penceresi",
+    "a11y.footerNav": "Yasal bağlantılar",
 
+    /* Üst bar (kur şeridi) */
+    "top.rateNote": "indikatif",
+
+    /* Üst menü ve mobil menü */
     "nav.home": "Anasayfa",
     "nav.corporate": "Kurumsal",
     "nav.about": "Hakkımızda",
@@ -33,12 +87,11 @@ const HK_I18N = {
     "nav.productList": "Ürün Listesi",
     "nav.services": "Hizmetlerimiz",
     "nav.docs": "Doküman Merkezi",
-    "nav.news": "Duyurular",
     "nav.contact": "İletişim",
-    "nav.portalLink": "Portal",
     "nav.openMenu": "Menüyü aç",
     "nav.close": "KAPAT ×",
 
+    /* Ürün kategorileri — data.js'teki kategori kodlarıyla eşleşir */
     "cat.asit": "Asitler",
     "cat.alkol": "Alkoller & Glikoller",
     "cat.amonyum": "Amonyum Bazlı Ürünler",
@@ -46,15 +99,8 @@ const HK_I18N = {
     "cat.sodyum": "Sodyum Bazlı Kimyasallar",
     "cat.solvent": "Solventler & Endüstriyel Kimyasallar",
     "cat.all": "Tümü",
-    "sub.altkat": "Altkat Kimyasalları",
-    "sub.finisaj": "Finisaj Kimyasalları",
-    "sub.dolap": "Dolap Boyaları",
-    "sub.proses": "Proses Kimyasalları",
-    "sub.tekboya": "Tekstil Boyaları",
-    "sub.insaatB": "İnşaat Boya Binderleri",
-    "sub.matbaaB": "Matbaa Binderleri",
-    "sub.tekstilB": "Tekstil Binderleri",
 
+    /* Ortak düğmeler */
     "btn.catalog": "Ürün Kataloğu",
     "btn.getQuote": "Teklif İsteyin",
     "btn.contactUs": "Bize Ulaşın",
@@ -63,7 +109,6 @@ const HK_I18N = {
     "btn.corporatePage": "Kurumsal Sayfamız",
     "btn.presentation": "Tanıtım Sunumu (PDF)",
     "btn.allDocs": "Tüm dokümanlar",
-    "btn.allNews": "Tüm duyurular",
     "btn.quoteForm": "Teklif Formu",
     "btn.whatsappLine": "WhatsApp Hattı",
     "btn.bySector": "Sektöre göre ürünler",
@@ -73,11 +118,13 @@ const HK_I18N = {
     "btn.send": "Gönder",
     "btn.join": "Katıl",
 
+    /* Site içi arama */
     "search.iconLabel": "Site içi arama",
     "search.ph": "Ürün adı veya kategori arayın…",
     "search.hint": "İPUCU: Klavyeden Ctrl + K ile aramayı her sayfada açabilirsiniz · ESC ile kapatın",
     "search.noResult": "Sonuç yok — bu ürünü sizin için tedarik edelim",
 
+    /* Teklif / sipariş sepeti */
     "basket.title": "Teklif Sepeti",
     "basket.sub": "Fiyatlar teklifle netleşir",
     "basket.empty1": "Teklif sepetiniz boş.",
@@ -88,7 +135,6 @@ const HK_I18N = {
     "basket.clear": "Sepeti Temizle",
     "basket.note": "Talebiniz satış ekibimize iletilir; mesai saatlerinde en kısa sürede dönüş yapılır.",
     "basket.added": "teklif sepetine eklendi.",
-    "basket.exists": "zaten teklif sepetinizde.",
     "basket.cleared": "Teklif sepeti temizlendi.",
     "basket.addFirst": "Önce sepete ürün ekleyin.",
     "basket.addAria": "Teklif sepetine ekle",
@@ -99,14 +145,16 @@ const HK_I18N = {
     "basket.orderWord": "Sipariş",
     "basket.modePill": "SİPARİŞ MODU",
     "basket.loginToOrder": "Giriş Yap & Sipariş Ver",
+
+    /* Sipariş akışı ve onay ekranları */
     "order.place": "Siparişi Gönder",
     "order.info": "Fiyat, ambalaj ve miktar detayları sipariş onayında satış temsilciniz tarafından netleştirilir.",
-    "order.loginNote": "Sipariş için müşteri girişi gerekir; teklif istemek için gerekmez.",
     "order.confirmTitle": "Sipariş Özeti",
     "order.company": "Teslimat firması",
     "order.rep": "Satış temsilciniz",
     "order.note": "Sipariş notu (opsiyonel)",
     "order.notePh": "Örn: Sevkiyatı perşembe gününe planlayalım…",
+    "order.noteLabel": "Sipariş notu",
     "order.confirm": "Onayla ve Gönder",
     "order.cancel": "Sepete Dön",
     "order.successTitle": "Siparişiniz alındı!",
@@ -116,6 +164,8 @@ const HK_I18N = {
     "order.toast": "Sipariş oluşturuldu:",
     "order.unit": "adet",
     "auth.newOrder": "Yeni Sipariş",
+
+    /* Siparişlerim sayfası (siparislerim.html) */
     "myord.title": "Siparişlerim",
     "myord.sub": "Siparişlerinizin onay, üretim ve sevkiyat durumunu anlık izleyin.",
     "myord.count": "sipariş",
@@ -131,6 +181,8 @@ const HK_I18N = {
     "myord.s2": "Üretimde",
     "myord.s3": "Sevkiyatta",
     "myord.s4": "Teslim Edildi",
+
+    /* Müşteri girişi (site-auth.js) */
     "auth.login": "Giriş Yap",
     "auth.account": "Hesabım",
     "auth.modalTitle": "Müşteri Girişi",
@@ -140,16 +192,15 @@ const HK_I18N = {
     "auth.submit": "Giriş Yap",
     "auth.demoHint": "Demo şifresi:",
     "auth.demoBtn": "Demo müşteri olarak gir →",
-    "auth.staff": "Herkim personeli misiniz?",
-    "auth.staffLink": "Portal girişi →",
     "auth.err": "E-posta veya şifre hatalı. ({n}/3 deneme)",
     "auth.locked": "Çok fazla hatalı deneme. {s} sn sonra tekrar deneyin.",
     "auth.welcome": "Hoş geldiniz",
     "auth.myOrders": "Siparişlerim",
-    "auth.goPortal": "Portalı Aç",
     "auth.logout": "Çıkış Yap",
     "auth.loggedOut": "Çıkış yapıldı.",
     "toast.sentOk": "Talebiniz iletildi ✓ Mesai saatlerinde dönüş yapılır.",
+
+    /* Misafir teklif formu ve hesap yönlendirmeleri */
     "quote.formTitle": "Teklif Talebi",
     "quote.formSub": "Size dönüş yapabilmemiz için iletişim bilgilerinizi bırakın.",
     "quote.name": "Ad Soyad",
@@ -160,9 +211,10 @@ const HK_I18N = {
     "quote.errContact": "Geçerli bir telefon veya e-posta girin.",
     "basket.memberNote": "Sipariş vermek onaylı müşteri hesabı gerektirir; fiyat teklifini üyeliksiz isteyebilirsiniz.",
     "basket.applyBtn": "Hesap Başvurusu →",
-    "basket.quoteLogin": "Teklif için müşteri girişi gerekir.",
     "auth.applyLink": "Hesabınız yok mu? Başvuru yapın →",
     "auth.noAccount": "Bu e-postayla onaylı hesap bulunamadı. Önce başvuru yapın.",
+
+    /* Müşteri hesap başvurusu (hesap.html) */
     "acct.title": "Müşteri Hesap Başvurusu",
     "acct.sub": "Sipariş vermek onaylı müşteri hesaplarına açıktır. Başvurunuz firma doğrulaması sonrası aktifleştirilir.",
     "acct.s1": "Formu doldurun — vergi numaranız anında biçim denetiminden geçer.",
@@ -199,15 +251,21 @@ const HK_I18N = {
     "acct.errKvkk": "Aydınlatma Metni onayı gereklidir.",
     "acct.errMail": "Geçerli bir e-posta girin.",
 
+    /* Portal (portal.html — yalnız personel, noindex) */
+    "portal.app.clashBadge": "✗ bu unvanla kayıtlı müşteri var",
+    "portal.app.clashRefused": "Onaylanmadı: bu unvanla kayıtlı bir müşteri kartı zaten var. Önce mevcut kartla birleştirin.",
+    "portal.login.storageFail": "Giriş kaydedilemedi: tarayıcı depolamaya izin vermiyor (gizli sekme olabilir).",
+
+    /* Anasayfa — hero ve künye rakamları */
     "home.hero.kicker": "Kimyevi Maddeler · Est. 1975",
     "home.hero.title": "Sanayinin kimyevi maddeleri,\n1975'ten beri Herkim'de.",
     "home.hero.lead": "Asitlerden solventlere, sodyum bazlı kimyasallardan deri-tabaklama ürünlerine — 1975'ten beri sanayinin kimyevi madde tedarikinde güvenilir çözüm ortağınızız.",
-    "home.hero.tagFormula": "%54 TECRÜBE",
     "home.stat.years": "Yıllık tecrübe",
     "home.stat.points": "Satış noktası",
     "home.stat.brands": "Ana kategori",
     "home.stat.groups": "Ürün çeşidi",
 
+    /* Anasayfa — bölüm başlıkları */
     "home.sectors.kicker": "01 — Hizmet Verdiğimiz Sektörler",
     "home.sectors.title": "Deri ve tekstilin\nkimya çözüm ortağı.",
     "home.products.kicker": "02 — Ürün Portföyü",
@@ -237,12 +295,11 @@ const HK_I18N = {
     "video.play": "Videoyu oynat",
     "home.docs.kicker": "06 — Doküman Merkezi",
     "home.docs.title": "Bütün dijital belgeler,\ntek yapı altında.",
-    "home.news.kicker": "07 — Duyurular",
-    "home.news.title": "Herkim'den haberler.",
     "home.contact.kicker": "07 — İletişim",
     "home.contact.title": "Bir telefon kadar\nyakınız.",
     "home.contact.lead": "Ürün, fiyat veya teknik destek — satış ekibimiz mesai saatleri içinde en kısa sürede döner. Acil talepler için WhatsApp hattımız her zaman açık.",
 
+    /* Sektör kartları */
     "sector.deri.t": "Deri & Tabaklama",
     "sector.deri.d": "Altkattan finisaja, tabakhanelerin tüm proses kimyasalları.",
     "sector.tekstil.t": "Tekstil",
@@ -260,6 +317,7 @@ const HK_I18N = {
     "sector.boya.t": "Dolap Boyaları",
     "sector.boya.d": "Anilin ve asit bazlı deri dolap boyaları.",
 
+    /* İlke ve değerler */
     "prin.01.t": "Sözümüz Senettir",
     "prin.01.d": "Teyit ettiğimiz fiyat, termin ve kalite değişmez. El sıkıştıysak, iş bitmiştir; gerisi evrak işidir.",
     "prin.02.t": "Şeffaf Fiyatlandırma",
@@ -273,6 +331,7 @@ const HK_I18N = {
     "prin.06.t": "Uzun Vadeli Ortaklık",
     "prin.06.d": "Tek seferlik satış değil, yıllara yayılan çözüm ortaklığı kurarız. Müşterilerimizin büyümesi, bizim büyümemizdir.",
 
+    /* Alt bilgi (footer) */
     "foot.cta": "Üretiminizin kimyasını birlikte planlayalım.",
     "foot.cta.btn": "Hemen Teklif Alın",
     "foot.brand.desc": "1975'ten bu yana deri ve tekstil kimyasalları tedarikinde güvenilir çözüm ortağı.",
@@ -291,6 +350,7 @@ const HK_I18N = {
     "foot.cookie": "Çerez Politikası",
     "foot.brandkit": "Marka Kiti",
 
+    /* Çerez bildirimi şeridi */
     "cookie.title": "Çerez Bildirimi.",
     "cookie.body": " Sitemiz, deneyiminizi iyileştirmek için yalnızca gerekli çerezleri kullanır. Detaylar için ",
     "cookie.link": "Çerez Politikamıza",
@@ -298,15 +358,38 @@ const HK_I18N = {
     "cookie.accept": "Kabul Ediyorum",
     "cookie.details": "Detaylar",
 
+    /* Bildirim (toast) metinleri */
     "toast.mailOpening": "E-posta uygulamanız açılıyor…",
     "toast.formErr": "Lütfen ad ve mesaj alanlarını doldurun.",
     "toast.mailErr": "Geçerli bir e-posta adresi girin.",
     "toast.newsOk": "E-bülten kaydınız alındı. Teşekkürler!",
 
+    /* E-posta yedeği — mailto konu/gövde metinleri (main.js) */
+    "mail.firm": "Firma",
+    "mail.contact": "İlgili kişi",
+    "mail.qty": "Tahmini miktar",
+    "mail.taxNo": "Vergi dairesi / numarası",
+    "mail.email": "E-posta",
+    "mail.mobile": "Cep telefonu",
+    "mail.phone": "Telefon",
+    "mail.address": "Adres",
+    "mail.web": "Web adresi",
+    "mail.message": "Mesaj",
+    "quote.mailIntro": "Merhaba, aşağıdaki ürünler için fiyat teklifi rica ederim:",
+    "quote.mailSubject": "Fiyat Teklifi Talebi — Herkim Kimya",
+    "order.mailIntro": "Merhaba, aşağıdaki siparişi vermek istiyorum:",
+    "order.mailSubject": "Sipariş — Herkim Kimya",
+    "acct.mailIntro": "Merhaba, müşteri hesabı başvurusunda bulunmak istiyorum. Firma bilgilerim aşağıdadır:",
+    "acct.mailSubject": "Hesap Başvurusu — Herkim Kimya",
+    "news.mailIntro": "Merhaba, e-bülteninize kaydolmak istiyorum.",
+    "news.mailSubject": "E-bülten Kaydı — Herkim Kimya",
+
+    /* WhatsApp ve yüzen düğmeler */
     "wa.msg": "Merhaba, ürünleriniz hakkında bilgi almak istiyorum.",
     "waFloat.title": "WhatsApp ile yazın",
     "toTop": "Yukarı dön",
 
+    /* İletişim bilgisi etiketleri */
     "ci.address": "Adres",
     "ci.phone": "Telefon",
     "ci.email": "E-posta",
@@ -314,6 +397,7 @@ const HK_I18N = {
     "ci.hours": "Çalışma Saatleri",
     "ci.hoursVal": "Hafta içi 08:30 – 17:30",
 
+    /* Tarihçe zaman çizelgesi */
     "tl.1975.t": "Kuruluş",
     "tl.1975.d": "İstanbul Kazlıçeşme deri bölgesinde kurulduk.",
     "tl.dist.t": "Büyüme",
@@ -323,6 +407,7 @@ const HK_I18N = {
     "tl.today.t": "Bugün",
     "tl.today.d": "Deri sektöründe lider kimyasal tedarikçilerden biriyiz.",
 
+    /* Sayfa başlıkları (hero) */
     "page.corp.title": "1975'ten beri\nderi kimyasının adı.",
     "page.corp.lead": "Herkim Kimya'nın hikâyesi, değerleri ve çalışma biçimi.",
     "page.catalog.title": "Ürün Kataloğu",
@@ -334,13 +419,12 @@ const HK_I18N = {
     "docs.downloadBtn": "Ürün Kataloğunu İndir (PDF)",
     "page.docs.title": "Doküman Merkezi",
     "page.docs.lead": "Kataloglar, TDS/SDS, sertifikalar ve kurumsal kimlik — tek yapı altında.",
-    "page.news.title": "Duyurular",
-    "page.news.lead": "Fuar katılımları, yeni ürünler ve şirket haberleri.",
     "page.contact.title": "İletişim & Teklif",
     "page.contact.lead": "Formu doldurun, arayın ya da WhatsApp'tan yazın.",
     "page.kvkk.title": "KVKK & Çerez Politikası",
     "page.kvkk.lead": "Kişisel verilerin korunması ve çerez kullanımı.",
 
+    /* Misyon & vizyon */
     "mission.kicker": "02 — Misyon & Vizyon",
     "mission.title": "Neden varız,\nnereye gidiyoruz?",
     "mission.m.t": "Misyon",
@@ -350,6 +434,7 @@ const HK_I18N = {
     "mission.val.t": "Değerler",
     "mission.val.d": "Güven, emek ve süreklilik. El sıkışmanın senet sayıldığı bir ticaret ahlakı ve nesiller boyu süren müşteri ilişkileri.",
 
+    /* Kalite ve sertifikalar */
     "quality.kicker": "05 — Kalite & Sertifikalar",
     "quality.title": "Belgeyle konuşuruz.",
     "cert.iso.t": "ISO 9001",
@@ -361,6 +446,7 @@ const HK_I18N = {
     "cert.rd.t": "AR-GE",
     "cert.rd.d": "Kendi laboratuvarımızda reçete geliştirme ve destek.",
 
+    /* Sık sorulan sorular */
     "faq.kicker": "06 — Sık Sorulan Sorular",
     "faq.title": "Merak edilenler.",
     "faq.q1": "Ürünlerinizi nereden temin ediyorsunuz?",
@@ -376,6 +462,7 @@ const HK_I18N = {
     "faq.q6": "Minimum sipariş miktarı nedir?",
     "faq.a6": "Ürüne göre değişir; ambalaj birimi (bidon/varil/IBC) bazında çalışırız. Detaylar teklif aşamasında netleşir.",
 
+    /* Hizmetler sayfası (hizmetler.html) */
     "srv.kicker": "01 — Hizmetlerimiz",
     "srv.title": "Ürünün ötesinde\ntam destek.",
     "srv.lead": "Doğru kimyasalı satmak yetmez; doğru kullanılmasını da sağlarız.",
@@ -385,30 +472,30 @@ const HK_I18N = {
     "srv.arge.d": "Kendi laboratuvarımızda müşteriye özel reçete geliştirir, mevcut proseslerinizi optimize ederiz.",
     "srv.teknik.t": "Teknik Servis",
     "srv.teknik.d": "Uygulama sorunlarında saha desteği; deneyimli kimya mühendislerimizle yanınızdayız.",
+    "srv.stat.services": "Hizmet alanı",
 
+    /* Ürün kataloğu ve ürün listesi tablosu */
     "cat.how.kicker": "Nasıl çalışır?",
     "cat.how.step": "ADIM",
     "cat.how.s1": "İhtiyacınız olan ürünleri + ile teklif sepetinize ekleyin.",
     "cat.how.s2": "Sepeti WhatsApp veya e-posta ile tek tıkla gönderin.",
     "cat.how.s3": "Satış ekibimiz en kısa sürede yazılı teklifle döner.",
-    "filter.allSubs": "Tüm Alt Kategoriler",
     "list.note": "* Fiyatlarımız kur ve piyasa koşullarına göre belirlenir; kesin fiyat için teklif isteyin. Listede olmayan ürünler için bize ulaşın.",
+    "tag.new": "Yeni",
+    "tag.featured": "Öne Çıkan",
+    "table.unit": "ürün",
     "th.no": "#",
     "th.name": "Ürün Adı",
     "th.cat": "Kategori",
     "th.brand": "Marka",
-    "th.pack": "Ambalaj",
     "th.doc": "Doküman",
     "th.quote": "Teklif",
 
-    "docs.bk.kicker": "Dijital Marka Kiti",
-    "docs.bk.title": "Tek marka,\ntutarlı görünüm.",
-    "docs.bk.lead": "Kartvizitten araç giydirmeye kadar tüm işlerde bu kurallar geçerlidir.",
-    "bk.logo": "01 · Logo Kullanımı",
-    "bk.color": "01 · Renk Paleti",
-    "bk.type": "03 · Tipografi",
-    "bk.voice": "02 · Ses Tonu",
+    /* Doküman merkezi kart bağlantıları */
+    "doc.download": "İndir (PDF) ↓",
+    "doc.request": "Talep et →",
 
+    /* Teklif & iletişim formu */
     "f.kicker": "Teklif & İletişim Formu",
     "f.title": "Size nasıl yardımcı olalım?",
     "f.name": "Ad Soyad",
@@ -424,9 +511,9 @@ const HK_I18N = {
     "t.sample": "Numune talebi",
     "t.other": "Diğer",
     "contact.mapBtn": "Google Haritalar'da Aç",
-    "contact.depSales": "Satış",
-    "contact.depGeneral": "Genel",
+    "contact.mapTitle": "Harita: Herkim Kimya — Deri OSB Pres Sok. No: 3, Tuzla / İstanbul",
 
+    /* KVKK ve çerez politikası */
     "kvkk.s1.title": "Kişisel verilerin korunması",
     "kvkk.s1.body": "Herkim Kimya, 6698 sayılı KVKK kapsamında veri sorumlusu sıfatıyla hareket eder. İletişim ve teklif formları aracılığıyla paylaştığınız ad, firma, telefon ve e-posta bilgileri yalnızca talebinizin karşılanması amacıyla işlenir; açık rızanız olmadan üçüncü kişilerle paylaşılmaz. KVKK haklarınızı info@herkimgroup.com adresine başvurarak kullanabilirsiniz.",
     "kvkk.s2.title": "Çerez kullanımı",
@@ -436,12 +523,22 @@ const HK_I18N = {
 
   /* ---------------- ENGLISH ---------------- */
   en: {
+    /* Genel / dil */
     "meta.langName": "English",
 
-    "top.rateNote": "indicative",
-    "top.phone": "+90 216 394 11 25",
-    "top.email": "info@herkimgroup.com",
+    /* Erişilebilirlik — hepsi data-i18n-aria ile aria-label olur */
+    "a11y.skip": "Skip to content",
+    "a11y.mainNav": "Main menu",
+    "a11y.mobileMenu": "Mobile menu",
+    "a11y.lang": "Language selection",
+    "a11y.rates": "Current exchange rates",
+    "a11y.searchDialog": "Site search dialog",
+    "a11y.footerNav": "Legal links",
 
+    /* Üst bar (kur şeridi) */
+    "top.rateNote": "indicative",
+
+    /* Üst menü ve mobil menü */
     "nav.home": "Home",
     "nav.corporate": "Corporate",
     "nav.about": "About Us",
@@ -454,12 +551,11 @@ const HK_I18N = {
     "nav.productList": "Product List",
     "nav.services": "Services",
     "nav.docs": "Document Center",
-    "nav.news": "News",
     "nav.contact": "Contact",
-    "nav.portalLink": "Portal",
     "nav.openMenu": "Open menu",
     "nav.close": "CLOSE ×",
 
+    /* Ürün kategorileri — data.js'teki kategori kodlarıyla eşleşir */
     "cat.asit": "Acids",
     "cat.alkol": "Alcohols & Glycols",
     "cat.amonyum": "Ammonium Based Products",
@@ -467,15 +563,8 @@ const HK_I18N = {
     "cat.sodyum": "Sodium Based Chemicals",
     "cat.solvent": "Solvents & Industrial Chemicals",
     "cat.all": "All",
-    "sub.altkat": "Base-Coat Chemicals",
-    "sub.finisaj": "Finishing Chemicals",
-    "sub.dolap": "Drum Dyes",
-    "sub.proses": "Process Chemicals",
-    "sub.tekboya": "Textile Dyes",
-    "sub.insaatB": "Construction Binders",
-    "sub.matbaaB": "Printing Binders",
-    "sub.tekstilB": "Textile Binders",
 
+    /* Ortak düğmeler */
     "btn.catalog": "Product Catalog",
     "btn.getQuote": "Request a Quote",
     "btn.contactUs": "Contact Us",
@@ -484,7 +573,6 @@ const HK_I18N = {
     "btn.corporatePage": "Corporate Page",
     "btn.presentation": "Company Profile (PDF)",
     "btn.allDocs": "All documents",
-    "btn.allNews": "All news",
     "btn.quoteForm": "Quote Form",
     "btn.whatsappLine": "WhatsApp Line",
     "btn.bySector": "Products by sector",
@@ -494,11 +582,13 @@ const HK_I18N = {
     "btn.send": "Send",
     "btn.join": "Join",
 
+    /* Site içi arama */
     "search.iconLabel": "Site search",
     "search.ph": "Search product name or category…",
     "search.hint": "TIP: Press Ctrl + K on any page to open search · ESC to close",
     "search.noResult": "No results — let us source this product for you",
 
+    /* Teklif / sipariş sepeti */
     "basket.title": "Quote Basket",
     "basket.sub": "Prices are confirmed by quote",
     "basket.empty1": "Your quote basket is empty.",
@@ -509,7 +599,6 @@ const HK_I18N = {
     "basket.clear": "Clear Basket",
     "basket.note": "Your request is sent to our sales team; we reply as soon as possible during business hours.",
     "basket.added": "added to your quote basket.",
-    "basket.exists": "is already in your basket.",
     "basket.cleared": "Quote basket cleared.",
     "basket.addFirst": "Add a product to the basket first.",
     "basket.addAria": "Add to quote basket",
@@ -520,14 +609,16 @@ const HK_I18N = {
     "basket.orderWord": "Order",
     "basket.modePill": "ORDER MODE",
     "basket.loginToOrder": "Sign In & Order",
+
+    /* Sipariş akışı ve onay ekranları */
     "order.place": "Place Order",
     "order.info": "Price, packaging and quantity details are confirmed by your sales representative at order approval.",
-    "order.loginNote": "Placing an order requires a customer sign-in; quote requests do not.",
     "order.confirmTitle": "Order Summary",
     "order.company": "Delivery company",
     "order.rep": "Your sales rep",
     "order.note": "Order note (optional)",
     "order.notePh": "E.g. please schedule shipping for Thursday…",
+    "order.noteLabel": "Order note",
     "order.confirm": "Confirm & Send",
     "order.cancel": "Back to Basket",
     "order.successTitle": "Order received!",
@@ -537,6 +628,8 @@ const HK_I18N = {
     "order.toast": "Order created:",
     "order.unit": "pcs",
     "auth.newOrder": "New Order",
+
+    /* Siparişlerim sayfası (siparislerim.html) */
     "myord.title": "My Orders",
     "myord.sub": "Track the approval, production and shipping status of your orders in real time.",
     "myord.count": "orders",
@@ -552,6 +645,8 @@ const HK_I18N = {
     "myord.s2": "In Production",
     "myord.s3": "In Transit",
     "myord.s4": "Delivered",
+
+    /* Müşteri girişi (site-auth.js) */
     "auth.login": "Sign In",
     "auth.account": "My Account",
     "auth.modalTitle": "Customer Sign-In",
@@ -561,16 +656,15 @@ const HK_I18N = {
     "auth.submit": "Sign In",
     "auth.demoHint": "Demo password:",
     "auth.demoBtn": "Enter as demo customer →",
-    "auth.staff": "Herkim staff?",
-    "auth.staffLink": "Portal login →",
     "auth.err": "Wrong e-mail or password. ({n}/3 attempts)",
     "auth.locked": "Too many failed attempts. Try again in {s} s.",
     "auth.welcome": "Welcome",
     "auth.myOrders": "My Orders",
-    "auth.goPortal": "Open Portal",
     "auth.logout": "Sign Out",
     "auth.loggedOut": "Signed out.",
     "toast.sentOk": "Your request has been sent ✓ We reply during business hours.",
+
+    /* Misafir teklif formu ve hesap yönlendirmeleri */
     "quote.formTitle": "Quote Request",
     "quote.formSub": "Leave your contact details so we can get back to you.",
     "quote.name": "Full name",
@@ -581,9 +675,10 @@ const HK_I18N = {
     "quote.errContact": "Enter a valid phone or e-mail.",
     "basket.memberNote": "Placing orders requires an approved customer account; quotes can be requested without one.",
     "basket.applyBtn": "Account Application →",
-    "basket.quoteLogin": "A customer sign-in is required for quotes.",
     "auth.applyLink": "No account yet? Apply now →",
     "auth.noAccount": "No approved account with this e-mail. Please apply first.",
+
+    /* Müşteri hesap başvurusu (hesap.html) */
     "acct.title": "Customer Account Application",
     "acct.sub": "Ordering is available to approved customer accounts. Your application is activated after company verification.",
     "acct.s1": "Fill in the form — your tax ID is format-checked instantly.",
@@ -620,15 +715,21 @@ const HK_I18N = {
     "acct.errKvkk": "Privacy Notice consent is required.",
     "acct.errMail": "Enter a valid e-mail.",
 
+    /* Portal (portal.html — yalnız personel, noindex) */
+    "portal.app.clashBadge": "✗ a customer is already registered under this trade name",
+    "portal.app.clashRefused": "Not approved: a customer record already exists under this trade name. Merge it with the existing record first.",
+    "portal.login.storageFail": "Sign-in could not be saved: the browser is blocking storage (this may be a private window).",
+
+    /* Anasayfa — hero ve künye rakamları */
     "home.hero.kicker": "Chemical Materials · Est. 1975",
     "home.hero.title": "Industrial chemicals,\nfrom Herkim since 1975.",
     "home.hero.lead": "From acids to solvents, sodium-based chemicals to leather & tanning products — your reliable chemical supply partner since 1975.",
-    "home.hero.tagFormula": "54 YRS EXP.",
     "home.stat.years": "Years of experience",
     "home.stat.points": "Sales points",
     "home.stat.brands": "Main categories",
     "home.stat.groups": "Products in range",
 
+    /* Anasayfa — bölüm başlıkları */
     "home.sectors.kicker": "01 — Industries We Serve",
     "home.sectors.title": "The chemistry partner\nfor leather and textiles.",
     "home.products.kicker": "02 — Product Portfolio",
@@ -658,12 +759,11 @@ const HK_I18N = {
     "video.play": "Play video",
     "home.docs.kicker": "06 — Document Center",
     "home.docs.title": "All digital documents,\nunder one structure.",
-    "home.news.kicker": "07 — News",
-    "home.news.title": "News from Herkim.",
     "home.contact.kicker": "07 — Contact",
     "home.contact.title": "As close as\na phone call.",
     "home.contact.lead": "Product, price or technical support — our sales team replies as soon as possible during business hours. For urgent requests, our WhatsApp line is always open.",
 
+    /* Sektör kartları */
     "sector.deri.t": "Leather & Tanning",
     "sector.deri.d": "From base coat to finishing — all process chemicals for tanneries.",
     "sector.tekstil.t": "Textiles",
@@ -681,6 +781,7 @@ const HK_I18N = {
     "sector.boya.t": "Drum Dyes",
     "sector.boya.d": "Aniline and acid-based leather drum dyes.",
 
+    /* İlke ve değerler */
     "prin.01.t": "Our Word Is Our Bond",
     "prin.01.d": "The price, deadline and quality we confirm do not change. Once we shake hands, the deal is done; the rest is paperwork.",
     "prin.02.t": "Transparent Pricing",
@@ -694,6 +795,7 @@ const HK_I18N = {
     "prin.06.t": "Long-Term Partnership",
     "prin.06.d": "We build solution partnerships that span years, not one-off sales. Our customers' growth is our growth.",
 
+    /* Alt bilgi (footer) */
     "foot.cta": "Let's plan the chemistry of your production together.",
     "foot.cta.btn": "Get a Quote Now",
     "foot.brand.desc": "A trusted partner in leather and textile chemicals since 1975. Broad product range and stocked supply.",
@@ -712,6 +814,7 @@ const HK_I18N = {
     "foot.cookie": "Cookie Policy",
     "foot.brandkit": "Brand Kit",
 
+    /* Çerez bildirimi şeridi */
     "cookie.title": "Cookie Notice.",
     "cookie.body": " Our site uses only necessary cookies to improve your experience. For details, see our ",
     "cookie.link": "Cookie Policy",
@@ -719,15 +822,38 @@ const HK_I18N = {
     "cookie.accept": "I Accept",
     "cookie.details": "Details",
 
+    /* Bildirim (toast) metinleri */
     "toast.mailOpening": "Opening your e-mail app…",
     "toast.formErr": "Please fill in the name and message fields.",
     "toast.mailErr": "Please enter a valid e-mail address.",
     "toast.newsOk": "You're subscribed to our newsletter. Thank you!",
 
+    /* E-posta yedeği — mailto konu/gövde metinleri (main.js) */
+    "mail.firm": "Company",
+    "mail.contact": "Contact person",
+    "mail.qty": "Estimated quantity",
+    "mail.taxNo": "Tax office / number",
+    "mail.email": "E-mail",
+    "mail.mobile": "Mobile phone",
+    "mail.phone": "Phone",
+    "mail.address": "Address",
+    "mail.web": "Website",
+    "mail.message": "Message",
+    "quote.mailIntro": "Hello, I would like a quote for the following products:",
+    "quote.mailSubject": "Quote Request — Herkim Kimya",
+    "order.mailIntro": "Hello, I would like to place the following order:",
+    "order.mailSubject": "Order — Herkim Kimya",
+    "acct.mailIntro": "Hello, I would like to apply for a customer account. My company details are below:",
+    "acct.mailSubject": "Account Application — Herkim Kimya",
+    "news.mailIntro": "Hello, I would like to subscribe to your newsletter.",
+    "news.mailSubject": "Newsletter Subscription — Herkim Kimya",
+
+    /* WhatsApp ve yüzen düğmeler */
     "wa.msg": "Hello, I would like information about your products.",
     "waFloat.title": "Message us on WhatsApp",
     "toTop": "Back to top",
 
+    /* İletişim bilgisi etiketleri */
     "ci.address": "Address",
     "ci.phone": "Phone",
     "ci.email": "E-mail",
@@ -735,6 +861,7 @@ const HK_I18N = {
     "ci.hours": "Working Hours",
     "ci.hoursVal": "Weekdays 08:30 – 17:30",
 
+    /* Tarihçe zaman çizelgesi */
     "tl.1975.t": "Foundation",
     "tl.1975.d": "Founded in Istanbul's Kazlıçeşme leather district.",
     "tl.dist.t": "Growth",
@@ -744,6 +871,7 @@ const HK_I18N = {
     "tl.today.t": "Today",
     "tl.today.d": "One of the leading chemical suppliers in the leather sector.",
 
+    /* Sayfa başlıkları (hero) */
     "page.corp.title": "A name in leather\nchemistry since 1975.",
     "page.corp.lead": "The story, values and way of working of Herkim Kimya.",
     "page.catalog.title": "Product Catalog",
@@ -755,13 +883,12 @@ const HK_I18N = {
     "docs.downloadBtn": "Download Product Catalogue (PDF)",
     "page.docs.title": "Document Center",
     "page.docs.lead": "Catalogs, TDS/SDS, certificates and brand identity — under one structure.",
-    "page.news.title": "News",
-    "page.news.lead": "Fair participations, new products and company news.",
     "page.contact.title": "Contact & Quote",
     "page.contact.lead": "Fill in the form, call us or message us on WhatsApp.",
     "page.kvkk.title": "Privacy & Cookie Policy",
     "page.kvkk.lead": "Protection of personal data and cookie usage.",
 
+    /* Misyon & vizyon */
     "mission.kicker": "02 — Mission & Vision",
     "mission.title": "Why we exist,\nwhere we're headed.",
     "mission.m.t": "Mission",
@@ -771,6 +898,7 @@ const HK_I18N = {
     "mission.val.t": "Values",
     "mission.val.d": "Trust, effort and continuity. A trade ethic where a handshake is a bond, and customer relationships that span generations.",
 
+    /* Kalite ve sertifikalar */
     "quality.kicker": "05 — Quality & Certificates",
     "quality.title": "We speak with documents.",
     "cert.iso.t": "ISO 9001",
@@ -782,6 +910,7 @@ const HK_I18N = {
     "cert.rd.t": "R&D",
     "cert.rd.d": "Recipe development and support in our own laboratory.",
 
+    /* Sık sorulan sorular */
     "faq.kicker": "06 — Frequently Asked Questions",
     "faq.title": "Good to know.",
     "faq.q1": "Where do your products come from?",
@@ -797,6 +926,7 @@ const HK_I18N = {
     "faq.q6": "What is the minimum order quantity?",
     "faq.a6": "It varies by product; we work in packaging units (drum/barrel/IBC). Details are clarified at the quote stage.",
 
+    /* Hizmetler sayfası (hizmetler.html) */
     "srv.kicker": "01 — Services",
     "srv.title": "Full support,\nbeyond the product.",
     "srv.lead": "Selling the right chemical isn't enough; we make sure it's used right too.",
@@ -806,30 +936,30 @@ const HK_I18N = {
     "srv.arge.d": "We develop customer-specific recipes in our own lab and optimize your existing processes.",
     "srv.teknik.t": "Technical Service",
     "srv.teknik.d": "Field support for application issues; our experienced chemical engineers are by your side.",
+    "srv.stat.services": "Service areas",
 
+    /* Ürün kataloğu ve ürün listesi tablosu */
     "cat.how.kicker": "How it works",
     "cat.how.step": "STEP",
     "cat.how.s1": "Add the products you need to your quote basket with +.",
     "cat.how.s2": "Send the basket via WhatsApp or e-mail in one click.",
     "cat.how.s3": "Our sales team replies with a written quote as soon as possible.",
-    "filter.allSubs": "All Subcategories",
     "list.note": "* Our prices depend on exchange rates and market conditions; request a quote for a firm price. For products not listed, contact us.",
+    "tag.new": "New",
+    "tag.featured": "Featured",
+    "table.unit": "products",
     "th.no": "#",
     "th.name": "Product Name",
     "th.cat": "Category",
     "th.brand": "Brand",
-    "th.pack": "Packaging",
     "th.doc": "Docs",
     "th.quote": "Quote",
 
-    "docs.bk.kicker": "Digital Brand Kit",
-    "docs.bk.title": "One brand,\na consistent look.",
-    "docs.bk.lead": "From business cards to vehicle wraps, these rules apply across all work.",
-    "bk.logo": "01 · Logo Usage",
-    "bk.color": "01 · Color Palette",
-    "bk.type": "03 · Typography",
-    "bk.voice": "02 · Tone of Voice",
+    /* Doküman merkezi kart bağlantıları */
+    "doc.download": "Download (PDF) ↓",
+    "doc.request": "Request →",
 
+    /* Teklif & iletişim formu */
     "f.kicker": "Quote & Contact Form",
     "f.title": "How can we help?",
     "f.name": "Full Name",
@@ -845,9 +975,9 @@ const HK_I18N = {
     "t.sample": "Sample request",
     "t.other": "Other",
     "contact.mapBtn": "Open in Google Maps",
-    "contact.depSales": "Sales",
-    "contact.depGeneral": "General",
+    "contact.mapTitle": "Map: Herkim Kimya — Deri OSB Pres Sok. No: 3, Tuzla / Istanbul",
 
+    /* KVKK ve çerez politikası */
     "kvkk.s1.title": "Protection of personal data",
     "kvkk.s1.body": "Herkim Kimya acts as data controller under Turkey's KVKK (Law No. 6698). The name, company, phone and e-mail you share via contact and quote forms are processed solely to fulfill your request and are not shared with third parties without your explicit consent. You may exercise your rights by writing to info@herkimgroup.com.",
     "kvkk.s2.title": "Cookie usage",
@@ -857,12 +987,22 @@ const HK_I18N = {
 
   /* ---------------- РУССКИЙ ---------------- */
   ru: {
+    /* Genel / dil */
     "meta.langName": "Русский",
 
-    "top.rateNote": "ориентировочно",
-    "top.phone": "+90 216 394 11 25",
-    "top.email": "info@herkimgroup.com",
+    /* Erişilebilirlik — hepsi data-i18n-aria ile aria-label olur */
+    "a11y.skip": "Перейти к содержимому",
+    "a11y.mainNav": "Главное меню",
+    "a11y.mobileMenu": "Мобильное меню",
+    "a11y.lang": "Выбор языка",
+    "a11y.rates": "Текущие курсы валют",
+    "a11y.searchDialog": "Окно поиска по сайту",
+    "a11y.footerNav": "Правовые ссылки",
 
+    /* Üst bar (kur şeridi) */
+    "top.rateNote": "ориентировочно",
+
+    /* Üst menü ve mobil menü */
     "nav.home": "Главная",
     "nav.corporate": "О компании",
     "nav.about": "О нас",
@@ -875,12 +1015,11 @@ const HK_I18N = {
     "nav.productList": "Список продукции",
     "nav.services": "Услуги",
     "nav.docs": "Документы",
-    "nav.news": "Новости",
     "nav.contact": "Контакты",
-    "nav.portalLink": "Портал",
     "nav.openMenu": "Открыть меню",
     "nav.close": "ЗАКРЫТЬ ×",
 
+    /* Ürün kategorileri — data.js'teki kategori kodlarıyla eşleşir */
     "cat.asit": "Кислоты",
     "cat.alkol": "Спирты и гликоли",
     "cat.amonyum": "Продукты на основе аммония",
@@ -888,15 +1027,8 @@ const HK_I18N = {
     "cat.sodyum": "Химия на основе натрия",
     "cat.solvent": "Растворители и промышленная химия",
     "cat.all": "Все",
-    "sub.altkat": "Грунтовая химия",
-    "sub.finisaj": "Финишная химия",
-    "sub.dolap": "Барабанные красители",
-    "sub.proses": "Химия процессов",
-    "sub.tekboya": "Текстильные красители",
-    "sub.insaatB": "Строительные биндеры",
-    "sub.matbaaB": "Печатные биндеры",
-    "sub.tekstilB": "Текстильные биндеры",
 
+    /* Ortak düğmeler */
     "btn.catalog": "Каталог продукции",
     "btn.getQuote": "Запросить цену",
     "btn.contactUs": "Связаться с нами",
@@ -905,7 +1037,6 @@ const HK_I18N = {
     "btn.corporatePage": "О компании",
     "btn.presentation": "Презентация (PDF)",
     "btn.allDocs": "Все документы",
-    "btn.allNews": "Все новости",
     "btn.quoteForm": "Форма запроса",
     "btn.whatsappLine": "Линия WhatsApp",
     "btn.bySector": "Продукция по отраслям",
@@ -915,11 +1046,13 @@ const HK_I18N = {
     "btn.send": "Отправить",
     "btn.join": "Подписаться",
 
+    /* Site içi arama */
     "search.iconLabel": "Поиск по сайту",
     "search.ph": "Поиск по названию или категории…",
     "search.hint": "СОВЕТ: нажмите Ctrl + K на любой странице для поиска · ESC — закрыть",
     "search.noResult": "Нет результатов — мы подберём этот продукт для вас",
 
+    /* Teklif / sipariş sepeti */
     "basket.title": "Корзина запроса",
     "basket.sub": "Цены уточняются по запросу",
     "basket.empty1": "Ваша корзина запроса пуста.",
@@ -930,7 +1063,6 @@ const HK_I18N = {
     "basket.clear": "Очистить корзину",
     "basket.note": "Ваш запрос направляется отделу продаж; мы ответим в кратчайшие сроки в рабочее время.",
     "basket.added": "добавлен в корзину запроса.",
-    "basket.exists": "уже в вашей корзине.",
     "basket.cleared": "Корзина запроса очищена.",
     "basket.addFirst": "Сначала добавьте продукт в корзину.",
     "basket.addAria": "Добавить в корзину запроса",
@@ -941,14 +1073,16 @@ const HK_I18N = {
     "basket.orderWord": "Заказ",
     "basket.modePill": "РЕЖИМ ЗАКАЗА",
     "basket.loginToOrder": "Войти и заказать",
+
+    /* Sipariş akışı ve onay ekranları */
     "order.place": "Отправить заказ",
     "order.info": "Цену, упаковку и объёмы подтверждает ваш менеджер при согласовании заказа.",
-    "order.loginNote": "Для заказа нужен вход клиента; запрос цены доступен без входа.",
     "order.confirmTitle": "Сводка заказа",
     "order.company": "Компания-получатель",
     "order.rep": "Ваш менеджер",
     "order.note": "Комментарий к заказу (необязательно)",
     "order.notePh": "Напр.: отгрузку планируйте на четверг…",
+    "order.noteLabel": "Комментарий к заказу",
     "order.confirm": "Подтвердить и отправить",
     "order.cancel": "Назад в корзину",
     "order.successTitle": "Заказ принят!",
@@ -958,6 +1092,8 @@ const HK_I18N = {
     "order.toast": "Заказ создан:",
     "order.unit": "шт.",
     "auth.newOrder": "Новый заказ",
+
+    /* Siparişlerim sayfası (siparislerim.html) */
     "myord.title": "Мои заказы",
     "myord.sub": "Следите за подтверждением, производством и доставкой заказов в реальном времени.",
     "myord.count": "заказ(ов)",
@@ -973,6 +1109,8 @@ const HK_I18N = {
     "myord.s2": "В производстве",
     "myord.s3": "В пути",
     "myord.s4": "Доставлен",
+
+    /* Müşteri girişi (site-auth.js) */
     "auth.login": "Войти",
     "auth.account": "Мой аккаунт",
     "auth.modalTitle": "Вход для клиентов",
@@ -982,16 +1120,15 @@ const HK_I18N = {
     "auth.submit": "Войти",
     "auth.demoHint": "Демо-пароль:",
     "auth.demoBtn": "Войти как демо-клиент →",
-    "auth.staff": "Сотрудник Herkim?",
-    "auth.staffLink": "Вход в портал →",
     "auth.err": "Неверный e-mail или пароль. ({n}/3)",
     "auth.locked": "Слишком много попыток. Повторите через {s} с.",
     "auth.welcome": "Добро пожаловать",
     "auth.myOrders": "Мои заказы",
-    "auth.goPortal": "Открыть портал",
     "auth.logout": "Выйти",
     "auth.loggedOut": "Вы вышли из системы.",
     "toast.sentOk": "Ваш запрос отправлен ✓ Ответим в рабочее время.",
+
+    /* Misafir teklif formu ve hesap yönlendirmeleri */
     "quote.formTitle": "Запрос цены",
     "quote.formSub": "Оставьте контакты, чтобы мы могли вам ответить.",
     "quote.name": "Имя и фамилия",
@@ -1002,9 +1139,10 @@ const HK_I18N = {
     "quote.errContact": "Укажите корректный телефон или e-mail.",
     "basket.memberNote": "Для заказа нужен подтверждённый аккаунт; запрос цены доступен без него.",
     "basket.applyBtn": "Заявка на аккаунт →",
-    "basket.quoteLogin": "Для запроса цены нужен вход клиента.",
     "auth.applyLink": "Нет аккаунта? Подайте заявку →",
     "auth.noAccount": "С этим e-mail нет подтверждённого аккаунта. Сначала подайте заявку.",
+
+    /* Müşteri hesap başvurusu (hesap.html) */
     "acct.title": "Заявка на клиентский аккаунт",
     "acct.sub": "Оформление заказов доступно подтверждённым клиентам. Заявка активируется после проверки компании.",
     "acct.s1": "Заполните форму — формат налогового номера проверяется мгновенно.",
@@ -1041,15 +1179,21 @@ const HK_I18N = {
     "acct.errKvkk": "Требуется согласие с Уведомлением.",
     "acct.errMail": "Введите корректный e-mail.",
 
+    /* Portal (portal.html — yalnız personel, noindex) */
+    "portal.app.clashBadge": "✗ клиент с таким наименованием уже зарегистрирован",
+    "portal.app.clashRefused": "Не одобрено: карточка клиента с таким наименованием уже существует. Сначала объедините её с существующей карточкой.",
+    "portal.login.storageFail": "Не удалось сохранить вход: браузер блокирует хранилище (возможно, это приватное окно).",
+
+    /* Anasayfa — hero ve künye rakamları */
     "home.hero.kicker": "Химическое сырьё · с 1975",
     "home.hero.title": "Промышленная химия —\nв Herkim с 1975 года.",
     "home.hero.lead": "От кислот до растворителей, от натриевой химии до продуктов для кожи и дубления — надёжный партнёр по поставкам химического сырья с 1975 года.",
-    "home.hero.tagFormula": "54 ГОДА ОПЫТА",
     "home.stat.years": "Лет опыта",
     "home.stat.points": "Точек продаж",
     "home.stat.brands": "Основные категории",
     "home.stat.groups": "Позиции в каталоге",
 
+    /* Anasayfa — bölüm başlıkları */
     "home.sectors.kicker": "01 — Отрасли, которым мы служим",
     "home.sectors.title": "Химический партнёр\nкожи и текстиля.",
     "home.products.kicker": "02 — Портфель продукции",
@@ -1079,12 +1223,11 @@ const HK_I18N = {
     "video.play": "Смотреть видео",
     "home.docs.kicker": "06 — Центр документов",
     "home.docs.title": "Все цифровые документы\nв единой структуре.",
-    "home.news.kicker": "07 — Новости",
-    "home.news.title": "Новости Herkim.",
     "home.contact.kicker": "07 — Контакты",
     "home.contact.title": "Мы всего\nв одном звонке.",
     "home.contact.lead": "Продукт, цена или техническая поддержка — наш отдел продаж ответит в кратчайшие сроки в рабочее время. Для срочных запросов линия WhatsApp всегда открыта.",
 
+    /* Sektör kartları */
     "sector.deri.t": "Кожа и дубление",
     "sector.deri.d": "От грунта до финиша — вся химия процессов для кожевенных заводов.",
     "sector.tekstil.t": "Текстиль",
@@ -1102,6 +1245,7 @@ const HK_I18N = {
     "sector.boya.t": "Барабанные красители",
     "sector.boya.d": "Анилиновые и кислотные барабанные красители для кожи.",
 
+    /* İlke ve değerler */
     "prin.01.t": "Наше слово — закон",
     "prin.01.d": "Подтверждённые цена, срок и качество не меняются. Если ударили по рукам — сделка закрыта; остальное — бумаги.",
     "prin.02.t": "Прозрачное ценообразование",
@@ -1115,6 +1259,7 @@ const HK_I18N = {
     "prin.06.t": "Долгосрочное партнёрство",
     "prin.06.d": "Мы строим партнёрство на годы, а не разовые продажи. Рост наших клиентов — наш рост.",
 
+    /* Alt bilgi (footer) */
     "foot.cta": "Спланируем химию вашего производства вместе.",
     "foot.cta.btn": "Запросить цену",
     "foot.brand.desc": "Надёжный партнёр в кожевенной и текстильной химии с 1975 года. Широкий ассортимент и складские запасы.",
@@ -1133,6 +1278,7 @@ const HK_I18N = {
     "foot.cookie": "Политика cookie",
     "foot.brandkit": "Бренд-кит",
 
+    /* Çerez bildirimi şeridi */
     "cookie.title": "Уведомление о cookie.",
     "cookie.body": " Сайт использует только необходимые cookie для улучшения работы. Подробнее — в нашей ",
     "cookie.link": "Политике cookie",
@@ -1140,15 +1286,38 @@ const HK_I18N = {
     "cookie.accept": "Принимаю",
     "cookie.details": "Подробнее",
 
+    /* Bildirim (toast) metinleri */
     "toast.mailOpening": "Открываем почтовое приложение…",
     "toast.formErr": "Заполните, пожалуйста, поля имени и сообщения.",
     "toast.mailErr": "Введите корректный e-mail.",
     "toast.newsOk": "Вы подписаны на рассылку. Спасибо!",
 
+    /* E-posta yedeği — mailto konu/gövde metinleri (main.js) */
+    "mail.firm": "Компания",
+    "mail.contact": "Контактное лицо",
+    "mail.qty": "Ориентировочный объём",
+    "mail.taxNo": "Налоговая инспекция / номер",
+    "mail.email": "E-mail",
+    "mail.mobile": "Мобильный телефон",
+    "mail.phone": "Телефон",
+    "mail.address": "Адрес",
+    "mail.web": "Сайт",
+    "mail.message": "Сообщение",
+    "quote.mailIntro": "Здравствуйте, прошу предоставить цену на следующие продукты:",
+    "quote.mailSubject": "Запрос цены — Herkim Kimya",
+    "order.mailIntro": "Здравствуйте, хочу разместить следующий заказ:",
+    "order.mailSubject": "Заказ — Herkim Kimya",
+    "acct.mailIntro": "Здравствуйте, хочу подать заявку на клиентский аккаунт. Данные компании ниже:",
+    "acct.mailSubject": "Заявка на аккаунт — Herkim Kimya",
+    "news.mailIntro": "Здравствуйте, хочу подписаться на вашу рассылку.",
+    "news.mailSubject": "Подписка на рассылку — Herkim Kimya",
+
+    /* WhatsApp ve yüzen düğmeler */
     "wa.msg": "Здравствуйте, хочу получить информацию о вашей продукции.",
     "waFloat.title": "Написать в WhatsApp",
     "toTop": "Наверх",
 
+    /* İletişim bilgisi etiketleri */
     "ci.address": "Адрес",
     "ci.phone": "Телефон",
     "ci.email": "E-mail",
@@ -1156,6 +1325,7 @@ const HK_I18N = {
     "ci.hours": "Часы работы",
     "ci.hoursVal": "Будни 08:30 – 17:30",
 
+    /* Tarihçe zaman çizelgesi */
     "tl.1975.t": "Основание",
     "tl.1975.d": "Основана в кожевенном районе Казлычешме, Стамбул.",
     "tl.dist.t": "Рост",
@@ -1165,6 +1335,7 @@ const HK_I18N = {
     "tl.today.t": "Сегодня",
     "tl.today.d": "Один из ведущих поставщиков химии для кожевенной отрасли.",
 
+    /* Sayfa başlıkları (hero) */
     "page.corp.title": "Имя в кожевенной\nхимии с 1975 года.",
     "page.corp.lead": "История, ценности и принципы работы Herkim Kimya.",
     "page.catalog.title": "Каталог продукции",
@@ -1176,13 +1347,12 @@ const HK_I18N = {
     "docs.downloadBtn": "Скачать каталог продукции (PDF)",
     "page.docs.title": "Центр документов",
     "page.docs.lead": "Каталоги, TDS/SDS, сертификаты и фирменный стиль — в единой структуре.",
-    "page.news.title": "Новости",
-    "page.news.lead": "Участие в выставках, новинки и новости компании.",
     "page.contact.title": "Контакты и запрос",
     "page.contact.lead": "Заполните форму, позвоните или напишите в WhatsApp.",
     "page.kvkk.title": "Конфиденциальность и cookie",
     "page.kvkk.lead": "Защита персональных данных и использование cookie.",
 
+    /* Misyon & vizyon */
     "mission.kicker": "02 — Миссия и видение",
     "mission.title": "Зачем мы есть\nи куда идём.",
     "mission.m.t": "Миссия",
@@ -1192,6 +1362,7 @@ const HK_I18N = {
     "mission.val.t": "Ценности",
     "mission.val.d": "Доверие, труд и преемственность. Деловая этика, где рукопожатие — закон, и клиентские отношения на поколения.",
 
+    /* Kalite ve sertifikalar */
     "quality.kicker": "05 — Качество и сертификаты",
     "quality.title": "Мы говорим документами.",
     "cert.iso.t": "ISO 9001",
@@ -1203,6 +1374,7 @@ const HK_I18N = {
     "cert.rd.t": "НИОКР",
     "cert.rd.d": "Разработка рецептур и поддержка в собственной лаборатории.",
 
+    /* Sık sorulan sorular */
     "faq.kicker": "06 — Частые вопросы",
     "faq.title": "Полезно знать.",
     "faq.q1": "Откуда ваша продукция?",
@@ -1218,6 +1390,7 @@ const HK_I18N = {
     "faq.q6": "Каков минимальный заказ?",
     "faq.a6": "Зависит от продукта; работаем в единицах упаковки (бидон/бочка/IBC). Детали уточняются на этапе запроса.",
 
+    /* Hizmetler sayfası (hizmetler.html) */
     "srv.kicker": "01 — Услуги",
     "srv.title": "Полная поддержка,\nбольше чем продукт.",
     "srv.lead": "Продать правильную химию мало; мы обеспечиваем и её правильное применение.",
@@ -1227,30 +1400,30 @@ const HK_I18N = {
     "srv.arge.d": "Разрабатываем индивидуальные рецептуры в собственной лаборатории и оптимизируем ваши процессы.",
     "srv.teknik.t": "Техническая служба",
     "srv.teknik.d": "Полевая поддержка при вопросах применения; наши опытные инженеры-химики рядом с вами.",
+    "srv.stat.services": "Направлений услуг",
 
+    /* Ürün kataloğu ve ürün listesi tablosu */
     "cat.how.kicker": "Как это работает",
     "cat.how.step": "ШАГ",
     "cat.how.s1": "Добавьте нужные продукты в корзину запроса кнопкой +.",
     "cat.how.s2": "Отправьте корзину в WhatsApp или по e-mail одним кликом.",
     "cat.how.s3": "Отдел продаж ответит письменным предложением в кратчайший срок.",
-    "filter.allSubs": "Все подкатегории",
     "list.note": "* Цены зависят от курса и рынка; для точной цены запросите предложение. По продуктам вне списка — свяжитесь с нами.",
+    "tag.new": "Новинка",
+    "tag.featured": "Избранное",
+    "table.unit": "продукт(ов)",
     "th.no": "#",
     "th.name": "Наименование",
     "th.cat": "Категория",
     "th.brand": "Бренд",
-    "th.pack": "Упаковка",
     "th.doc": "Док.",
     "th.quote": "Запрос",
 
-    "docs.bk.kicker": "Цифровой бренд-кит",
-    "docs.bk.title": "Один бренд,\nединый вид.",
-    "docs.bk.lead": "От визиток до брендирования транспорта — эти правила действуют везде.",
-    "bk.logo": "01 · Использование лого",
-    "bk.color": "01 · Палитра",
-    "bk.type": "03 · Типографика",
-    "bk.voice": "02 · Тон общения",
+    /* Doküman merkezi kart bağlantıları */
+    "doc.download": "Скачать (PDF) ↓",
+    "doc.request": "Запросить →",
 
+    /* Teklif & iletişim formu */
     "f.kicker": "Форма запроса и контакта",
     "f.title": "Чем можем помочь?",
     "f.name": "Имя и фамилия",
@@ -1266,9 +1439,9 @@ const HK_I18N = {
     "t.sample": "Запрос образца",
     "t.other": "Другое",
     "contact.mapBtn": "Открыть в Google Maps",
-    "contact.depSales": "Продажи",
-    "contact.depGeneral": "Общий",
+    "contact.mapTitle": "Карта: Herkim Kimya — Deri OSB Pres Sok. No: 3, Тузла / Стамбул",
 
+    /* KVKK ve çerez politikası */
     "kvkk.s1.title": "Защита персональных данных",
     "kvkk.s1.body": "Herkim Kimya выступает оператором данных согласно закону Турции KVKK (№ 6698). Имя, компания, телефон и e-mail, переданные через формы, обрабатываются исключительно для выполнения вашего запроса и не передаются третьим лицам без вашего согласия. Свои права вы можете реализовать, написав на info@herkimgroup.com.",
     "kvkk.s2.title": "Использование cookie",

@@ -1,6 +1,28 @@
 /* ============================================================
    HERKİM PORTAL — Uygulama arayüzü (uçtan uca akış demosu)
    Herkim tasarım sistemi üzerine kurulur (style.css ile birlikte yüklenir).
+
+   ------------------------------------------------------------
+   İÇİNDEKİLER
+   Bölüme gitmek için başlık metnini aratın; sıra dosyadaki gerçek sıradır.
+
+     01  Giriş                        (.lgw, .lg-*, .rolebar, .sec-strip)
+     02  Uygulama kabuğu              (.app, .sb, .main, .topline)
+     03  KPI                          (.kpis, .kpi)
+     04  Panel / tablo                (.panel, .ptbl, .tbl-wrap)
+     05  Durum çipleri                (.st, .st--*)
+     06  İlerleme                     (.prog)
+     07  Sipariş oluşturma (katalog)  (.order-grid, .cat-*, .qty, .cart-*)
+     08  Operasyon (depo)             (.ops-note, .advance-btn)
+     09  Müşteri kartları             (.cust-grid, .cust-card, .cust-mini)
+     10  Aktivite / geçmiş            (.feed, .feed-*)
+     11  Huni (funnel)                (.funnel, .fun-*)
+     12  Çekmece                      (.ov2, .dw, .dw-*, .tl2, .reply-box)
+     13  Duyarlılık                   (@media 1080 / 860 / 560)
+     14  Hesap başvuruları            (.app-row, .app-*)
+
+   Renk ve tipografi belirteçleri style.css'in :root bloğundan gelir;
+   burada yeni belirteç tanımlanmaz.
    ============================================================ */
 
 .pt-body { background: #F3EEE6; min-height: 100vh; }
@@ -186,7 +208,12 @@
 .dw-head .sub { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
 .dw-x { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--crimson); letter-spacing: 0.08em; }
 .dw-body { flex: 1; overflow-y: auto; padding: 24px; }
-.dw-t { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; color: var(--ink-3); margin: 24px 0 12px; text-transform: uppercase; }
+/* text-transform: uppercase KALDIRILDI. Bu başlıklar Türkçe cümle
+   parçaları ("Sipariş durumu", "Görüşme geçmişi", "İletişim"); CSS ile
+   büyütmek noktalı İ'yi bozma riskini taşıyor. Büyük harf isteniyorsa
+   metnin kendisi kaynakta büyük yazılmalı — o metin portal.html ve
+   i18n'de, bu dosyada değil. */
+.dw-t { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; color: var(--ink-3); margin: 24px 0 12px; }
 .dw-t:first-child { margin-top: 0; }
 .tl2 { position: relative; padding-left: 26px; }
 .tl2::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
