@@ -4,26 +4,31 @@
    Dinamik içerik güvenli DOM API'leri (createElement/textContent) ile üretilir.
    ------------------------------------------------------------
    İÇİNDEKİLER  (satır no'lar yaklaşıktır; bölüm başlıkları "==== n)" ile aranabilir)
-     —)  Yardımcılar, kısayollar ve türetilen sabitler ......... satır  31
-     1)  Başlık davranışı ve mobil menü ....................... satır  67
-     2)  Dil değiştirici ...................................... satır  91
-     3)  Döviz kuru ........................................... satır 103
-     4)  Görünürlük animasyonları ve sayaçlar ................. satır 133
-     5)  Toast ................................................ satır 171
-     6)  Sepet: teklif + doğrudan sipariş ..................... satır 184
-         6a) Depo (localStorage) ve durum ..................... satır 186
-         6b) Sepete özel küçük yardımcılar .................... satır 230
-         6c) Görünümler: sepet / onay / misafir teklifi ....... satır 279
-         6d) Sipariş gönderimi ve e-posta yedeği .............. satır 425
-         6e) Çizim ve çekmece aç/kapa ......................... satır 474
-         6f) Teklif gönderimi (WhatsApp / e-posta) ............ satır 521
-     7)  Ürün kartı ........................................... satır 557
-     8)  Dinamik içerik (dil değişince yeniden çizilir) ....... satır 584
-     9)  Site içi arama ....................................... satır 739
-    10)  Çerez bildirimi ...................................... satır 789
-    11)  Formlar (iletişim + hesap başvurusu) ................. satır 798
-    12)  Siparişlerim + e-bülten .............................. satır 923
-    13)  Tanıtım videosu ve WhatsApp bağlantıları ............. satır 1025
+     —)  Yardımcılar, kısayollar ve türetilen sabitler ......... satır  36
+         Katalog kaynağı (data.js + portal ekleri) ........... satır  65
+     1)  Başlık davranışı ve mobil menü ....................... satır  94
+     2)  Dil değiştirici ...................................... satır 118
+     3)  Döviz kuru ........................................... satır 130
+     4)  Görünürlük animasyonları ve sayaçlar ................. satır 160
+     5)  Toast ................................................ satır 235
+     6)  Sepet: teklif + doğrudan sipariş ..................... satır 248
+         6a) Depo (localStorage) ve durum ..................... satır 250
+         6b) Sepete özel küçük yardımcılar .................... satır 295
+         6c) Görünümler: sepet / onay / misafir teklifi ....... satır 349
+         6d) Sipariş gönderimi ve e-posta yedeği .............. satır 497
+         6e) Çizim ve çekmece aç/kapa ......................... satır 577
+         6f) Teklif gönderimi (WhatsApp / e-posta) ............ satır 625
+     7)  Ürün kartı ........................................... satır 661
+     8)  Dinamik içerik (dil değişince yeniden çizilir) ....... satır 688
+     9)  Site içi arama ....................................... satır 878
+    10)  Çerez bildirimi ...................................... satır 928
+    11)  Formlar (iletişim + hesap başvurusu) ................. satır 937
+    12)  Siparişlerim + e-bülten .............................. satır 1062
+    13)  Tanıtım videosu ve WhatsApp bağlantıları ............. satır 1164
+
+   KATALOG: ürün ve doküman listeleri HK_PRODUCTS/HK_DOCS'tan DOĞRUDAN değil,
+   allProducts()/allDocs() üzerinden okunur; böylece portalda eklenen kayıtlar
+   da (yalnızca ekleyenin kendi tarayıcısında) listelerde görünür.
    ============================================================ */
 (function () {
   "use strict";
@@ -56,6 +61,28 @@
   const SUB_LABEL = (sub) => (HK_SUBS[sub] ? pick(HK_SUBS[sub]) : sub);
   const SUB_CODE = (sub) => (HK_SUBS[sub] ? HK_SUBS[sub].code : "•");
   const PNAME = (p) => pick(p.n);
+
+  /* KATALOG KAYNAĞI — yayınlı liste (data.js) + portalda eklenenler.
+     portal-store.js her sayfada main.js'ten ÖNCE yüklenir, ama yüklenememiş,
+     bir eklenti tarafından engellenmiş ya da localStorage kapatılmış olabilir.
+     Böyle bir durumda yayınlı katalog EKRANDAN KAYBOLMAMALI: birleştirici yoksa
+     ya da beklenmedik bir şey dönerse doğrudan data.js dizisine düşülür.
+     Not: portal ekleri yalnızca EKLEYENİN kendi tarayıcısında durur; siteye
+     gerçekten yayınlanmaları için portalın dışa aktardığı kod data.js'e
+     yapıştırılıp commit'lenmelidir. */
+  function safeList(fn, base) {
+    if (typeof fn === "function") {
+      try {
+        const out = fn();
+        if (Array.isArray(out) && out.length) return out;
+      } catch (_) {}
+    }
+    return base;
+  }
+  /* Her çizimde yeniden okunur ki portalda eklenen kayıt, sayfa yenilenince
+     (ya da dil değişip yeniden çizilince) yerini alsın. */
+  const allProducts = () => safeList(window.hgpAllProducts, HK_PRODUCTS);
+  const allDocs = () => safeList(window.hgpAllDocs, HK_DOCS);
 
   /* Açılır panellerin durumu ekran okuyucuya da bildirilsin: tetikleyicide
      aria-expanded, panelin kendisinde aria-hidden güncellenir. */
@@ -188,6 +215,21 @@
     $$("[data-hk-years]").forEach(n => { n.textContent = v; });
   }
   syncYearCounters();
+
+  /* Ürün sayısı da tek yerden türetilir. Sayfaya elle yazılan "42" her yeni
+     üründe sessizce yanlışa döner; [data-hk-products] taşıyan her düğüme
+     birleşik katalogun uzunluğu yazılır. Düğümde data-count varsa sayaç
+     animasyonu da bu değeri okusun diye o da güncellenir (yıl sayaçlarındaki
+     kalıbın aynısı). HTML'deki sabit sayı, JS çalışmazsa görünecek yedektir. */
+  function syncProductCounters() {
+    const v = String(allProducts().length);
+    $$("[data-hk-products]").forEach(n => {
+      if (n.hasAttribute("data-count")) n.dataset.count = v;
+      n.textContent = v;
+    });
+  }
+  syncProductCounters();
+
   $$("[data-count]").forEach(node => cio.observe(node));
 
   /* ============ 5) Toast ============ */
@@ -231,7 +273,8 @@
   let lastOrderId = "";
 
   function addToBasket(id) {
-    const p = HK_PRODUCTS.find(x => x.id === id);
+    // Portalda eklenen ürünler de sepete girebilmeli: birleşik listede aranır.
+    const p = allProducts().find(x => x.id === id);
     if (!p) return;
     const b = getBasket();
     const line = b.find(x => x.id === id);
@@ -252,10 +295,15 @@
   /* ---- 6b) Sepete özel küçük yardımcılar ---- */
 
   /* Sepet satırlarını ürün kaydıyla eşler; silinmiş id'ler elenir.
-     Teklif metni, sipariş kalemleri ve e-posta yedekleri hep bunu kullanır. */
-  const basketEntries = () => getBasket()
-    .map(line => { const p = HK_PRODUCTS.find(x => x.id === line.id); return p ? { p: p, qty: line.qty || 1 } : null; })
-    .filter(Boolean);
+     Teklif metni, sipariş kalemleri ve e-posta yedekleri hep bunu kullanır.
+     Eşleme birleşik listeden yapılır; yoksa portalda eklenip sepete konan bir
+     ürün diğer sayfada sessizce düşerdi. */
+  const basketEntries = () => {
+    const all = allProducts();
+    return getBasket()
+      .map(line => { const p = all.find(x => x.id === line.id); return p ? { p: p, qty: line.qty || 1 } : null; })
+      .filter(Boolean);
+  };
 
   /* Çekmece altındaki gri açıklama satırı */
   function smallNote(text) {
@@ -305,8 +353,9 @@
       const u = window.hkAuth.user();
       body.appendChild(el("span", "bd-mode", "● " + T("basket.modePill") + " — " + u.company));
     }
+    const all = allProducts();
     b.forEach(line => {
-      const p = HK_PRODUCTS.find(x => x.id === line.id);
+      const p = all.find(x => x.id === line.id);
       if (!p) return;
       const item = el("div", "bd-item");
       const info = el("div");
@@ -349,8 +398,9 @@
     const h = el("h4", null, T("order.confirmTitle"));
     h.style.cssText = "font-family:var(--font-display);font-weight:800;font-size:17px;margin-bottom:6px";
     body.appendChild(h);
+    const all = allProducts();
     b.forEach(line => {
-      const p = HK_PRODUCTS.find(x => x.id === line.id);
+      const p = all.find(x => x.id === line.id);
       if (!p) return;
       const row = el("div", "bd-item");
       const info = el("div");
@@ -460,6 +510,37 @@
       "?subject=" + encodeURIComponent(T("order.mailSubject") + " — " + u.company) +
       "&body=" + encodeURIComponent(body);
     toast(T("toast.mailOpening"));
+    /* Sepeti BURADA kendiliğinden boşaltmayız: taslağın gerçekten gönderildiğini
+       tarayıcıdan bilemeyiz, kullanıcı e-posta penceresini kapatmış olabilir.
+       Bunun yerine boşaltma kararını kullanıcıya bırakan bir adım gösteririz —
+       aksi hâlde sepet hiç temizlenmiyor ve kalıcı olarak dolu kalıyordu. */
+    bdView = "handoff";
+    renderBasket();
+  }
+
+  /* Mailto devri sonrası: "gönderdim" onayı sepeti boşaltır. */
+  function renderHandoff(body) {
+    const box = el("div", "bd-success");
+    box.appendChild(el("h4", null, T("order.handoffTitle")));
+    const p = el("p", null, T("order.handoffBody"));
+    p.style.marginTop = "8px";
+    box.appendChild(p);
+    const sent = el("button", "btn btn--primary", T("order.handoffSent"));
+    sent.type = "button";
+    sent.style.cssText = "width:100%;justify-content:center;margin-top:18px";
+    sent.addEventListener("click", () => {
+      setBasket([]);            // setBasket zaten yeniden çizer
+      bdView = "cart";
+      renderBasket();
+      closeBasket();
+    });
+    box.appendChild(sent);
+    const back = el("button", "btn btn--ghost btn--sm", T("order.handoffBack"));
+    back.type = "button";
+    back.style.cssText = "width:100%;justify-content:center;margin-top:10px";
+    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
+    box.appendChild(back);
+    body.appendChild(box);
   }
 
   /* Sipariş ancak GERÇEKTEN iletildikten sonra "alındı" sayılır: portal kaydı da,
@@ -524,6 +605,7 @@
       empty.appendChild(p1); body.appendChild(empty);
       return;
     }
+    if (bdView === "handoff") { renderHandoff(body); return; }
     if (bdView === "confirm") { renderConfirm(body, b); return; }
     if (bdView === "quoteform") { renderQuoteForm(body); return; }
     renderCart(body, b);
@@ -610,17 +692,34 @@
   const tableState = { q: "", cat: "all" };
   let tableSortKey = "id", tableSortDir = 1;
 
+  /* ÜRÜN SIRALAMASI — önce "yeni", sonra "öne çıkan", sonra geri kalanlar.
+     Etiketler data.js'te p.tag alanındadır ("yeni" | "one" | null). Rozetleri
+     productCard() basar; burada yalnızca SIRA belirlenir, yani rozet ile sıra
+     tek kaynaktan (p.tag) türer ve ikisi asla ayrışmaz.
+     Aynı öncelikteki ürünler data.js'teki sırayı (id) korur: Array#sort ES2019'dan
+     beri kararlıdır, yine de niyet açık olsun diye id karşılaştırması yazıldı.
+     Portalda eklenen ürünler de aynı p.tag alanını taşır ve bu sıralamaya
+     yayınlı ürünlerle BİRLİKTE girer: "yeni" etiketli bir portal ürünü listenin
+     sonuna değil BAŞINA gelir. Portal id'leri 9000'in üstündedir; id yalnızca
+     eşitlik bozucudur, bu yüzden büyük id sırayı değil sadece aynı etiket
+     grubundaki yeri belirler (portal ekleri kendi grubunun sonunda).
+     YENİ ETİKET EKLERSENİZ: sadece HK_TAG_ORDER'a bir satır ekleyin. */
+  const HK_TAG_ORDER = { yeni: 0, one: 1 };
+  const tagRank = (p) => (p && p.tag in HK_TAG_ORDER) ? HK_TAG_ORDER[p.tag] : 2;
+  const byHighlight = (a, b) => tagRank(a) - tagRank(b) || a.id - b.id;
+
   function renderFeatured() {
     const wrap = $("#featured-products");
     if (!wrap) return;
-    const featured = HK_PRODUCTS.filter(p => p.tag).concat(HK_PRODUCTS.filter(p => !p.tag)).slice(0, FEATURED_LIMIT);
+    const featured = allProducts().slice().sort(byHighlight).slice(0, FEATURED_LIMIT);
     wrap.replaceChildren(...featured.map(productCard));
   }
 
   function renderGrid() {
     const wrap = $("#product-grid");
     if (!wrap) return;
-    const list = HK_PRODUCTS.filter(p => {
+    const all = allProducts();
+    const list = all.filter(p => {
       if (catState.cat !== "all" && CAT_OF(p.sub) !== catState.cat) return false;
       if (catState.sub !== "all" && p.sub !== catState.sub) return false;
       if (catState.q) {
@@ -629,6 +728,8 @@
       }
       return true;
     });
+    /* Filtre/arama sonucunda da yeni ve öne çıkan ürünler en üstte kalır. */
+    list.sort(byHighlight);
     if (list.length) wrap.replaceChildren(...list.map(productCard));
     else {
       const msg = el("p", "muted");
@@ -639,13 +740,14 @@
       wrap.replaceChildren(msg);
     }
     const rc = $("#grid-count");
-    if (rc) rc.textContent = list.length + " / " + HK_PRODUCTS.length;
+    // Payda da birleşik listeden gelir; yoksa "43 / 42" gibi bir sayı çıkardı.
+    if (rc) rc.textContent = list.length + " / " + all.length;
   }
 
   function renderTable() {
     const tbody = $("#ptable-body");
     if (!tbody) return;
-    let list = HK_PRODUCTS.slice();
+    let list = allProducts().slice();
     if (tableState.cat !== "all") list = list.filter(p => CAT_OF(p.sub) === tableState.cat);
     if (tableState.q) {
       const q = trLower(tableState.q);
@@ -692,7 +794,7 @@
   function renderDocs() {
     const wrap = $("#doc-grid");
     if (!wrap) return;
-    let list = HK_DOCS.filter(d => docState.cat === "all" || d.cat === docState.cat);
+    let list = allDocs().filter(d => docState.cat === "all" || d.cat === docState.cat);
     if (wrap.dataset.home) list = list.slice(0, DOC_HOME_LIMIT);
     wrap.replaceChildren(...list.map(d => {
       const card = el("article", "doc-card");
@@ -701,9 +803,16 @@
       card.appendChild(el("p", null, pick(d.desc)));
       const meta = el("div", "dc-meta");
       meta.appendChild(el("span", null, pick(d.meta)));
-      const link = el("a", "dc-link", d.file ? T("doc.download") : T("doc.request"));
-      link.href = d.file || "iletisim.html";
-      if (d.file) link.setAttribute("download", "");
+      /* Yolu ÇİZİM ANINDA bir kez daha denetleriz. hgpAddDoc zaten denetliyor,
+         ama o zaman deponun tek kapı olması gerekirdi: hg_store_v1 aynı kaynaktaki
+         herhangi bir betikle ya da konsoldan elle yazılabilir ve buradaki değer
+         her ziyaretçinin tıkladığı <a href> olur. Denetim başarısızsa bağlantı
+         indirme değil "talep et" hâline döner — bozuk kayıt kartı gizlemez. */
+      const safeFile = (typeof window.hgpSafeDocPath === "function")
+        ? window.hgpSafeDocPath(d.file) : d.file;
+      const link = el("a", "dc-link", safeFile ? T("doc.download") : T("doc.request"));
+      link.href = safeFile || "iletisim.html";
+      if (safeFile) link.setAttribute("download", "");
       meta.appendChild(link); card.appendChild(meta);
       return card;
     }));
@@ -756,7 +865,22 @@
   window.hkRenderDynamic();
   renderBasket();
   document.addEventListener("hk:langchange", () => { observeReveal(document); renderBasket(); });
-  document.addEventListener("hk:authchange", () => { bdView = "cart"; renderBasket(); renderTable(); });
+  /* SEPET OTURUMA BAĞLIDIR. Çıkış yapıldığında ya da BAŞKA bir müşteri hesabına
+     geçildiğinde sepet boşaltılır: ortak bir bilgisayarda bir sonraki kullanıcı
+     öncekinin sepetini görmemeli, sipariş yanlış firmaya bağlanmamalıdır.
+     Misafirden girişe geçiş (kimlik yok → kullanıcı) sepeti KORUR; ziyaretçi
+     sepetini doldurup sonra giriş yapmış olabilir, bu meşru bir akıştır. */
+  const userKey = () => {
+    const u = window.hkAuth && window.hkAuth.user();
+    return u ? (u.email || u.company || u.role) : null;
+  };
+  let lastUserKey = userKey();
+  document.addEventListener("hk:authchange", () => {
+    const now = userKey();
+    if (lastUserKey && now !== lastUserKey) setBasket([]);
+    lastUserKey = now;
+    bdView = "cart"; renderBasket(); renderTable();
+  });
 
   /* ============ 9) Site içi arama ============ */
   const SEARCH_FOCUS_MS = 60;      // katman açılış animasyonu bitmeden odak vermeyelim
@@ -795,7 +919,7 @@
     function renderResults(q) {
       const qq = trLower(q.trim());
       if (!qq) { results.replaceChildren(...PAGES().map(p => row(p.t, T("nav.corporate"), p.h))); return; }
-      const prods = HK_PRODUCTS
+      const prods = allProducts()
         .filter(p => trLower([p.n.tr, p.n.en, p.n.ru, p.brand].join(" ")).includes(qq))
         .slice(0, SEARCH_PROD_LIMIT)
         .map(p => row(PNAME(p), p.brand, "urun-listesi.html"));

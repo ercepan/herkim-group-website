@@ -547,9 +547,15 @@ h3.display { font-size: var(--fs-h3); }
    ikinci bir sütun koymayın. */
 .sec-head { margin-bottom: var(--space-head); }
 .sec-head .display { margin-top: var(--space-sm); }
+/* Başlık bloğundan SONRA gelen her doğrudan çocuk aynı aralığı alır. Kural
+   ögeye değil KONUMA bağlıdır; çünkü bu blok kimi bölümde <p class="lead">,
+   kimisinde <a class="btn">, kimisinde düz bir <div> ile bitiyor. Yalnızca
+   .lead'e üst boşluk verildiğinde düğmeyle biten bölümlerde düğme başlığa
+   yapışıyordu (bkz. "06 — Doküman Merkezi"). */
+.sec-head > * + * { margin-top: var(--space-md); }
 /* Açıklama ölçüsü tek noktadan: HTML'de satır içi max-width YAZMAYIN.
    (Eskiden sayfalara dağılmış 38ch/40ch/44ch değerleri vardı.) */
-.sec-head .lead { margin-top: var(--space-md); max-width: 58ch; }
+.sec-head .lead { max-width: 58ch; }
 .sec-no {
   position: absolute; top: 26px; right: var(--gutter);
   font-family: var(--font-display); font-weight: 800; font-stretch: 120%;
@@ -658,7 +664,12 @@ h3.display { font-size: var(--fs-h3); }
 }
 .ec-formula sub { font-size: 0.55em; }
 .ec-name { font-weight: 600; font-size: var(--fs-body); line-height: 1.3; }
-.ec-meta { margin-top: auto; padding-top: var(--space-sm); font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-3); display: flex; flex-direction: column; gap: 3px; }
+/* Sağdaki padding, mutlak konumlu "+" düğmesine (.ec-add) AYRILMIŞ YERDİR.
+   .ec-add akıştan çıktığı için metin onun altına girer ve uzun kategori adları
+   düğmeyle çakışırdı ("Deri & Tabaklama Kimyasalları"). Hesap: düğme sağdan
+   14px içeride ve 36px geniş; kartın kendi padding'i 18px. 14 + 36 − 18 = 32px
+   örtüşme, + 12px nefes payı = 44px. .ec-add ölçüsü değişirse burayı da güncelleyin. */
+.ec-meta { margin-top: auto; padding-top: var(--space-sm); padding-right: 44px; font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-3); display: flex; flex-direction: column; gap: 3px; }
 .ec-add {
   position: absolute; right: 14px; bottom: 14px; z-index: 2;
   width: 36px; height: 36px;
@@ -806,12 +817,36 @@ h3.display { font-size: var(--fs-h3); }
   border: 1.5px solid var(--line);
   border-radius: var(--radius);
   transition: border-color 0.15s, box-shadow 0.15s;
+  /* Yazı tipi/boyutu kalıtılmaz: form ögeleri tarayıcının kendi varsayılanını
+     kullanır. Belirtilmezse <select> diğer alanlardan farklı görünür. */
+  font-family: inherit; font-size: var(--fs-body); color: var(--ink);
+  line-height: 1.4;
+  width: 100%;
 }
 .field input:focus, .field select:focus, .field textarea:focus {
   outline: none; border-color: var(--crimson);
   box-shadow: 3px 3px 0 rgba(163, 28, 60, 0.25);
 }
 .field textarea { min-height: 130px; resize: vertical; }
+
+/* <select>: yerel (native) görünümü kapatıp diğer alanlarla aynı kutuya oturtur.
+   appearance:none olmadan tarayıcı kendi çerçevesini, yüksekliğini ve okunu
+   çizer; alan komşusu <input>'tan alçak ve farklı kenarlıklı görünür.
+   Ok işareti gömülü SVG'dir — CSP dış kaynak yüklemeye izin vermez ve harici
+   bir görsel için ekstra istek atmaya değmez. Sağdaki padding oku metnin
+   üstüne bindirmemek içindir. */
+.field select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  padding-right: 42px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23A31C3C' stroke-width='1.8' stroke-linecap='square'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 12px 8px;
+}
+/* Açılır listenin kendi satırları işletim sistemi tarafından çizilir; yalnızca
+   renkleri devralabiliriz. */
+.field select option { color: var(--ink); background: var(--white); }
 
 /* ---------- Alt bilgi ---------- */
 .footer { background: var(--ink); color: var(--paper); }

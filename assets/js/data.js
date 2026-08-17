@@ -17,6 +17,16 @@
 
    Hepsi `const` — window'a YAZILMAZ. Diğer dosyalar bu adlara çıplak isimle
    başvurduğu için data.js her sayfada en başta yüklenmek zorundadır.
+
+   YAYINLANMIŞ KAYNAK BURASIDIR
+     HK_PRODUCTS ve HK_DOCS, siteyi ziyaret eden HERKESİN gördüğü listelerdir.
+     Portal (portal.html) bu listelere kayıt ekleyebilir; ancak o kayıtlar
+     yalnızca EKLEYEN KİŞİNİN KENDİ TARAYICISINDA (localStorage) durur — başka
+     bir bilgisayardan giren ziyaretçi onları GÖRMEZ. Portal eki bir önizlemedir.
+     Gerçekten yayınlamak için: portaldaki dışa aktarma çıktısı aşağıdaki
+     dizilere yapıştırılır ve commit edilir. Site ancak o zaman değişir.
+     Ana site listeleri main.js'teki allProducts()/allDocs() ile okur: bu iki
+     dizi + varsa portal ekleri.
    ============================================================ */
 
 /* Şirket künyesi.

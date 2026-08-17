@@ -8,6 +8,16 @@
    window'a yazılır. Sebep: sayfadaki başka bir script'in hgpGet/hgNotify gibi
    isimleri sessizce ezmesini engellemek ve bu katmanın genel API'sini tek
    bakışta okunur kılmak. Yeni bir şey dışarıya açılacaksa o bloğa eklenir.
+
+   İÇİNDEKİLER
+     Oturum sabitleri · demo kullanıcıları · müşteri kartları
+     Depo API'si (hgpGet / hgpSave / hgpAct) ve sipariş–talep akışı
+     Hesap başvurusu (VKN/TCKN doğrulama, onay–red)
+     KATALOG EKLERİ — portalda eklenen ürün ve dokümanlar + data.js'e
+       yapıştırılacak kodu üreten dışa aktarım (hgpAddProduct … hgpExportDocs).
+       Bu bölüm ANA SİTEDE de çalışır: hgpAllProducts / hgpAllDocs her render'da
+       çağrılır, bu yüzden ucuz ve istisna fırlatmaz olmak zorundadır.
+     Gerçek bildirim (hgNotify)
    ============================================================ */
 (function () {
   "use strict";
@@ -139,7 +149,10 @@
       ],
       applications: hgpSeedApps(),
       accounts: [],   // onaylı web hesapları: {email, name, company, initials}
-      customers: []   // onaylı başvurulardan doğan CRM kartları
+      customers: [],  // onaylı başvurulardan doğan CRM kartları
+      customProducts: [], // portalda eklenen ürünler (bkz. KATALOG EKLERİ bölümü)
+      customDocs: [],     // portalda eklenen dokümanlar
+      customSeq: {}       // katalog eklerinde dağıtılmış en yüksek kimlik (geri sayılmaz)
     };
   }
 
@@ -162,18 +175,44 @@
 
   /* UYARI — hgpGet() saf bir OKUMA DEĞİLDİR, çağrıldığında depoya YAZAR:
        1) depo boş/bozuksa tohum veriyi yazar (hgpSeed + hgpSave),
-       2) eski sürüm depoya applications/accounts/customers alanlarını ekler (taşıma),
+       2) eski sürüm depoya applications/accounts/customers ve
+          customProducts/customDocs/customSeq alanlarını ekler (taşıma),
        3) ana sitedeki formdan biriken talep kuyruğunu (HGP_QUEUE) içeri alıp
           kuyruğu SİLER ve depoyu kaydeder.
      Yani salt görüntüleme amacıyla çağrıldığında bile localStorage değişebilir.
      Yapı riskli olduğu için bilinçli olarak bölünmemiştir; değiştirmeden önce
      tüm çağrı yerlerini (portal-app.js, site-auth.js, main.js) gözden geçirin. */
+  /* SALT-OKUNUR erişim — hgpGet() ile karıştırmayın.
+     hgpGet() saf bir okuma DEĞİLDİR: depo boşsa demo tohumunu YAZAR, taşıma
+     yapar ve landing kuyruğunu boşaltır. Bu, portalda doğru davranıştır.
+     Ama hgpAllProducts/hgpAllDocs artık HERKESE AÇIK sayfalarda her çizimde
+     çağrılıyor; orada hgpGet() kullanmak, siteyi ziyaret eden HERKESİN
+     tarayıcısına 6 sahte sipariş, 6 etkinlik ve kişisel veri biçiminde bir
+     hesap başvurusu yazıyordu (ölçüldü: 3688 bayt). Ziyaretçinin deposuna
+     uydurma iş kaydı yazmak KVKK açısından da savunulamaz.
+     hgpPeek() hiçbir şey yazmaz; depo yoksa null döner. */
+  function hgpPeek() {
+    try { return JSON.parse(localStorage.getItem(HGP_KEY)) || null; }
+    catch (e) { return null; }
+  }
+
   function hgpGet() {
     var s = null;
     try { s = JSON.parse(localStorage.getItem(HGP_KEY)); } catch (e) {}
     if (!s || !s.orders) { s = hgpSeed(); hgpSave(s); }
     // Eski depo sürümlerine hesap alanlarını ekle (taşıma)
     if (!s.applications) { s.applications = hgpSeedApps(); s.accounts = []; s.customers = []; hgpSave(s); }
+    /* Katalog eklerini eski depolara ekle (taşıma). Alanlar AYRI AYRI
+       denetlenir: yalnızca birini taşıyan bir ara sürümden gelen depo da
+       eksiksiz tamamlansın, mevcut kayıtlar ezilmesin. customSeq boş bir nesne
+       olarak başlar; ilk ekleme sırasında listedeki en büyük kimlikten devam
+       eder, yani taşınan depoda kimlik çakışmaz. */
+    if (!s.customProducts || !s.customDocs || !s.customSeq) {
+      if (!s.customProducts) s.customProducts = [];
+      if (!s.customDocs) s.customDocs = [];
+      if (!s.customSeq) s.customSeq = {};
+      hgpSave(s);
+    }
     // Ana sitedeki iletişim formundan düşen talepleri içeri al (Landing → CRM)
     try {
       var q = JSON.parse(localStorage.getItem(HGP_QUEUE)) || [];
@@ -406,7 +445,378 @@
     return a.status;
   }
 
-  /* Demoyu sıfırla */
+  /* ============================================================
+     KATALOG EKLERİ — portalda eklenen ürünler ve dokümanlar
+     ------------------------------------------------------------
+     DÜRÜST SINIR — ARAYÜZDE DE AYNEN YAZILMALIDIR:
+     buradaki her kayıt localStorage'dadır, yani YALNIZCA eklendiği tarayıcıda
+     ve o cihazda durur. Satışın dizüstünde eklenen bir ürün, başka bir
+     bilgisayardan siteye giren müşteride GÖRÜNMEZ. Bu katman iki şey verir:
+       1) operatörün kendi tarayıcısında canlı ÖNİZLEME
+          (hgpAllProducts / hgpAllDocs — ana sitede de çağrılır),
+       2) hgpExportProducts / hgpExportDocs ile data.js'e yapıştırılacak kodun
+          kendisi.
+     Yayına çıkmanın TEK yolu (2)'deki kodu assets/js/data.js'e yapıştırıp
+     commit + push etmektir. Hiçbir yerde "yayınlandı" izlenimi verilmemelidir.
+     ============================================================ */
+
+  /* Portalda eklenen kayıtların kimlikleri 9001'den başlar: data.js'teki
+     1..42 aralığıyla ASLA çakışmaz ve kimliğe bakan kişi kaydın portaldan
+     geldiğini anında anlar. Aynı taban dokümanlar için de kullanılır. */
+  var HGP_CUSTOM_ID_BASE = 9000;
+
+  /* Doküman kategorileri — data.js'teki HK_DOCS cat değerleriyle birebir.
+     Buraya yeni bir kategori eklemek tek başına yetmez; dokumanlar.html'deki
+     süzgeç ve i18n anahtarları da aynı anda güncellenmelidir. */
+  var HGP_DOC_CATS = ["katalog", "teknik", "sertifika", "marka", "hukuki"];
+
+  function hgpStr(x) { return String(x == null ? "" : x).trim(); }
+
+  /* data.js'teki const'lar window'a YAZILMAZ; ayrıca const oldukları için,
+     bu dosya bir gün data.js'ten ÖNCE yüklenirse çıplak isme dokunmak
+     "geçici ölü bölge" (TDZ) yüzünden typeof ile bile istisna fırlatır.
+     Bu yüzden her erişim try/catch içindedir ve her zaman bir dizi döner. */
+  function hgpBaseProducts() {
+    try { return (typeof HK_PRODUCTS !== "undefined" && HK_PRODUCTS) ? HK_PRODUCTS : []; }
+    catch (e) { return []; }
+  }
+  function hgpBaseDocs() {
+    try { return (typeof HK_DOCS !== "undefined" && HK_DOCS) ? HK_DOCS : []; }
+    catch (e) { return []; }
+  }
+
+  /* sub, data.js'teki HK_SUBS anahtarlarından biri olmak zorundadır.
+     HK_SUBS yoksa doğrulayacak listemiz de yoktur: uydurmak yerine REDDEDERİZ.
+     Doğrulanmamış bir kategori katalogda sessizce kırık kart üretir. */
+  function hgpKnownSub(sub) {
+    if (!sub) return false;
+    var subs = null;
+    try { subs = (typeof HK_SUBS !== "undefined" && HK_SUBS) ? HK_SUBS : null; }
+    catch (e) { subs = null; }
+    if (!subs) {
+      console.warn("Herkim portal: HK_SUBS okunamadı (data.js yüklenmemiş) — ürün kategorisi doğrulanamadı, kayıt YAPILMADI.");
+      return false;
+    }
+    return Object.prototype.hasOwnProperty.call(subs, sub);
+  }
+
+  /* Üç dilli zorunlu alan: üçü de doluysa kırpılmış nesne, değilse null.
+     Kural — kullanıcıya görünen her metin tr/en/ru üçünde de var olmalıdır. */
+  function hgpTriple(o) {
+    var v = o || {};
+    var t = { tr: hgpStr(v.tr), en: hgpStr(v.en), ru: hgpStr(v.ru) };
+    return (t.tr && t.en && t.ru) ? t : null;
+  }
+
+  /* Üç dilli isteğe bağlı alan (doküman açıklaması/meta): boş kalabilir ama
+     alanın kendisi HK_DOCS şeklindeki gibi her zaman üç anahtarlı durur. */
+  function hgpTripleOpt(o) {
+    var v = o || {};
+    return { tr: hgpStr(v.tr), en: hgpStr(v.en), ru: hgpStr(v.ru) };
+  }
+
+  /* tag yalnızca "yeni" (yeni ürün) ya da "one" (öne çıkan) olabilir;
+     boş dize dâhil başka her değer null'a düşer — data.js'teki karşılığı budur. */
+  function hgpTag(t) {
+    var v = hgpStr(t);
+    return (v === "yeni" || v === "one") ? v : null;
+  }
+
+  /* Sıradaki kimlik — KİMLİK ASLA GERİ KULLANILMAZ.
+     Dizi uzunluğu kimlik üretmek için kullanılamaz; ama yalnızca listedeki en
+     büyük kimliğe bakmak da YETMEZ: en son eklenen kayıt silinince liste
+     küçülür ve bir sonraki ekleme aynı kimliği ikinci kez üretirdi. O kimlik
+     çoktan dışa aktarılmış, ekranda gösterilmiş, konuşulmuş olabilir.
+     Bu yüzden en yüksek kimlik depoda ayrıca saklanır (customSeq) ve sayaç
+     yalnızca ileri gider. Listedeki en büyük kimlik yine de hesaba katılır:
+     depo elle kurcalanmış ya da eski bir yedekten gelmiş olabilir.
+     Sayacın kaydedilmesi çağıranın hgpSave(s) çağrısıyla olur. */
+  function hgpNextCustomId(s, field) {
+    var arr = (s && s[field]) || [], i, id;
+    var max = Number(s.customSeq && s.customSeq[field]);
+    if (!isFinite(max) || max < HGP_CUSTOM_ID_BASE) max = HGP_CUSTOM_ID_BASE;
+    for (i = 0; i < arr.length; i++) {
+      id = Number(arr[i] && arr[i].id);
+      if (isFinite(id) && id > max) max = id;
+    }
+    max += 1;
+    if (!s.customSeq) s.customSeq = {};
+    s.customSeq[field] = max;
+    return max;
+  }
+
+  /* GÜVENLİK — doküman yolu denetimi. Süs değil, gerçek bir denetimdir.
+     Buradaki değer ANA SİTEDEKİ doküman merkezinde <a href> içine yazılır:
+       · "javascript:" yazan bir operatör (ya da konsoldan depoyu kurcalayan
+         biri) siteyi açan herkeste kod çalıştırabilirdi,
+       · "data:" ile sahte bir belge gömülebilirdi,
+       · "//baska.adres" veya "http://…" kullanıcıyı sessizce dışarı götürürdü.
+     Bu yüzden yalnızca GÖRELİ dosya yolu kabul edilir. İki nokta üst üste
+     içeren her değer reddedilir; bu tek kural bilinen/bilinmeyen bütün şemaları
+     (javascript:, data:, vbscript:, http:, https:, …) birden kapatır — şema adı
+     listesi tutmak, listede olmayan bir şema çıktığında sessizce açık kalır.
+     Görünmez denetim karakterleri şemayı gizlemek için kullanılabildiğinden
+     denetimden ÖNCE temizlenir.
+     Boş yol GEÇERLİDİR: dosyası olmayan kart, data.js'te file alanı bulunmayan
+     kayıtlar gibi "talep et" bağlantısı üretir.
+     Dönüş: temizlenmiş yol, boş dize (dosyasız) ya da null (güvensiz). */
+  function hgpSafeDocPath(x) {
+    /* SIRA ÖNEMLİDİR — önce denetim karakterleri silinir, SONRA kırpılır.
+       Ters sırada (hgpStr önce trim ediyordu) şu atlatma çalışıyordu:
+       "\u0001 //evil.example.com/x.pdf". trim() denetim karakterini boşluk
+       saymadığı için baştan hiçbir şey atmaz; ardından \u0001 silinince dize
+       " //evil..." olur ve BAŞTA bir boşluk kalır. Konuma bakan
+       indexOf("//")===0 ve charAt(0)==="/" testleri bir karakter kaydığı için
+       ıskalar; tarayıcı ise href başındaki boşluğu yok sayıp adresi
+       http://evil.example.com/x.pdf olarak çözer (tarayıcıda ölçüldü).
+       Bu yüzden İÇERİDE kalan her boşluk da reddedilir: geçerli bir göreli
+       dosya yolunda boşluk aranmaz, böylece konuma bakan hiçbir test
+       kaydırılamaz. Değer PUBLIC doküman merkezinde <a href> içine girer. */
+    var v = String(x == null ? "" : x).replace(/[\u0000-\u001F\u007F]/g, "").trim();
+    if (!v) return "";                        // dosyasız kart — geçerli
+    if (/\s/.test(v)) return null;            // yol içinde boşluk: kaydırma denemesi
+    if (v.indexOf(":") !== -1) return null;   // her türlü şema denemesi
+    if (v.indexOf("//") === 0) return null;   // protokolden bağımsız adres
+    if (v.indexOf("\\") !== -1) return null;  // ters bölü: bazı tarayıcılar "/" sayar
+    if (v.charAt(0) === "/") return null;     // kök yol — göreli değil
+    if (/(^|\/)\.\.(\/|$)/.test(v)) return null; // ".." ile depo dışına tırmanma
+    return v;
+  }
+
+  /* ---------------- Ürünler ----------------
+     who parametresi isteğe bağlıdır ve yalnızca etkinlik akışında görünen adı
+     belirler (portal-app.js USER.name geçer); sözleşmedeki çağrı hgpAddProduct(p)
+     olduğu gibi çalışmaya devam eder. */
+
+  /* Ürün ekle. p = { sub, n:{tr,en,ru}, brand, tag }
+     Geçersiz girdide depoya HİÇBİR ŞEY yazılmaz ve null döner. */
+  function hgpAddProduct(p, who) {
+    var d = p || {};
+    var sub = hgpStr(d.sub);
+    if (!hgpKnownSub(sub)) return null;
+    var n = hgpTriple(d.n);
+    if (!n) return null;
+    var s = hgpGet();
+    var id = hgpNextCustomId(s, "customProducts");
+    s.customProducts.unshift({
+      id: id, sub: sub, n: n,
+      brand: hgpStr(d.brand),
+      tag: hgpTag(d.tag),
+      createdAt: hgpNow()
+    });
+    hgpAct(s, who || "Portal", "Kataloğa ürün eklendi: " + n.tr + " (#" + id + ")", "genel");
+    hgpSave(s);
+    return id;
+  }
+
+  /* Ürün güncelle — kısmi yama: yalnızca gönderilen alanlar değişir.
+     Yamanın herhangi bir alanı geçersizse HİÇBİR alan yazılmaz (ya hep ya hiç);
+     yarısı güncellenmiş bir kayıt, hiç güncellenmemişten daha tehlikelidir. */
+  function hgpUpdateProduct(id, patch, who) {
+    var d = patch || {}, s = hgpGet(), key = Number(id), it = null, i;
+    for (i = 0; i < s.customProducts.length; i++) {
+      if (Number(s.customProducts[i].id) === key) { it = s.customProducts[i]; break; }
+    }
+    if (!it) return false;
+    var sub = it.sub, n = it.n, brand = it.brand, tag = it.tag;
+    if (d.sub !== undefined) { sub = hgpStr(d.sub); if (!hgpKnownSub(sub)) return false; }
+    if (d.n !== undefined) { n = hgpTriple(d.n); if (!n) return false; }
+    if (d.brand !== undefined) brand = hgpStr(d.brand);
+    if (d.tag !== undefined) tag = hgpTag(d.tag);
+    it.sub = sub; it.n = n; it.brand = brand; it.tag = tag;
+    hgpAct(s, who || "Portal", "Katalog ürünü güncellendi: " + n.tr + " (#" + it.id + ")", "genel");
+    hgpSave(s);
+    return true;
+  }
+
+  function hgpDeleteProduct(id, who) {
+    var s = hgpGet(), key = Number(id), i, gone;
+    for (i = 0; i < s.customProducts.length; i++) {
+      if (Number(s.customProducts[i].id) === key) {
+        gone = s.customProducts.splice(i, 1)[0];
+        hgpAct(s, who || "Portal", "Katalogdan ürün silindi: " + ((gone.n && gone.n.tr) || "—") + " (#" + gone.id + ")", "genel");
+        hgpSave(s);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /* Yalnızca portalda eklenen ürünler, yeniden eskiye (kayıtlar zaten unshift
+     ile eklendiği için depodaki sıra budur). Dönen dizi kopyadır: çağıran
+     tarafın sıralaması/filtresi depoyu bozmaz. */
+  function hgpListProducts() {
+    try { return (hgpGet().customProducts || []).slice(); }
+    catch (e) { return []; }
+  }
+
+  /* data.js listesi + portal ekleri, BU sırayla.
+     Ana site her render'da çağırır: asla istisna fırlatmaz, her zaman dizi
+     döner, HK_PRODUCTS'ı değiştirmez (concat yeni dizi üretir). */
+  function hgpAllProducts() {
+    var custom = [];
+    try { custom = (hgpPeek() || {}).customProducts || []; } catch (e) { custom = []; }
+    return hgpBaseProducts().concat(custom);
+  }
+
+  /* ---------------- Dokümanlar ---------------- */
+
+  /* Doküman ekle. d = { ext, cat, file, title:{tr,en,ru}, desc:{…}, meta:{…} }
+     file isteğe bağlıdır; verilirse hgpSafeDocPath denetiminden geçmek
+     zorundadır. Geçersiz girdide hiçbir şey yazılmaz ve null döner. */
+  function hgpAddDoc(d, who) {
+    var v = d || {};
+    var cat = hgpStr(v.cat);
+    if (HGP_DOC_CATS.indexOf(cat) === -1) return null;
+    var title = hgpTriple(v.title);
+    if (!title) return null;
+    var file = hgpSafeDocPath(v.file);
+    if (file === null) {
+      console.warn("Herkim portal: doküman yolu güvenli görülmedi (yalnızca göreli dosya yolu kabul edilir) — kayıt YAPILMADI.");
+      return null;
+    }
+    /* Uzantı Türkçe metin değil dosya uzantısıdır; bu yüzden yerel ayara bağlı
+       olmayan büyütme kullanılır ("tif" → "TIF", "TİF" değil). */
+    var ext = hgpStr(v.ext).toUpperCase() || "PDF";
+    var s = hgpGet();
+    var id = hgpNextCustomId(s, "customDocs");
+    s.customDocs.unshift({
+      id: id, ext: ext, cat: cat, file: file,
+      title: title, desc: hgpTripleOpt(v.desc), meta: hgpTripleOpt(v.meta),
+      createdAt: hgpNow()
+    });
+    hgpAct(s, who || "Portal", "Doküman merkezine kayıt eklendi: " + title.tr + " (#" + id + ")", "genel");
+    hgpSave(s);
+    return id;
+  }
+
+  function hgpDeleteDoc(id, who) {
+    var s = hgpGet(), key = Number(id), i, gone;
+    for (i = 0; i < s.customDocs.length; i++) {
+      if (Number(s.customDocs[i].id) === key) {
+        gone = s.customDocs.splice(i, 1)[0];
+        hgpAct(s, who || "Portal", "Doküman merkezinden kayıt silindi: " + ((gone.title && gone.title.tr) || "—") + " (#" + gone.id + ")", "genel");
+        hgpSave(s);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function hgpListDocs() {
+    try { return (hgpGet().customDocs || []).slice(); }
+    catch (e) { return []; }
+  }
+
+  function hgpAllDocs() {
+    var custom = [];
+    try { custom = (hgpPeek() || {}).customDocs || []; } catch (e) { custom = []; }
+    return hgpBaseDocs().concat(custom);
+  }
+
+  /* ---------------- data.js'e yapıştırılacak kod ----------------
+     Üretilen metin OLDUĞU GİBİ yapıştırılabilir olmak zorundadır.
+     Dize kaçışlarını elle yapmıyoruz: JSON.stringify tırnağı, ters bölüyü ve
+     satır sonlarını kaçırır ve ürettiği JSON dize sözdizimi, JavaScript dize
+     sözdiziminin alt kümesidir — yani çıktı geçerli JS'tir. */
+  function hgpQ(x) { return JSON.stringify(String(x == null ? "" : x)); }
+
+  /* Sütun hizası için doldurma; en az bir boşluk hep kalır ki uzun değerlerde
+     alanlar birbirine yapışmasın. */
+  function hgpPad(s, n) {
+    var v = String(s);
+    while (v.length < n - 1) v += " ";
+    return v + " ";
+  }
+
+  /* data.js'teki en büyük kimlik — dışa aktarımda numaralandırma buradan devam
+     eder, böylece yapıştırılan satırlar mevcut listeyle çakışmaz. */
+  function hgpMaxBaseId(list) {
+    var max = 0, i, id;
+    for (i = 0; i < list.length; i++) {
+      id = Number(list[i] && list[i].id);
+      if (isFinite(id) && id > max) max = id;
+    }
+    return max;
+  }
+
+  /* Portal ürünlerini HK_PRODUCTS satırı biçiminde dışa aktar.
+     Sıra eskiden yeniye çevrilir ki kimlikler eklenme sırasıyla artsın —
+     data.js'teki dizilim de artan kimliktir. Hiç portal ürünü yoksa "" döner. */
+  function hgpExportProducts() {
+    var list = hgpListProducts().reverse();
+    if (!list.length) return "";
+    var start = hgpMaxBaseId(hgpBaseProducts());
+    var out = [
+      "/* ============================================================",
+      "   PORTALDA EKLENEN ÜRÜNLER — " + hgpToday(),
+      "   NEREYE: assets/js/data.js → HK_PRODUCTS dizisi.",
+      "   NASIL: dizinin şu anki SON satırının sonuna bir virgül ekleyin, sonra",
+      "   aşağıdaki satırları kapanış \"];\" işaretinden hemen önce yapıştırın.",
+      "   Kimlikler mevcut en büyük id (" + start + ") üzerinden yeniden numaralandırıldı;",
+      "   portaldaki 9000'li kimlikler yalnızca portale özeldir, buraya taşınmaz.",
+      "   SONRA: değişikliği commit edip push ETMEDEN bu ürünler yayındaki siteye",
+      "   ULAŞMAZ. Portaldaki kayıt yalnızca eklendiği tarayıcıda görünür.",
+      "   YAPIŞTIRDIKTAN SONRA: bu kayıtları portaldaki listeden SİLİN. Silmezseniz",
+      "   bir sonraki dışa aktarım aynı ürünleri YENİDEN üretir ve data.js'e ikinci",
+      "   kez yapıştırılırsa katalogda çift kayıt oluşur (id'ler farklı olur, ad aynı).",
+      "   AYRICA: ürün kataloğu PDF'i data.js ile aynı listeyi taşır; ikisi",
+      "   birlikte güncellenmelidir.",
+      "   ============================================================ */"
+    ];
+    var i, p, line;
+    for (i = 0; i < list.length; i++) {
+      p = list[i];
+      line = "  { " + hgpPad("id: " + (start + i + 1) + ",", 8) +
+             hgpPad("sub: " + hgpQ(p.sub) + ",", 16) +
+             "n: { tr: " + hgpQ(p.n && p.n.tr) + ", en: " + hgpQ(p.n && p.n.en) + ", ru: " + hgpQ(p.n && p.n.ru) + " }, " +
+             "brand: " + hgpQ(p.brand) + ", " +
+             "tag: " + (p.tag ? hgpQ(p.tag) : "null") + " }";
+      out.push(line + (i < list.length - 1 ? "," : ""));
+    }
+    return out.join("\n") + "\n";
+  }
+
+  /* Portal dokümanlarını HK_DOCS satırı biçiminde dışa aktar.
+     HK_DOCS kayıtlarında id alanı YOKTUR; portaldeki kimlik bilerek yazılmaz.
+     file alanı, data.js'teki dosyasız kartlarda olduğu gibi boşsa hiç yazılmaz. */
+  function hgpExportDocs() {
+    var list = hgpListDocs().reverse();
+    if (!list.length) return "";
+    var out = [
+      "/* ============================================================",
+      "   PORTALDA EKLENEN DOKÜMANLAR — " + hgpToday(),
+      "   NEREYE: assets/js/data.js → HK_DOCS dizisi.",
+      "   NASIL: dizinin şu anki SON satırının sonuna bir virgül ekleyin, sonra",
+      "   aşağıdaki satırları kapanış \"];\" işaretinden hemen önce yapıştırın.",
+      "   HK_DOCS kayıtlarında id alanı yoktur; portal kimlikleri aktarılmaz.",
+      "   file alanı olan kart indirme bağlantısı, olmayan kart \"talep et\"",
+      "   bağlantısı üretir — dosyanın gerçekten assets/docs/ altında ve depoda",
+      "   olduğundan emin olun, yoksa bağlantı 404 verir.",
+      "   SONRA: değişikliği commit edip push ETMEDEN bu dokümanlar yayındaki",
+      "   YAPIŞTIRDIKTAN SONRA: bu kayıtları portaldaki listeden SİLİN. Silmezseniz",
+      "   bir sonraki dışa aktarım aynı dokümanları YENİDEN üretir ve ikinci kez",
+      "   yapıştırılırsa doküman merkezinde çift kart oluşur.",
+      "   siteye ULAŞMAZ. Portaldaki kayıt yalnızca eklendiği tarayıcıda görünür.",
+      "   ============================================================ */"
+    ];
+    var i, d, line;
+    for (i = 0; i < list.length; i++) {
+      d = list[i];
+      line = "  { " + hgpPad("ext: " + hgpQ(d.ext) + ",", 12) +
+             hgpPad("cat: " + hgpQ(d.cat) + ",", 18) +
+             (d.file ? "file: " + hgpQ(d.file) + ", " : "") +
+             "title: { tr: " + hgpQ(d.title && d.title.tr) + ", en: " + hgpQ(d.title && d.title.en) + ", ru: " + hgpQ(d.title && d.title.ru) + " }, " +
+             "desc: { tr: " + hgpQ(d.desc && d.desc.tr) + ", en: " + hgpQ(d.desc && d.desc.en) + ", ru: " + hgpQ(d.desc && d.desc.ru) + " }, " +
+             "meta: { tr: " + hgpQ(d.meta && d.meta.tr) + ", en: " + hgpQ(d.meta && d.meta.en) + ", ru: " + hgpQ(d.meta && d.meta.ru) + " } }";
+      out.push(line + (i < list.length - 1 ? "," : ""));
+    }
+    return out.join("\n") + "\n";
+  }
+
+  /* Demoyu sıfırla.
+     DİKKAT: bu, portalda eklenen ürün ve dokümanları da siler — henüz data.js'e
+     yapıştırılmamış kayıtlar geri getirilemez. Sıfırlamadan önce dışa aktarın. */
   function hgpReset() { localStorage.removeItem(HGP_KEY); }
 
   /* ---------------- Gerçek bildirim (Web3Forms) ----------------
@@ -485,6 +895,25 @@
   window.hgpValidTaxId = hgpValidTaxId;
   window.hgpAddApplication = hgpAddApplication;
   window.hgpDecideApplication = hgpDecideApplication;
+
+  /* Katalog ekleri. hgpAllProducts / hgpAllDocs ANA SİTEDE de çağrılır;
+     diğerleri yalnızca portalde kullanılır. hgpExport* çıktısı data.js'e
+     yapıştırılacak koddur — yayına çıkmanın tek yolu odur. */
+  window.HGP_CUSTOM_ID_BASE = HGP_CUSTOM_ID_BASE;
+  window.HGP_DOC_CATS = HGP_DOC_CATS;
+  window.hgpAddProduct = hgpAddProduct;
+  window.hgpUpdateProduct = hgpUpdateProduct;
+  window.hgpDeleteProduct = hgpDeleteProduct;
+  window.hgpListProducts = hgpListProducts;
+  window.hgpAllProducts = hgpAllProducts;
+  window.hgpAddDoc = hgpAddDoc;
+  window.hgpDeleteDoc = hgpDeleteDoc;
+  window.hgpListDocs = hgpListDocs;
+  window.hgpAllDocs = hgpAllDocs;
+  window.hgpSafeDocPath = hgpSafeDocPath;
+  window.hgpExportProducts = hgpExportProducts;
+  window.hgpExportDocs = hgpExportDocs;
+
   window.hgpReset = hgpReset;
   window.hgNotify = hgNotify;
 })();

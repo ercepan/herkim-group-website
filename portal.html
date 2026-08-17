@@ -12,8 +12,8 @@
   <!-- Dış sitelere giderken tam URL değil yalnızca origin sızsın (HTTPS -> HTTP'de hiç sızmasın). -->
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Müşteri Portalı — Herkim Kimya</title>
-  <meta name="description" content="Herkim Kimya Portalı: sipariş verme, sipariş/teslimat takibi, talepler, müşteri kartı ve yönetim görünürlüğü — uçtan uca tek akış. Demo.">
+  <title>Personel Portalı — Herkim Kimya</title>
+  <meta name="description" content="Herkim Kimya personel portalı: sipariş onayı, teslimat takibi, talepler, müşteri kartı ve yönetim görünürlüğü — uçtan uca tek akış. Demo.">
   <meta name="robots" content="noindex">
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,10 +38,10 @@
         </a>
         <svg class="lg-hex" viewBox="0 0 200 200" aria-hidden="true"><path d="M100 10l78 45v90l-78 45-78-45V55z" fill="none" stroke="#FAF6F1" stroke-width="3"/></svg>
         <div class="lg-mid">
-          <h1>Müşteriden yönetime,<br><em>tek akış.</em></h1>
-          <p>Talep tek noktadan toplanır, sipariş verilir, satış onaylar, depo ilerletir, yönetim anlık izler. Her temas noktası dijital kayıt altında.</p>
+          <h1>Talepten teslimata,<br><em>tek akış.</em></h1>
+          <p>Ana siteden düşen talep ve siparişler tek noktada toplanır, satış onaylar, depo ilerletir, yönetim anlık izler. Her temas noktası dijital kayıt altında.</p>
           <div class="lg-flow" aria-hidden="true">
-            <div class="lg-step"><span class="no">1</span><b>Talep / Sipariş — tek noktadan</b></div>
+            <div class="lg-step"><span class="no">1</span><b>Talep / Sipariş — ana siteden düşer</b></div>
             <div class="lg-step"><span class="no">2</span><b>Akıllı CRM — tek müşteri kartı</b></div>
             <div class="lg-step"><span class="no">3</span><b>Satış onayı — sipariş & süreç takibi</b></div>
             <div class="lg-step"><span class="no">4</span><b>Depo / Üretim / Sevkiyat</b></div>
@@ -53,21 +53,13 @@
       <div class="lg-form-wrap">
         <div class="lg-card">
           <h2>Portala giriş<span class="accent">.</span></h2>
-          <p class="sub">Uçtan uca akışı dört farklı gözden deneyin.</p>
+          <p class="sub">Yalnız Herkim personeli. Uçtan uca akışı üç farklı gözden deneyin.</p>
           <div class="lg-err" id="lg-err" role="alert"></div>
-          <form id="lg-form">
-            <div class="field" style="margin-bottom:14px">
-              <label for="lg-mail">E-POSTA</label>
-              <input id="lg-mail" type="email" value="satinalma@derimderi.com.tr" autocomplete="username" maxlength="80">
-            </div>
-            <div class="field" style="margin-bottom:16px">
-              <label for="lg-pass">ŞİFRE <span style="text-transform:none;letter-spacing:0">(demo: demo1234)</span></label>
-              <input id="lg-pass" type="password" value="demo1234" autocomplete="current-password" maxlength="64">
-            </div>
-            <button class="btn btn--primary" style="width:100%;justify-content:center" type="submit" id="lg-btn">Giriş yap</button>
-          </form>
+          <!-- E-posta/şifre formu KALDIRILDI: rol düğmeleri zaten şifre sormuyordu
+               (portal-app.js, [data-role] bağlaması) ve müşteri rolü portaldan çıkınca
+               formun tek gerçek işlevi olan müşteri girişi de kapandı. Giriş aşağıdaki
+               rol düğmeleriyledir. Gerekçenin tamamı portal-app.js'in giriş bölümünde. -->
           <div class="rolebar">
-            <button class="rolebtn" data-role="musteri"><b>Müşteri</b><span>Sipariş ver &amp; takip et</span></button>
             <button class="rolebtn" data-role="satis"><b>Satış (CRM)</b><span>Onay, talepler, müşteri kartı</span></button>
             <button class="rolebtn" data-role="depo"><b>Depo / Üretim</b><span>Sipariş akışını ilerlet</span></button>
             <button class="rolebtn" data-role="yonetim"><b>Yönetim</b><span>Anlık görünürlük</span></button>
@@ -75,9 +67,8 @@
           <div class="sec-strip" aria-label="Güvenlik">
             <span>Yetki bazlı erişim</span>
             <span>15 dk'da otomatik çıkış</span>
-            <span>3 hatada kilit</span>
           </div>
-          <p style="margin-top:14px;font-size:var(--fs-small);color:var(--ink-3)">Müşteri hesabınız yok mu? <a class="accent" href="hesap.html"><b>Başvuru yapın →</b></a></p>
+          <p style="margin-top:var(--space-sm);font-size:var(--fs-small);color:var(--ink-3)">Müşteri misiniz? Siparişlerinizi ana sitedeki hesabınızdan izleyin: <a class="accent" href="siparislerim.html"><b>Siparişlerim →</b></a></p>
         </div>
       </div>
     </div>
@@ -87,7 +78,11 @@
   <div id="app-view" style="display:none">
     <div class="app">
       <aside class="sb">
-        <a class="brand" href="index.html" aria-label="Herkim">
+        <!-- Uygulama içindeki logo portalın KENDİ özet ekranına gider (ana siteye
+             değil). href korunur ki JS çalışmasa da, yeni sekmede de gerçek bir
+             bağlantı olsun; tam yenilemeyi portal-app.js'teki dinleyici keser.
+             Satır içi onclick YOK — CSP satır içi script'i engeller. -->
+        <a class="brand" id="sb-brand" href="portal.html" aria-label="Herkim Portal — özet ekranına dön">
           <svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true" style="width:38px;height:38px"><circle cx="160" cy="160" r="148" fill="#1B1216" stroke="#C42449" stroke-width="10"/><g fill="#FAF6F1"><rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/><polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/></g></svg>
           <span class="brand-name"><b>HERKİM</b><span>PORTAL</span></span>
         </a>
@@ -100,8 +95,9 @@
             <div><b id="u-name">—</b><span id="u-title">—</span></div>
           </div>
           <div class="sb-last" id="u-last"></div>
-          <button class="sb-link" id="btn-switch" style="margin-top:6px">🔁 Rol değiştir</button>
-          <button class="sb-link" id="btn-logout">↩ Çıkış yap</button>
+          <!-- Emoji YOK (proje kuralı): etiketler düz metindir. -->
+          <button class="sb-link" id="btn-switch" style="margin-top:var(--space-xs)">Rol değiştir</button>
+          <button class="sb-link" id="btn-logout">Çıkış yap</button>
         </div>
       </aside>
 
@@ -114,7 +110,6 @@
           <div class="top-actions">
             <span class="demo-badge"><i></i>DEMO ORTAMI</span>
             <button class="btn btn--ghost btn--sm" id="btn-reset" title="Demo verisini başa sar">↺ Demoyu sıfırla</button>
-            <button class="btn btn--primary btn--sm" id="btn-primary-action" style="display:none">+ Yeni Sipariş</button>
           </div>
         </div>
 
@@ -135,27 +130,6 @@
           </div>
         </section>
 
-        <!-- YENİ SİPARİŞ (müşteri) -->
-        <section id="view-neworder" style="display:none">
-          <div class="order-grid">
-            <div class="panel">
-              <div class="panel-head">
-                <h2>Ürün kataloğu</h2>
-                <div class="panel-tools"><input type="text" id="cat-search" placeholder="Ürün ara…"></div>
-              </div>
-              <div class="cat-list" id="cat-list"></div>
-            </div>
-            <div class="panel cart-box">
-              <div class="panel-head"><h2>Sipariş özeti</h2><span class="st st--bekliyor" style="background:var(--crimson-soft);color:var(--crimson)">Onaya gider</span></div>
-              <div class="cart-lines" id="cart-lines"><div class="empty2">Soldan ürün ekleyin.</div></div>
-              <div class="cart-foot">
-                <button class="btn btn--primary" style="justify-content:center" id="btn-place-order">Siparişi Gönder</button>
-                <span class="cart-note">* Sipariş, satış temsilcinizin onayına düşer; durumunu buradan izlersiniz. Fiyatlar onay aşamasında netleşir.</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <!-- SİPARİŞLER -->
         <section id="view-orders" style="display:none">
           <div class="panel">
@@ -172,15 +146,17 @@
 
         <!-- TALEPLER -->
         <section id="view-requests" style="display:none">
-          <div class="panel" id="new-req-panel" style="margin-bottom:18px">
+          <div class="panel" id="new-req-panel" style="margin-bottom:var(--space-md)">
             <div class="panel-head"><h2>Yeni talep oluştur</h2><span class="st st--acik">Anında CRM'e düşer</span></div>
-            <form id="req-form" style="padding:18px 20px;display:grid;gap:13px">
+            <form id="req-form" style="padding:var(--space-md);display:grid;gap:var(--space-sm)">
               <div class="field"><label for="rf-subject">KONU</label><input id="rf-subject" type="text" placeholder="örn. Numune talebi — su bazlı top coat" maxlength="90"></div>
               <div class="field"><label for="rf-detail">DETAY <span id="rf-count" style="text-transform:none;letter-spacing:0">0/500</span></label><textarea id="rf-detail" rows="3" placeholder="İhtiyacınızı kısaca anlatın." maxlength="500"></textarea></div>
               <div><button class="btn btn--primary btn--sm" type="submit">Talebi gönder</button></div>
             </form>
           </div>
-          <div id="req-list" style="display:grid;gap:13px"></div>
+          <!-- Kartlar .panel olduğu için aralık panel aralığıyla aynı olmalı;
+               portal.css bu listede .panel + .panel kenar boşluğunu sıfırlar. -->
+          <div id="req-list" style="display:grid;gap:var(--space-md)"></div>
         </section>
 
         <!-- MÜŞTERİLER (satış) -->
@@ -195,6 +171,24 @@
             <div class="tbl-wrap"><table class="ptbl"><thead><tr><th>SİPARİŞ / MÜŞTERİ</th><th>KALEMLER</th><th>DURUM</th><th>SONRAKİ ADIM</th></tr></thead><tbody id="ops-body"></tbody></table></div>
           </div>
         </section>
+
+        <!-- ÜRÜNLER — katalog yönetimi (yalnız satış ve yönetim; menü NAV tablosundan basılır)
+             Panellerin İÇERİĞİ bilerek burada değil portal-app.js'te (15. bölüm) üretilir:
+             ekrandaki her metin T("anahtar", "Türkçe yedek") üzerinden geçmek zorundadır ve
+             operatörün yazdığı metin yalnızca createElement + textContent ile basılır. -->
+        <section id="view-products" style="display:none">
+          <div class="panel" id="prod-form-panel"></div>
+          <div class="panel" id="prod-list-panel"></div>
+          <div class="panel" id="prod-export-panel"></div>
+        </section>
+
+        <!-- DOKÜMANLAR — doküman merkezi yönetimi (yalnız satış ve yönetim).
+             İçerik portal-app.js 16. bölümde üretilir; yukarıdaki not burası için de geçerlidir. -->
+        <section id="view-docs" style="display:none">
+          <div class="panel" id="doc-form-panel"></div>
+          <div class="panel" id="doc-list-panel"></div>
+          <div class="panel" id="doc-export-panel"></div>
+        </section>
       </main>
     </div>
 
@@ -203,7 +197,7 @@
     <aside class="dw" id="dw-order" aria-label="Sipariş detayı">
       <div class="dw-head">
         <div><h2 id="do-id">—</h2><div class="sub" id="do-sub">—</div></div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-xs)">
           <button class="dw-x" data-close>KAPAT ×</button>
           <span id="do-chip"></span>
         </div>
@@ -220,7 +214,7 @@
           <div class="box"><b>TAHMİNİ TESLİM</b><span id="do-eta">—</span></div>
           <div class="box"><b>SATIŞ TEMSİLCİSİ</b><span id="do-rep">Ayşe Yılmaz</span></div>
         </div>
-        <div id="do-actions" style="margin-top:22px"></div>
+        <div id="do-actions" style="margin-top:var(--space-md)"></div>
       </div>
     </aside>
 
@@ -231,7 +225,8 @@
         <button class="dw-x" data-close>KAPAT ×</button>
       </div>
       <div class="dw-body">
-        <div class="crm-note2" style="margin-bottom:4px"><span>🪪</span><span><b>Tek müşteri kartı:</b> iletişim geçmişi, siparişler ve talepler tek yerde — temsilci değişse de hafıza şirkette kalır.</span></div>
+        <!-- Emoji YOK (proje kuralı): baştaki simge kaldırıldı, kutu tek metin bloğuyla kaldı. -->
+        <div class="crm-note2" style="margin-bottom:var(--space-2xs)"><span><b>Tek müşteri kartı:</b> iletişim geçmişi, siparişler ve talepler tek yerde — temsilci değişse de hafıza şirkette kalır.</span></div>
         <div class="dw-t">İletişim</div>
         <div class="dw-meta">
           <div class="box"><b>YETKİLİ</b><span id="dc-contact">—</span></div>
@@ -244,7 +239,7 @@
         <div class="dw-t">Not ekle</div>
         <div class="reply-box">
           <textarea id="dc-note" placeholder="örn. Telefonla arandı; eylül için 2 ton finisaj planlıyor." maxlength="300"></textarea>
-          <button class="btn btn--primary btn--sm" id="dc-note-btn" style="margin-top:10px">Nota kaydet</button>
+          <button class="btn btn--primary btn--sm" id="dc-note-btn" style="margin-top:var(--space-sm)">Nota kaydet</button>
         </div>
         <div class="dw-t">Siparişleri</div>
         <div class="dw-items" id="dc-orders"></div>

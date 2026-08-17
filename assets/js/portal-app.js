@@ -1,6 +1,11 @@
 /* ============================================================
    HERKİM PORTAL — Uygulama mantığı (uçtan uca tek akış)
-   Müşteri sipariş verir → Satış onaylar → Depo ilerletir → Yönetim izler.
+   YALNIZ PERSONEL: satış · depo · yönetim. Üç rol vardır, dördüncüsü yoktur.
+   Sipariş ve talep ANA SİTEDEN düşer (müşteri kendi siparişini
+   siparislerim.html'den izler) → Satış onaylar → Depo ilerletir → Yönetim izler.
+   Müşteri rolü portalda BULUNMAZ; ana sitenin oturumu (site-auth.js) aynı
+   anahtarı "musteri" rolüyle yazdığı için boot() o oturumu tanıyıp portalı
+   açmaz — oturumu da silmez, çünkü kullanıcı ana sitede hâlâ açıktır.
    Güvenli DOM API'leri (innerHTML yok). Demo verisi: portal-store.js.
 
    İÇİNDEKİLER
@@ -9,18 +14,20 @@
      3. Bildirim (toast)
      4. Giriş + güvenlik (oturum, kilitlenme, boşta kalma)
      5. Rol yapılandırması (NAV / TITLES / ROLE_LABEL + ROL EKLEME REHBERİ)
-     6. Kabuk (buildNav, show)
+     6. Kabuk (buildNav, show, logo → özet)
      7. Durum çipi / ilerleme çubuğu
      8. KPI + huni + aktivite akışı
      9. Sipariş tabloları (orderRow, renderOrders, renderDash)
-    10. Yeni sipariş (katalog + sepet + teklif aktarımı)
-    11. Talepler (liste, yanıt, yeni talep formu)
-    12. Müşteri kartları (satış)
-    13. Hesap başvuruları (satış onay kutusu)
-    14. Operasyon panosu (depo)
-    15. Sipariş çekmecesi
-    16. Müşteri kartı çekmecesi
-    17. Toplu çizim + başlatma (renderAll, boot)
+    10. Talepler (liste, yanıt, yeni talep formu)
+    11. Müşteri kartları (satış)
+    12. Hesap başvuruları (satış onay kutusu)
+    13. Operasyon panosu (depo)
+    14. Katalog yönetimi — ortak parçalar (form alanları, dışa aktarım paneli)
+    15. Ürün yönetimi (satış / yönetim)
+    16. Doküman yönetimi (satış / yönetim)
+    17. Sipariş çekmecesi
+    18. Müşteri kartı çekmecesi
+    19. Toplu çizim + başlatma (renderAll, boot)
    ============================================================ */
 (function () {
   "use strict";
@@ -71,7 +78,6 @@
   var IDLE_POLL_MS = 60000;      // boşta kalma denetiminin tekrar aralığı
   var COUNT_ANIM_MS = 600;       // KPI sayaç animasyonu
   var DASH_ROWS = 5;             // özet ekranındaki sipariş satırı sayısı
-  var QTY_MAX = 999;             // sepette tek kalem için üst sınır
 
   var USER = null, curView = "dash";
 
@@ -114,58 +120,31 @@
     b.addEventListener("click", function () { enter(b.getAttribute("data-role")); });
   });
 
-  var errBox = $("#lg-err"), lgBtn = $("#lg-btn"), lockTimer = null;
-  function getLock() {
-    try { return JSON.parse(localStorage.getItem(HGP_LOCK_KEY)) || { n: 0, until: 0 }; }
-    catch (e) { console.warn("Herkim portal: kilit kaydı okunamadı — bozuk JSON.", e); return { n: 0, until: 0 }; }
-  }
-  function showErr(m) {
+  /* GİRİŞ: yalnız rol düğmeleriyle. E-posta/şifre formu KALDIRILDI.
+     Gerekçe: rol düğmeleri enter(role) ile doğrudan giriyor ve ŞİFREYİ HİÇ
+     SORMUYORDU (yukarıdaki [data-role] bağlaması) — form personel için zaten
+     bir kapı değildi. Tek gerçek işlevi müşteri e-postasıyla giriş yolu açmaktı;
+     müşteri rolü portaldan çıkınca bu yol da kapandı ve geriye "doğru şifreyi
+     yaz, sonra çalışmadığını öğren" diyen bir form kalıyordu.
+     Kilit sayaçları (HGP_LOCK_*) portal-store.js'te DURUYOR: ana sitedeki
+     gerçek müşteri girişi (site-auth.js) onları kullanmaya devam ediyor.
+     NOT: bu portalın gerçek bir kimlik denetimi YOKTUR ve olamaz — statik site,
+     sunucu yok. Rol düğmesi = giriş. Gerçek denetim ancak bir sunucu ile gelir. */
+  var errBox = $("#lg-err");
+  /* Portal yalnız personelindir; buraya düşen müşteriye nereye gideceğini
+     söylemek zorundayız. Uyarı kutusuna açıklama + "Siparişlerim" bağlantısı
+     basar. innerHTML YOK: metin düğümü ve <a> ayrı ayrı kurulur. Kutu
+     role="alert" olduğu için değişikliği ekran okuyucu kendiliğinden duyurur. */
+  function showCustomerNotice(lead) {
     if (!errBox) return;
-    errBox.textContent = m;
+    errBox.textContent = "";
+    errBox.appendChild(document.createTextNode(lead + " "));
+    var a = el("a", "accent", T("portal.login.myOrdersLink", "Siparişlerim →"));
+    a.href = "siparislerim.html";
+    errBox.appendChild(a);
     errBox.classList.remove("show"); void errBox.offsetWidth;
     errBox.classList.add("show");
   }
-  function lockUI() {
-    if (!lgBtn) return;
-    var l = getLock(), left = Math.ceil((l.until - nowMs()) / 1000);
-    if (left > 0) {
-      lgBtn.disabled = true; lgBtn.style.opacity = "0.55";
-      showErr("Çok fazla hatalı deneme. Giriş " + left + " sn kilitlendi.");
-      if (!lockTimer) lockTimer = setInterval(lockUI, 1000);
-    } else {
-      lgBtn.disabled = false; lgBtn.style.opacity = "";
-      if (lockTimer) { clearInterval(lockTimer); lockTimer = null; }
-      if (l.until) {
-        if (errBox) errBox.classList.remove("show");
-        localStorage.removeItem(HGP_LOCK_KEY);
-      }
-    }
-  }
-  lockUI();
-  var lgForm = $("#lg-form");
-  if (lgForm) lgForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    var l = getLock();
-    if (l.until > nowMs()) { lockUI(); return; }
-    var failTry = function (msg) {
-      l.n = (l.n || 0) + 1;
-      if (l.n >= HGP_MAX_FAILS) { l.until = nowMs() + HGP_LOCK_MS; l.n = 0; }
-      localStorage.setItem(HGP_LOCK_KEY, JSON.stringify(l));
-      if (l.until > nowMs()) lockUI();
-      else showErr(msg.replace("{n}", l.n).replace("{max}", HGP_MAX_FAILS));
-    };
-    var passInput = $("#lg-pass");
-    if (!passInput) { console.warn("Herkim portal: şifre alanı (#lg-pass) bulunamadı."); return; }
-    if (passInput.value !== HGP_DEMO_PASS) { failTry("E-posta veya şifre hatalı. ({n}/{max} deneme)"); return; }
-    // E-posta → hesap: varsayılan demo müşteri ya da onaylı web hesabı
-    var em = ($("#lg-mail") ? $("#lg-mail").value : "").trim().toLowerCase();
-    if (!em || em === "satinalma@derimderi.com.tr") { enter("musteri"); return; }
-    var acc = null;
-    (hgpGet().accounts || []).forEach(function (a) { if (a.email === em) acc = a; });
-    if (!acc) { failTry("Bu e-postayla onaylı hesap bulunamadı. Önce başvuru yapın. ({n}/{max})"); return; }
-    enter("musteri", { role: "musteri", name: acc.name, company: acc.company,
-                       initials: acc.initials, rep: salesRepName(), email: acc.email });
-  });
 
   function logout() { localStorage.removeItem(HGP_SESSION_KEY); location.reload(); }
   var btnLogout = need("#btn-logout");
@@ -197,6 +176,10 @@
 
   /* ---------- 5. Rol yapılandırması ----------
      ROL EKLEME REHBERİ
+     Portalda ÜÇ rol vardır ve hepsi Herkim personelidir: satis · depo · yonetim.
+     Müşteri rolü yoktur — müşteri ana sitede kalır (siparislerim.html). Aşağıdaki
+     tablolara "musteri" satırı EKLEMEYİN; portalı müşteriye açmak istiyorsanız
+     karar önce ürün tarafında verilir, bu dosya ondan sonra değişir.
      Yeni bir rol (ya da yeni bir ekran) eklerken sırasıyla şu noktalara uğrayın.
      A) TABLOLAR — yeni rol için satır eklemek yeterli, kod değişmez:
         NAV .................. sol menü öğeleri + rozet sayaçları
@@ -208,32 +191,33 @@
         SHOW_FUNNEL .......... özet ekranında huni paneli görünsün mü
         SHOW_FEED ............ özet ekranında aktivite paneli görünsün mü
         CAN_CREATE_REQUEST ... "yeni talep" formu görünsün mü
-        PRIMARY_ACTION ....... başlıktaki birincil aksiyon düğmesinin gittiği görünüm
+        CAN_EDIT_CATALOG ..... katalog yönetimi ekranları (Ürünler / Dokümanlar) açılsın mı
      B) HÂLÂ ELLE DALLANAN YERLER — davranışları rollere göre gerçekten farklı
         olduğu için tabloya indirgenmedi; yeni rolde tek tek gözden geçirin.
         Satır numaraları yaklaşıktır, şaşarsa `USER.role` araması listenin tamamını verir:
-        myOrders / myRequests ......... yalnız "musteri" kendi kaydını görür ....... ~sat. 274
-        renderKpis .................... her rol için ayrı KPI seti ................. ~sat. 372
-        renderOrders (sıralama) ....... "satis" listeyi adıma göre sıralar ......... ~sat. 476
-        renderDash (sıralama) ......... "satis"/"depo" farklı önceliklendirir ...... ~sat. 497
-        renderRequests (yanıt kutusu) . yalnız "satis" talep yanıtlar .............. ~sat. 648
-        renderApplications ............ yalnız "satis" başvuru kutusunu görür ...... ~sat. 738
-        openOrder (aksiyonlar) ........ "satis" onaylar, "depo" ilerletir .......... ~sat. 897
-        boot (#scope künyesi) ......... "musteri" kendi firma adını görür .......... ~sat. 1041
+        renderKpis .................... her rol için ayrı KPI seti ................. ~sat. 422
+        renderOrders (sıralama) ....... "satis" listeyi adıma göre sıralar ......... ~sat. 515
+        renderDash (sıralama) ......... "satis"/"depo" farklı önceliklendirir ...... ~sat. 541
+        renderRequests (yanıt kutusu) . yalnız "satis" talep yanıtlar .............. ~sat. 565
+        renderApplications ............ yalnız "satis" başvuru kutusunu görür ...... ~sat. 691
+        allowed (görünüm kilidi) ...... katalog ekranları CAN_EDIT_CATALOG'a bakar . ~sat. 349
+        openOrder (aksiyonlar) ........ "satis" onaylar, "depo" ilerletir .......... ~sat. 1356
+        boot (müşteri oturumu) ........ "musteri" oturumu portalı AÇMAZ ............ ~sat. 1533
      Ayrıca portal.html'de yeni görünüm için #view-<ad> kabı ve show() içindeki
-     görünüm listesi güncellenmelidir. */
+     görünüm listesi (VIEWS) güncellenmelidir.
+     ÖRNEK — "Ürünler"/"Dokümanlar" ekranları böyle bağlandı: NAV'a satis ve
+     yonetim satırı, TITLES'a iki görünüm, CAN_EDIT_CATALOG tablosu, VIEWS'a iki
+     ad, allowed() içinde ikinci denetim, renderAll'da renderProducts/renderDocs.
+     Depo bilerek DIŞARIDA bırakıldı: katalogu düzenlemek satışın ve yönetimin
+     işidir. */
   var NAV = {
-    musteri: [
-      { v: "dash", t: "Özet" },
-      { v: "neworder", t: "Yeni Sipariş" },
-      { v: "orders", t: "Siparişlerim" },
-      { v: "requests", t: "Taleplerim" }
-    ],
     satis: [
       { v: "dash", t: "CRM Özeti" },
       { v: "orders", t: "Siparişler & Onay", cnt: "onay" },
       { v: "requests", t: "Gelen Talepler", cnt: "acik" },
-      { v: "customers", t: "Müşteri Kartları", cnt: "basvuru" }
+      { v: "customers", t: "Müşteri Kartları", cnt: "basvuru" },
+      { v: "products", t: "Ürünler" },
+      { v: "docs", t: "Dokümanlar" }
     ],
     depo: [
       { v: "dash", t: "Özet" },
@@ -242,42 +226,47 @@
     yonetim: [
       { v: "dash", t: "Dashboard" },
       { v: "orders", t: "Tüm Siparişler" },
-      { v: "requests", t: "Talepler" }
+      { v: "requests", t: "Talepler" },
+      { v: "products", t: "Ürünler" },
+      { v: "docs", t: "Dokümanlar" }
     ]
   };
   var TITLES = {
-    dash: { musteri: "Özet", satis: "CRM Özeti", depo: "Operasyon Özeti", yonetim: "Yönetim Dashboard'u" },
-    neworder: { musteri: "Yeni Sipariş" },
-    orders: { musteri: "Siparişlerim", satis: "Siparişler & Onay", depo: "Siparişler", yonetim: "Tüm Siparişler" },
-    requests: { musteri: "Taleplerim", satis: "Gelen Talepler", yonetim: "Talepler" },
+    dash: { satis: "CRM Özeti", depo: "Operasyon Özeti", yonetim: "Yönetim Dashboard'u" },
+    orders: { satis: "Siparişler & Onay", depo: "Siparişler", yonetim: "Tüm Siparişler" },
+    requests: { satis: "Gelen Talepler", yonetim: "Talepler" },
     customers: { satis: "Müşteri Kartları" },
-    ops: { depo: "Operasyon Panosu" }
+    ops: { depo: "Operasyon Panosu" },
+    products: { satis: "Ürün Yönetimi", yonetim: "Ürün Yönetimi" },
+    docs: { satis: "Doküman Yönetimi", yonetim: "Doküman Yönetimi" }
   };
-  var ROLE_LABEL = { musteri: "MÜŞTERİ", satis: "SATIŞ · CRM", depo: "DEPO / ÜRETİM", yonetim: "YÖNETİM" };
+  var ROLE_LABEL = { satis: "SATIŞ · CRM", depo: "DEPO / ÜRETİM", yonetim: "YÖNETİM" };
 
   /* Rol → ekran davranışı tabloları (yukarıdaki rehberin A maddesi) */
-  var SHOWS_CUSTOMER = { musteri: false, satis: true, depo: true, yonetim: true };
-  var FEED_LIMIT = { musteri: 7, satis: 7, depo: 7, yonetim: 14 };
+  var SHOWS_CUSTOMER = { satis: true, depo: true, yonetim: true };
+  var FEED_LIMIT = { satis: 7, depo: 7, yonetim: 14 };
   var DASH_LIST_TITLE = {
-    musteri: "Son siparişler", satis: "Önce onay bekleyenler",
+    satis: "Önce onay bekleyenler",
     depo: "Süreçteki siparişler", yonetim: "Son siparişler"
   };
-  var SHOW_FUNNEL = { musteri: false, satis: true, depo: false, yonetim: true };
-  var SHOW_FEED = { musteri: false, satis: true, depo: true, yonetim: true };
-  var CAN_CREATE_REQUEST = { musteri: true, satis: false, depo: false, yonetim: false };
-  var PRIMARY_ACTION = { musteri: "neworder" };
+  var SHOW_FUNNEL = { satis: true, depo: false, yonetim: true };
+  var SHOW_FEED = { satis: true, depo: true, yonetim: true };
+  /* Talep ANA SİTEDEN düşer; portalda talep AÇAN rol yoktur — bu yüzden üçü de
+     false ve #new-req-panel hiçbir rolde görünmez. Tablo yine de duruyor: talebi
+     içeriden açabilen bir rol gerekirse tek satır true yapmak yetsin. */
+  var CAN_CREATE_REQUEST = { satis: false, depo: false, yonetim: false };
+  /* Katalog yönetimi (Ürünler / Dokümanlar) satış ve yönetimindir.
+     "depo" DIŞARIDA: deponun işi akan siparişi ilerletmek, ürün tanımlamak değil. */
+  var CAN_EDIT_CATALOG = { satis: true, depo: false, yonetim: true };
 
   /* CSS display değeri: "" satırı olduğu gibi bırakır, "none" gizler */
   function vis(on) { return on ? "" : "none"; }
 
-  function myOrders(s) {
-    if (USER.role === "musteri") return s.orders.filter(function (o) { return o.customer === USER.company; });
-    return s.orders.slice();
-  }
-  function myRequests(s) {
-    if (USER.role === "musteri") return s.requests.filter(function (r) { return r.customer === USER.company; });
-    return s.requests.slice();
-  }
+  /* Personelin hepsi tüm kayıtları görür; süzme yalnız ekran içindeki
+     sıralama/filtre denetimleriyle yapılır. (Kendi kaydını gören müşteri rolü
+     portaldan kaldırıldı; kopyayı bozmamak için liste yine kopyalanır.) */
+  function myOrders(s) { return s.orders.slice(); }
+  function myRequests(s) { return s.requests.slice(); }
 
   /* ---------- 6. Kabuk ---------- */
   /* Depoda tutulan ham adım/durum kodlarını sayan yardımcılar (rozetler + huni ortak kullanır) */
@@ -288,7 +277,7 @@
     return list.filter(function (r) { return r.status === REQ_ACIK; }).length;
   }
 
-  var VIEWS = ["dash", "neworder", "orders", "requests", "customers", "ops"];
+  var VIEWS = ["dash", "orders", "requests", "customers", "ops", "products", "docs"];
 
   function buildNav() {
     var s = hgpGet();
@@ -310,7 +299,19 @@
     });
   }
 
+  /* Görünüm rol için açık mı? Menü zaten yalnızca rolün NAV satırlarını basar;
+     buradaki ikinci denetim show()'un menü dışından da çağrılabilmesi içindir
+     (adres çubuğuna yazılan portal.html#products gibi).
+     GÜVENLİK DEĞİLDİR: istemcideki her denetim gibi konsoldan atlatılabilir —
+     4. bölümdeki uyarı burası için de geçerlidir, gerçek yetki denetimi
+     sunucuda yapılır. Amacı yanlış ekrana düşmeyi önlemek. */
+  function allowed(v) {
+    if (v === "products" || v === "docs") return !!CAN_EDIT_CATALOG[USER.role];
+    return true;
+  }
+
   function show(v) {
+    if (!allowed(v)) v = "dash";
     curView = v;
     VIEWS.forEach(function (x) {
       var p = $("#view-" + x);
@@ -321,6 +322,21 @@
     buildNav();
     renderAll();
   }
+
+  /* Sol menüdeki logo portalın KENDİ özetine gider, ana siteye değil.
+     href="portal.html" bilerek duruyor: JS çalışmazsa da, orta tıkla/yeni
+     sekmede de gerçek bir bağlantıdır. Burada yalnızca aynı sayfadaki tam
+     yenilemeyi engelleyip görünümü anında değiştiriyoruz. Değiştirici tuşlarla
+     tıklamaya karışmayız — kullanıcı yeni sekmede açmak istiyor olabilir.
+     (Giriş ekranındaki logo ayrıdır ve ana siteye gitmeye devam eder: orada
+     henüz oturum yoktur, gidilecek bir özet ekranı da yoktur.) */
+  var sbBrand = need("#sb-brand");
+  if (sbBrand) sbBrand.addEventListener("click", function (e) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (!USER) return;
+    show("dash");
+  });
 
   /* ---------- 7. Durum çipi / ilerleme ---------- */
   /* Adım indeksini dizilerin sınırına kıstırırız: bozuk bir kayıt "st st--undefined" üretmesin */
@@ -369,12 +385,7 @@
     row.textContent = "";
     var steps = function (from, to) { return countStep(o, from, to); };
     var open = countOpenRequests(r);
-    if (USER.role === "musteri") {
-      row.appendChild(kpi(steps(STEP_ONAY, STEP_SEVK), "Aktif sipariş"));
-      row.appendChild(kpi(steps(STEP_ONAY, STEP_ONAY), "Onay bekleyen"));
-      row.appendChild(kpi(open, "Açık talep"));
-      row.appendChild(kpi(steps(STEP_TESLIM, STEP_TESLIM), "Teslim (2026)"));
-    } else if (USER.role === "satis") {
+    if (USER.role === "satis") {
       row.appendChild(kpi(steps(STEP_ONAY, STEP_ONAY), "Onay bekleyen sipariş"));
       row.appendChild(kpi(open, "Açık talep"));
       row.appendChild(kpi(steps(STEP_ONAYLANDI, STEP_SEVK), "Süreçteki sipariş"));
@@ -507,111 +518,7 @@
   var dashMore = $("#dash-more");
   if (dashMore) dashMore.addEventListener("click", function () { show("orders"); });
 
-  /* ---------- 10. Yeni sipariş (katalog + sepet) ---------- */
-  var cart = {}; // productId -> qty
-  var catQ = "";
-  function prodName(p) { return p.n.tr; }
-  /* Alt kategori adı: data.js ile katalog arasında kopukluk olursa satırı düşürmeyiz */
-  function subName(p) {
-    var sub = HK_SUBS[p.sub];
-    if (!sub) { console.warn("Herkim portal: ürünün alt kategorisi bulunamadı — " + p.id); return "—"; }
-    return sub.tr;
-  }
-  /* Ambalaj birimi. HK_PRODUCTS'ta "pack" alanı YOKTUR (data.js) — gerçek ambalaj
-     listesi tedarikçiden gelmediği için uydurulmaz (altın kural 4). Alan bir gün
-     eklenirse burası kendiliğinden onu kullanır; o güne kadar nötr "adet" yazılır.
-     ÖNCEKİ HATA: doğrudan p.pack okunuyordu ve ekrana "undefined" düşüyordu. */
-  function packLabel(p) {
-    return (p && p.pack) ? p.pack : T("order.unit", "adet");
-  }
-  function findProduct(id) {
-    var p = null;
-    HK_PRODUCTS.forEach(function (x) { if (x.id === +id) p = x; });
-    return p;
-  }
-  function renderCatalog() {
-    var wrap = $("#cat-list"); if (!wrap) return;
-    wrap.textContent = "";
-    HK_PRODUCTS.filter(function (p) {
-      if (!catQ) return true;
-      return prodName(p).toLocaleLowerCase("tr").indexOf(catQ.toLocaleLowerCase("tr")) !== -1;
-    }).forEach(function (p) {
-      var row = el("div", "cat-item");
-      var info = el("div");
-      info.appendChild(el("b", null, prodName(p)));
-      info.appendChild(el("span", "mono", subName(p) + " · " + packLabel(p)));
-      row.appendChild(info);
-      var q = el("div", "qty");
-      var minus = el("button", null, "−");
-      var inp = el("input");
-      inp.type = "text"; inp.value = cart[p.id] || 0; inp.setAttribute("inputmode", "numeric");
-      var plus = el("button", null, "+");
-      function setQty(v) {
-        v = Math.max(0, Math.min(QTY_MAX, v | 0));
-        if (v === 0) delete cart[p.id]; else cart[p.id] = v;
-        inp.value = v;
-        renderCart();
-      }
-      minus.addEventListener("click", function () { setQty((cart[p.id] || 0) - 1); });
-      plus.addEventListener("click", function () { setQty((cart[p.id] || 0) + 1); });
-      inp.addEventListener("input", function () { setQty(parseInt(inp.value, 10) || 0); });
-      q.appendChild(minus); q.appendChild(inp); q.appendChild(plus);
-      row.appendChild(q);
-      var add = el("button", "advance-btn cat-add", "Ekle +");
-      add.addEventListener("click", function () { setQty((cart[p.id] || 0) + 1); });
-      row.appendChild(add);
-      wrap.appendChild(row);
-    });
-  }
-  var cs = $("#cat-search");
-  if (cs) cs.addEventListener("input", function () { catQ = cs.value; renderCatalog(); });
-
-  function renderCart() {
-    var wrap = $("#cart-lines"); if (!wrap) return;
-    wrap.textContent = "";
-    var ids = Object.keys(cart);
-    if (!ids.length) { wrap.appendChild(el("div", "empty2", "Soldan ürün ekleyin.")); return; }
-    ids.forEach(function (id) {
-      var p = findProduct(id);
-      if (!p) return;
-      var line = el("div", "cart-line");
-      line.appendChild(el("b", null, prodName(p)));
-      line.appendChild(el("span", "mono", cart[id] + " × " + packLabel(p)));
-      wrap.appendChild(line);
-    });
-  }
-  var placeBtn = need("#btn-place-order");
-  if (placeBtn) placeBtn.addEventListener("click", function () {
-    var ids = Object.keys(cart);
-    if (!ids.length) { toast("Önce sepete ürün ekleyin."); return; }
-    // Katalogdan düşmüş bir ürün sepette kalmışsa siparişe yazmayız
-    var items = [];
-    ids.forEach(function (id) {
-      var p = findProduct(id);
-      if (!p) { console.warn("Herkim portal: sepetteki ürün katalogda yok — " + id); return; }
-      items.push({ n: prodName(p), q: cart[id] + " × " + packLabel(p) });
-    });
-    if (!items.length) { toast("Sepetteki ürünler katalogda bulunamadı."); return; }
-    var oid = hgpAddOrder(USER.company, items, USER.name + " (" + USER.company + ")");
-    cart = {};
-    renderCatalog(); renderCart();
-    toast("Sipariş " + oid + " oluşturuldu — satış onayına düştü ✓");
-    show("orders");
-  });
-
-  /* Teklif sepetinden aktarım (ana site → portal) */
-  function consumePrefill() {
-    var pf = null;
-    try { pf = JSON.parse(localStorage.getItem(HGP_PREFILL)); }
-    catch (e) { console.warn("Herkim portal: teklif sepeti aktarımı okunamadı — bozuk JSON.", e); }
-    if (!pf || !pf.ids || !pf.ids.length) return;
-    localStorage.removeItem(HGP_PREFILL);
-    pf.ids.forEach(function (id) { cart[id] = (cart[id] || 0) + 1; });
-    show("neworder");
-    toast("Teklif sepetiniz siparişe aktarıldı — miktarları belirleyin.");
-  }
-
-  /* ---------- 11. Talepler ---------- */
+  /* ---------- 10. Talepler ---------- */
   var REQ_DETAIL_MAX = 500; // portal.html'deki #rf-detail maxlength değeriyle aynı olmalı
   var REPLY_MAX = 300;      // satış yanıtı için üst sınır
   function renderRequests() {
@@ -627,39 +534,41 @@
       var head = el("div", "panel-head");
       var left = el("div");
       var t = el("b", null, r.subject);
-      t.style.cssText = "display:block;font-size:15px;color:var(--ink)";
+      // Biçim tamamen CSS'te: .panel-head b kuralı diğer panel başlıklarıyla aynı
+      // yazı tipini, puntoyu ve rengi verir. Buraya satır içi stil YAZMAYIN —
+      // eskiden yalnız punto ayarlanıyordu, yazı tipi gövdeden mirasla geliyordu.
       left.appendChild(t);
       left.appendChild(el("span", "mono", r.id + " · " + r.date + (SHOWS_CUSTOMER[USER.role] ? " · " + r.customer : "")));
       head.appendChild(left);
       var right = el("div");
-      right.style.cssText = "display:flex;gap:8px;align-items:center";
+      right.style.cssText = "display:flex;gap:var(--space-xs);align-items:center";
       if (r.viaLanding) right.appendChild(el("span", "st st--landing", "Landing"));
       var acik = r.status === REQ_ACIK;
       right.appendChild(el("span", acik ? "st st--" + REQ_ACIK : "st st--" + REQ_YANIT, acik ? "Açık" : "Yanıtlandı"));
       head.appendChild(right);
       card.appendChild(head);
       var body = el("div");
-      body.style.cssText = "padding:15px 20px";
+      body.style.cssText = "padding:var(--space-md)";
       body.appendChild(el("p", null, r.detail));
       if (r.reply) {
         var rep = el("div", "crm-note2");
-        rep.style.marginTop = "12px";
+        rep.style.marginTop = "var(--space-sm)";
         var rb = el("div");
         rb.appendChild(el("b", null, r.reply.by + " · " + r.reply.when));
         var rp = el("p", null, r.reply.text);
-        rp.style.marginTop = "3px";
+        rp.style.marginTop = "var(--space-2xs)";
         rb.appendChild(rp);
         rep.appendChild(rb);
         body.appendChild(rep);
       }
       if (USER.role === "satis" && r.status === REQ_ACIK) {
         var box = el("div", "reply-box");
-        box.style.marginTop = "12px";
+        box.style.marginTop = "var(--space-sm)";
         var ta = el("textarea");
         ta.placeholder = "Yanıtınız… (müşteriye ve CRM kartına işlenir)";
         ta.maxLength = REPLY_MAX;
         var btn = el("button", "btn btn--primary btn--sm", "Yanıtla");
-        btn.style.marginTop = "8px";
+        btn.style.marginTop = "var(--space-xs)";
         btn.addEventListener("click", function () {
           var txt = ta.value.trim();
           if (!txt) { toast("Yanıt boş olamaz."); return; }
@@ -692,7 +601,7 @@
     renderAll();
   });
 
-  /* ---------- 12. Müşteri kartları (satış) ---------- */
+  /* ---------- 11. Müşteri kartları (satış) ---------- */
   /* CRM'deki tüm müşteriler: sabit demo kartları + onaylı başvurulardan doğanlar */
   function allCustomers(s) { return HGP_CUSTOMERS.concat(s.customers || []); }
   /* Unvan karşılaştırması: portal-store.js'teki hgpNormFirm ile BİREBİR AYNI olmalıdır.
@@ -737,7 +646,7 @@
     });
   }
 
-  /* ---------- 13. Hesap başvuruları (satış onay kutusu) ---------- */
+  /* ---------- 12. Hesap başvuruları (satış onay kutusu) ---------- */
   function renderApplications(s) {
     var view = $("#view-customers"); if (!view) return;
     var old = $("#apps-panel", view);
@@ -747,10 +656,14 @@
     if (!pend.length) return;
     var panel = el("div", "panel");
     panel.id = "apps-panel";
-    panel.style.marginBottom = "22px";
-    var head = el("div", "p-head");
+    panel.style.marginBottom = "var(--space-md)";
+    /* Başlık bandı: sınıf "panel-head" olmalı — "p-head" hiçbir stil dosyasında
+       tanımlı değildi, bu yüzden başlık ve notu panel kenarına yapışık, alt
+       çizgisiz ve tarayıcı varsayılan puntosuyla çıkıyordu. Not satırı da
+       diğer panellerdeki gibi .ops-note basamağını alır. */
+    var head = el("div", "panel-head");
     head.appendChild(el("h3", null, "Bekleyen Hesap Başvuruları (" + pend.length + ")"));
-    head.appendChild(el("span", "mono", "Web sitesinden — firma doğrulaması sizde"));
+    head.appendChild(el("span", "ops-note mono", "Web sitesinden — firma doğrulaması sizde"));
     panel.appendChild(head);
     pend.forEach(function (a) {
       var row = el("div", "app-row");
@@ -806,7 +719,7 @@
     view.insertBefore(panel, view.firstChild);
   }
 
-  /* ---------- 14. Operasyon (depo) ---------- */
+  /* ---------- 13. Operasyon (depo) ---------- */
   /* KURAL: ADV_LABEL, siparişin İÇİNDE BULUNDUĞU adımla (o.step) indekslenir ve etiket, o
      siparişi BİR SONRAKİ adıma taşıyan eylemi anlatır. Yani ADV_LABEL[0] = "Onayla" çünkü
      0 = "Onay Bekliyor" adımındaki eylem onaylamaktır. Son indeks bir eylem değil, akışın
@@ -843,7 +756,547 @@
     });
   }
 
-  /* ---------- 15. Sipariş çekmecesi ---------- */
+  /* ---------- 14. Katalog yönetimi — ortak parçalar ----------
+     15. ve 16. bölümdeki iki ekran (Ürünler / Dokümanlar) kataloğu yönetir:
+     operatörün yazdığı metin önce localStorage'a, oradan da ANA SİTEDEKİ ürün
+     ve doküman listelerine (hgpAllProducts / hgpAllDocs) düşer. İki sonucu var:
+
+     1) BURADA innerHTML KULLANMAK DEPOLANMIŞ XSS DEMEKTİR. Operatörün (ya da
+        konsoldan depoyu kurcalayan birinin) yazdığı metin siteyi açan herkeste
+        çalışırdı. Bütün düğümler createElement + textContent ile kurulur;
+        istisnası yoktur. Aynı kural doküman dosya yolu için de geçerlidir —
+        yol <a href> içine girdiği için portal-store.js'teki hgpSafeDocPath
+        denetiminden geçmek zorundadır (bkz. 16. bölümdeki ön denetim).
+
+     2) KAYIT YALNIZCA BU TARAYICIDADIR. Satışın dizüstünde eklenen ürün, başka
+        bir bilgisayardan siteye giren müşteride GÖRÜNMEZ. Yayına çıkmanın tek
+        yolu dışa aktarılan kodu assets/js/data.js'e yapıştırıp commit etmektir.
+        Arayüz bunu saklamaz; dışa aktarım panelindeki uyarı bunu açıkça yazar.
+        O metinleri yumuşatmayın: "yayınladım" sanan operatör, müşterinin asla
+        göremeyeceği bir ürünü beklemeye başlar.
+
+     Ekranlar bir KEZ kurulur (prodBuilt / docsBuilt), sonra yalnızca listeler
+     yeniden çizilir. Sebep: renderAll her toast'tan sonra çağrılıyor; formu her
+     seferinde yeniden kursaydık operatörün yazmakta olduğu metin silinirdi. */
+
+  var CAT_NAME_MAX = 120;   // ürün adı / doküman başlığı (tek satır)
+  var CAT_DESC_MAX = 300;   // doküman açıklaması
+  var CAT_META_MAX = 60;    // doküman künyesi (örn. "v2026 · PDF")
+  var CAT_PATH_MAX = 160;   // assets/docs/… göreli dosya yolu
+  var CAT_EXT_MAX = 8;      // dosya uzantısı (PDF, ZIP…)
+  var CAT_BRAND_MAX = 60;   // marka / menşei
+
+  /* data.js'teki const'lar window'a yazılmaz; portal-store.js'teki
+     hgpBaseProducts ile aynı gerekçeyle korumalı okunur (dosya bir gün
+     data.js'ten önce yüklenirse çıplak isim TDZ yüzünden istisna fırlatır). */
+  function baseProducts() {
+    try { return (typeof HK_PRODUCTS !== "undefined" && HK_PRODUCTS) ? HK_PRODUCTS : []; }
+    catch (e) { return []; }
+  }
+  function baseDocs() {
+    try { return (typeof HK_DOCS !== "undefined" && HK_DOCS) ? HK_DOCS : []; }
+    catch (e) { return []; }
+  }
+  /* Ürün kategorisi seçeneği: anahtar + data.js'teki Türkçe etiket. Liste
+     okunamazsa BOŞ döner ve form kategori uydurmak yerine kendini kilitler. */
+  function subPairs() {
+    var out = [];
+    try {
+      if (typeof HK_SUBS !== "undefined" && HK_SUBS) {
+        Object.keys(HK_SUBS).forEach(function (k) { out.push([k, HK_SUBS[k].tr]); });
+      }
+    } catch (e) {}
+    return out;
+  }
+  function subLabel(k) {
+    try {
+      if (typeof HK_SUBS !== "undefined" && HK_SUBS && HK_SUBS[k]) return HK_SUBS[k].tr;
+    } catch (e) {}
+    return k || "—";
+  }
+
+  /* Doküman kategorisi etiketleri. Anahtarlar portal-store.js'teki
+     HGP_DOC_CATS ile birebir aynıdır; oraya yeni kategori eklenirse buraya da
+     etiket yazılmalıdır. Etiketi olmayan kategori uydurulmaz, anahtarın
+     kendisi gösterilir. */
+  var DOC_CAT_TR = {
+    katalog: "Katalog & fiyat listesi",
+    teknik: "Teknik doküman (TDS / SDS)",
+    sertifika: "Sertifika",
+    marka: "Marka & kurumsal",
+    hukuki: "Hukuki metin"
+  };
+  function docCatLabel(k) { return T("portal.doc.cat." + k, DOC_CAT_TR[k] || k); }
+  function docCatPairs() {
+    var cats = (typeof HGP_DOC_CATS !== "undefined" && HGP_DOC_CATS) ? HGP_DOC_CATS : Object.keys(DOC_CAT_TR);
+    return cats.map(function (k) { return [k, docCatLabel(k)]; });
+  }
+
+  /* Ürün etiketi: data.js'te tag "yeni" | "one" | null'dır; boş seçenek null'a düşer */
+  function tagPairs() {
+    return [
+      ["", T("portal.prod.tagNone", "Etiket yok")],
+      ["yeni", T("portal.prod.tagYeni", "Yeni ürün")],
+      ["one", T("portal.prod.tagOne", "Öne çıkan")]
+    ];
+  }
+  function tagLabel(t) {
+    if (t === "yeni") return T("portal.prod.tagYeni", "Yeni ürün");
+    if (t === "one") return T("portal.prod.tagOne", "Öne çıkan");
+    return "—";
+  }
+
+  /* Etiketli form alanı. Alanların metni portal.html'de değil burada durur:
+     görünen her dize T("anahtar", "Türkçe yedek") üzerinden geçmek zorundadır. */
+  function fld(id, label, node, full) {
+    var f = el("div", "field" + (full ? " field--full" : ""));
+    var l = el("label", null, label);
+    node.id = id; l.htmlFor = id;
+    f.appendChild(l); f.appendChild(node);
+    return f;
+  }
+  function txt(max, ph) {
+    var i = el("input");
+    i.type = "text"; i.maxLength = max;
+    if (ph) i.placeholder = ph;
+    return i;
+  }
+  function area(max, ph) {
+    var t = el("textarea");
+    t.maxLength = max; t.rows = 3;
+    // .field textarea 130px varsayar; üç dilli blokta üç kutu yan yana çok uzuyor
+    t.style.minHeight = "78px";
+    if (ph) t.placeholder = ph;
+    return t;
+  }
+  /* pairs: [[değer, etiket], …] */
+  function pick(pairs) {
+    var s = el("select");
+    pairs.forEach(function (p) {
+      var o = el("option", null, p[1]);
+      o.value = p[0];
+      s.appendChild(o);
+    });
+    return s;
+  }
+  /* note: dize ya da hazır düğüm (sayaç satırı gibi sonradan güncellenenler için) */
+  function panelHead(title, note) {
+    var h = el("div", "panel-head");
+    h.appendChild(el("h2", null, title));
+    if (note) h.appendChild(typeof note === "string" ? el("span", "ops-note", note) : note);
+    return h;
+  }
+  /* Üç dilli alan grubu başlığı. h1 (sayfa) → h2 (panel) → h3 (grup) sırası
+     korunur; .dw-t yalnızca görünüm sınıfıdır (mono, küçük, aralıklı). */
+  function groupHead(text) { return el("h3", "dw-t field--full", text); }
+
+  /* Sabit (data.js) ve portal kayıtları AYRI sayılır: operatör yayındaki
+     listeyle kendi eklediklerini karıştırmasın. */
+  function countsLine(baseN, customN) {
+    return T("portal.cat.baseCount", "data.js'te sabit: ") + baseN +
+           T("portal.cat.customCount", "  ·  bu tarayıcıda eklenen: ") + customN;
+  }
+
+  /* Panoya kopyalama. navigator.clipboard yalnızca güvenli kaynakta (https ya
+     da localhost) vardır; orada bile izin verilmezse REDDEDER. Her iki durumda
+     metni seçili bırakıp kullanıcıya Ctrl/Cmd + C diyoruz — sessizce
+     başarısız olmak en kötü seçenektir. */
+  function copyBox(ta) {
+    if (!ta.value) { toast(T("portal.exp.nothing", "Önce “Kodu üret” düğmesine basın.")); return; }
+    ta.focus(); ta.select();
+    var done = function () { toast(T("portal.exp.copied", "Kod panoya kopyalandı.")); };
+    var manual = function () {
+      toast(T("portal.exp.copyManual", "Tarayıcı panoya yazamadı — metin seçildi, Ctrl/Cmd + C ile kopyalayın."));
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ta.value).then(done, manual);
+        return;
+      }
+    } catch (e) { /* güvensiz kaynakta erişim denemesi bile atabilir */ }
+    manual();
+  }
+
+  /* Dışa aktarım paneli — iki ekranda da aynı. opts:
+       title / note  panel başlığı ve künyesi
+       warn          DÜRÜST SINIR metni (yumuşatmayın)
+       label         textarea'nın erişilebilir adı
+       empty         aktarılacak kayıt yokken gösterilen bildirim
+       build         hgpExportProducts / hgpExportDocs */
+  function buildExportPanel(panel, opts) {
+    panel.textContent = "";
+    panel.appendChild(panelHead(opts.title, opts.note));
+    var body = el("div");
+    body.style.cssText = "padding:var(--space-md);display:grid;gap:var(--space-sm)";
+
+    var warn = el("div", "crm-note2");
+    var wt = el("div");
+    wt.appendChild(el("b", null, T("portal.exp.warnHead", "Bu kayıtlar yayında değil.")));
+    var wp = el("p", null, opts.warn);
+    wp.style.marginTop = "var(--space-2xs)";
+    wt.appendChild(wp);
+    warn.appendChild(wt);
+    body.appendChild(warn);
+
+    var row = el("div");
+    row.style.cssText = "display:flex;gap:var(--space-xs);flex-wrap:wrap";
+    var gen = el("button", "btn btn--primary btn--sm", T("portal.exp.gen", "Kodu üret"));
+    gen.type = "button";
+    var cp = el("button", "btn btn--ghost btn--sm", T("portal.exp.copy", "Kopyala"));
+    cp.type = "button";
+    row.appendChild(gen); row.appendChild(cp);
+    body.appendChild(row);
+
+    var box = el("div", "reply-box");
+    var ta = el("textarea");
+    ta.readOnly = true;
+    ta.rows = 12;
+    ta.setAttribute("aria-label", opts.label);
+    ta.placeholder = T("portal.exp.placeholder", "“Kodu üret” düğmesine basın; oluşan satırlar burada görünür.");
+    ta.style.cssText = "min-height:200px;font-family:var(--font-mono);font-size:var(--fs-micro);background:var(--paper)";
+    box.appendChild(ta);
+    body.appendChild(box);
+
+    gen.addEventListener("click", function () {
+      var code = opts.build();
+      if (!code) { ta.value = ""; toast(opts.empty); return; }
+      ta.value = code;
+      toast(T("portal.exp.ready", "Kod üretildi — kopyalayıp assets/js/data.js'e yapıştırın, sonra commit edin."));
+    });
+    cp.addEventListener("click", function () { copyBox(ta); });
+
+    panel.appendChild(body);
+  }
+
+  /* ---------- 15. Ürün yönetimi (satış / yönetim) ---------- */
+  var PROD_COLS = 6;                 // ürün tablosundaki sütun sayısı (boş satır colSpan'i)
+  var prodBuilt = false;             // ekran bir kez kurulur (bkz. 14. bölüm)
+  var prodF = null;                  // form alanlarının düğümleri
+  var prodBodyEl = null, prodCountEl = null;
+
+  function buildProductScreen() {
+    if (prodBuilt) return;
+    var fp = need("#prod-form-panel"), lp = need("#prod-list-panel"), xp = need("#prod-export-panel");
+    if (!fp || !lp || !xp) return;
+    prodBuilt = true;
+
+    /* --- Ekleme formu --- */
+    fp.textContent = "";
+    fp.appendChild(panelHead(
+      T("portal.prod.formTitle", "Yeni ürün ekle"),
+      T("portal.prod.formNote", "Kayıt bu tarayıcıda tutulur; yayına çıkarma adımı en alttaki panelde")));
+    var form = el("form", "form-grid");
+    form.style.cssText = "padding:var(--space-md)";
+
+    var subs = subPairs();
+    prodF = {
+      sub: pick(subs.length ? subs : [["", T("portal.prod.subMissing", "Kategori listesi okunamadı")]]),
+      brand: txt(CAT_BRAND_MAX, T("portal.prod.phBrand", "örn. Herkim")),
+      tr: txt(CAT_NAME_MAX, T("portal.prod.phTr", "örn. Sodyum Format")),
+      en: txt(CAT_NAME_MAX, T("portal.prod.phEn", "örn. Sodium Formate")),
+      ru: txt(CAT_NAME_MAX, T("portal.prod.phRu", "örn. Формиат натрия")),
+      tag: pick(tagPairs())
+    };
+    // Kategori listesi yoksa hgpAddProduct zaten reddeder; formu da kilitleriz
+    if (!subs.length) {
+      prodF.sub.disabled = true;
+      console.warn("Herkim portal: HK_SUBS okunamadı — ürün ekleme formu kilitlendi.");
+    }
+
+    form.appendChild(fld("pf-sub", T("portal.prod.lblSub", "KATEGORİ"), prodF.sub));
+    form.appendChild(fld("pf-brand", T("portal.prod.lblBrand", "MARKA / MENŞEİ"), prodF.brand));
+    form.appendChild(groupHead(T("portal.prod.namesHead", "ÜRÜN ADI — ÜÇ DİL DE ZORUNLU")));
+    form.appendChild(fld("pf-tr", T("portal.prod.lblTr", "AD (TÜRKÇE)"), prodF.tr, true));
+    form.appendChild(fld("pf-en", T("portal.prod.lblEn", "AD (İNGİLİZCE)"), prodF.en));
+    form.appendChild(fld("pf-ru", T("portal.prod.lblRu", "AD (RUSÇA)"), prodF.ru));
+    form.appendChild(fld("pf-tag", T("portal.prod.lblTag", "ETİKET"), prodF.tag));
+
+    var act = el("div", "field--full");
+    act.style.cssText = "display:flex;gap:var(--space-sm);align-items:center;flex-wrap:wrap";
+    var sub = el("button", "btn btn--primary btn--sm", T("portal.prod.submit", "Ürünü ekle"));
+    sub.type = "submit";
+    act.appendChild(sub);
+    act.appendChild(el("span", "cart-note",
+      T("portal.prod.submitNote", "Üç dildeki ad boş bırakılamaz — eksikse kayıt yapılmaz.")));
+    form.appendChild(act);
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var n = { tr: prodF.tr.value.trim(), en: prodF.en.value.trim(), ru: prodF.ru.value.trim() };
+      if (!prodF.sub.value) { toast(T("portal.prod.needSub", "Önce bir ürün kategorisi seçin.")); return; }
+      if (!n.tr || !n.en || !n.ru) {
+        toast(T("portal.prod.needNames", "Ürün adı üç dilde de zorunludur: Türkçe, İngilizce ve Rusça."));
+        return;
+      }
+      var id = hgpAddProduct({ sub: prodF.sub.value, n: n, brand: prodF.brand.value, tag: prodF.tag.value }, USER.name);
+      if (!id) {
+        toast(T("portal.prod.addFail", "Ürün eklenemedi — kategoriyi ve üç dildeki adı kontrol edin."));
+        return;
+      }
+      prodF.tr.value = ""; prodF.en.value = ""; prodF.ru.value = ""; prodF.brand.value = "";
+      toast(T("portal.prod.added", "Ürün bu tarayıcıya eklendi — yayına çıkması için dışa aktarın.") + " #" + id);
+      renderAll();
+    });
+    fp.appendChild(form);
+
+    /* --- Portalda eklenenlerin listesi --- */
+    lp.textContent = "";
+    prodCountEl = el("span", "ops-note", "");
+    lp.appendChild(panelHead(T("portal.prod.listTitle", "Portalda eklenen ürünler"), prodCountEl));
+    var wrap = el("div", "tbl-wrap");
+    var tbl = el("table", "ptbl");
+    var thead = el("thead"), htr = el("tr");
+    [
+      T("portal.prod.colId", "KİMLİK"),
+      T("portal.prod.colName", "AD (TR / EN / RU)"),
+      T("portal.prod.colCat", "KATEGORİ"),
+      T("portal.prod.colBrand", "MARKA"),
+      T("portal.prod.colTag", "ETİKET"),
+      T("portal.cat.colAction", "İŞLEM")
+    ].forEach(function (c) { htr.appendChild(el("th", null, c)); });
+    thead.appendChild(htr);
+    prodBodyEl = el("tbody");
+    tbl.appendChild(thead); tbl.appendChild(prodBodyEl);
+    wrap.appendChild(tbl);
+    lp.appendChild(wrap);
+
+    /* --- data.js'e aktarım --- */
+    buildExportPanel(xp, {
+      title: T("portal.prod.expTitle", "data.js'e aktar"),
+      note: T("portal.prod.expNote", "HK_PRODUCTS dizisine yapıştırılacak satırlar"),
+      warn: T("portal.prod.expWarn",
+        "Portalda eklenen ürünler yalnızca bu tarayıcıda, bu cihazda durur. Başka bir bilgisayardan siteye giren müşteri onları görmez. Yayındaki siteye ulaşmalarının tek yolu: aşağıdaki kodu üretip assets/js/data.js dosyasındaki HK_PRODUCTS dizisine yapıştırmak, sonra değişikliği commit edip push etmek."),
+      label: T("portal.prod.expLabel", "Üretilen ürün kodu"),
+      empty: T("portal.prod.expEmpty", "Aktarılacak ürün yok — önce yukarıdan ürün ekleyin."),
+      build: function () { return hgpExportProducts(); }
+    });
+  }
+
+  function prodRow(p) {
+    var tr = el("tr");
+    // .ptbl tbody tr işaretçiyi "el" yapar; bu satırların tamamı tıklanabilir değil
+    tr.style.cursor = "default";
+    tr.appendChild(el("td", "mono", "#" + p.id));
+    var td2 = el("td");
+    td2.appendChild(el("b", null, (p.n && p.n.tr) || "—"));
+    td2.appendChild(el("span", "t-cust", ((p.n && p.n.en) || "—") + " · " + ((p.n && p.n.ru) || "—")));
+    tr.appendChild(td2);
+    tr.appendChild(el("td", null, subLabel(p.sub)));
+    tr.appendChild(el("td", null, p.brand || "—"));
+    tr.appendChild(el("td", null, tagLabel(p.tag)));
+    var tda = el("td");
+    var del = el("button", "advance-btn", T("portal.cat.del", "Sil"));
+    del.type = "button";
+    del.addEventListener("click", function () {
+      // Dışa aktarılmamış kayıt geri getirilemez; silmeden önce sorarız
+      if (!window.confirm(T("portal.prod.delConfirm",
+        "Bu ürün bu tarayıcıdan silinecek. Dışa aktarılmadıysa geri getirilemez. Silinsin mi?"))) return;
+      if (hgpDeleteProduct(p.id, USER.name)) toast(T("portal.prod.deleted", "Ürün silindi."));
+      renderAll();
+    });
+    tda.appendChild(del);
+    tr.appendChild(tda);
+    return tr;
+  }
+
+  function renderProducts() {
+    if (!USER || !CAN_EDIT_CATALOG[USER.role]) return;
+    buildProductScreen();
+    if (!prodBodyEl) return;
+    var list = hgpListProducts();
+    if (prodCountEl) prodCountEl.textContent = countsLine(baseProducts().length, list.length);
+    prodBodyEl.textContent = "";
+    if (!list.length) {
+      var tr = el("tr"), td = el("td", "empty2",
+        T("portal.prod.empty", "Bu tarayıcıda eklenmiş ürün yok. Yukarıdaki formla ekleyin."));
+      td.colSpan = PROD_COLS; tr.appendChild(td); prodBodyEl.appendChild(tr);
+      return;
+    }
+    list.forEach(function (p) { prodBodyEl.appendChild(prodRow(p)); });
+  }
+
+  /* ---------- 16. Doküman yönetimi (satış / yönetim) ---------- */
+  var DOC_COLS = 6;
+  var docsBuilt = false;
+  var docF = null;
+  var docBodyEl = null, docCountEl = null;
+
+  function buildDocScreen() {
+    if (docsBuilt) return;
+    var fp = need("#doc-form-panel"), lp = need("#doc-list-panel"), xp = need("#doc-export-panel");
+    if (!fp || !lp || !xp) return;
+    docsBuilt = true;
+
+    /* --- Ekleme formu --- */
+    fp.textContent = "";
+    fp.appendChild(panelHead(
+      T("portal.doc.formTitle", "Yeni doküman kaydı"),
+      T("portal.doc.formNote", "Kayıt bu tarayıcıda tutulur; yayına çıkarma adımı en alttaki panelde")));
+    var form = el("form", "form-grid");
+    form.style.cssText = "padding:var(--space-md)";
+
+    docF = {
+      cat: pick(docCatPairs()),
+      ext: txt(CAT_EXT_MAX, T("portal.doc.phExt", "PDF")),
+      tr: txt(CAT_NAME_MAX, T("portal.doc.phTitleTr", "örn. Ürün Kataloğu")),
+      en: txt(CAT_NAME_MAX, T("portal.doc.phTitleEn", "örn. Product Catalog")),
+      ru: txt(CAT_NAME_MAX, T("portal.doc.phTitleRu", "örn. Каталог продукции")),
+      dtr: area(CAT_DESC_MAX, ""),
+      den: area(CAT_DESC_MAX, ""),
+      dru: area(CAT_DESC_MAX, ""),
+      mtr: txt(CAT_META_MAX, T("portal.doc.phMeta", "örn. TR/EN/RU")),
+      men: txt(CAT_META_MAX, ""),
+      mru: txt(CAT_META_MAX, ""),
+      file: txt(CAT_PATH_MAX, T("portal.doc.phFile", "assets/docs/ornek-belge.pdf"))
+    };
+    docF.ext.value = "PDF"; // data.js'teki kayıtların çoğunluğu; operatör değiştirebilir
+
+    form.appendChild(fld("df-cat", T("portal.doc.lblCat", "KATEGORİ"), docF.cat));
+    form.appendChild(fld("df-ext", T("portal.doc.lblExt", "DOSYA TÜRÜ"), docF.ext));
+
+    form.appendChild(groupHead(T("portal.doc.titleHead", "BAŞLIK — ÜÇ DİL DE ZORUNLU")));
+    form.appendChild(fld("df-tr", T("portal.doc.lblTitleTr", "BAŞLIK (TÜRKÇE)"), docF.tr, true));
+    form.appendChild(fld("df-en", T("portal.doc.lblTitleEn", "BAŞLIK (İNGİLİZCE)"), docF.en));
+    form.appendChild(fld("df-ru", T("portal.doc.lblTitleRu", "BAŞLIK (RUSÇA)"), docF.ru));
+
+    form.appendChild(groupHead(T("portal.doc.descHead", "AÇIKLAMA — KART METNİ")));
+    form.appendChild(fld("df-dtr", T("portal.doc.lblDescTr", "AÇIKLAMA (TÜRKÇE)"), docF.dtr, true));
+    form.appendChild(fld("df-den", T("portal.doc.lblDescEn", "AÇIKLAMA (İNGİLİZCE)"), docF.den));
+    form.appendChild(fld("df-dru", T("portal.doc.lblDescRu", "AÇIKLAMA (RUSÇA)"), docF.dru));
+
+    form.appendChild(groupHead(T("portal.doc.metaHead", "KÜNYE — KARTIN ALT SATIRI")));
+    form.appendChild(fld("df-mtr", T("portal.doc.lblMetaTr", "KÜNYE (TÜRKÇE)"), docF.mtr, true));
+    form.appendChild(fld("df-men", T("portal.doc.lblMetaEn", "KÜNYE (İNGİLİZCE)"), docF.men));
+    form.appendChild(fld("df-mru", T("portal.doc.lblMetaRu", "KÜNYE (RUSÇA)"), docF.mru));
+
+    form.appendChild(groupHead(T("portal.doc.fileHead", "DOSYA YOLU — İSTEĞE BAĞLI")));
+    form.appendChild(fld("df-file", T("portal.doc.lblFile", "DEPODAKİ GÖRELİ YOL"), docF.file, true));
+    var fnote = el("div", "field--full");
+    var fp1 = el("p", "cart-note", T("portal.doc.fileNote",
+      "Dosyanın kendisi portaldan yüklenemez — arka uç yoktur. Dosyayı depoda assets/docs/ altına koyup commit edin, buraya da yalnızca o göreli yolu yazın (örn. assets/docs/ornek-belge.pdf)."));
+    var fp2 = el("p", "cart-note", T("portal.doc.fileEmptyNote",
+      "Boş bırakırsanız kart, dosyası olmayan diğer kayıtlar gibi “talep et” bağlantısıyla görünür — mevcut davranış budur."));
+    fp2.style.marginTop = "var(--space-xs)";
+    fnote.appendChild(fp1); fnote.appendChild(fp2);
+    form.appendChild(fnote);
+
+    var act = el("div", "field--full");
+    act.style.cssText = "display:flex;gap:var(--space-sm);align-items:center;flex-wrap:wrap";
+    var sub = el("button", "btn btn--primary btn--sm", T("portal.doc.submit", "Dokümanı ekle"));
+    sub.type = "submit";
+    act.appendChild(sub);
+    act.appendChild(el("span", "cart-note",
+      T("portal.doc.submitNote", "Başlık üç dilde de zorunludur — eksikse kayıt yapılmaz.")));
+    form.appendChild(act);
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var title = { tr: docF.tr.value.trim(), en: docF.en.value.trim(), ru: docF.ru.value.trim() };
+      if (!docF.cat.value) { toast(T("portal.doc.needCat", "Önce bir doküman kategorisi seçin.")); return; }
+      if (!title.tr || !title.en || !title.ru) {
+        toast(T("portal.doc.needTitle", "Doküman başlığı üç dilde de zorunludur: Türkçe, İngilizce ve Rusça."));
+        return;
+      }
+      /* Yol denetimi depoda da yapılır (hgpSafeDocPath); burada ÖNCEDEN
+         çağırmamızın tek sebebi operatöre "neden olmadı" diyebilmek — depo
+         geçersiz yolda sessizce null döner. Asıl denetim orasıdır. */
+      var path = docF.file.value.trim();
+      if (typeof hgpSafeDocPath === "function" && hgpSafeDocPath(path) === null) {
+        toast(T("portal.doc.badPath",
+          "Dosya yolu kabul edilmedi: yalnızca depo içindeki göreli yol yazılabilir (örn. assets/docs/belge.pdf)."));
+        return;
+      }
+      var id = hgpAddDoc({
+        ext: docF.ext.value, cat: docF.cat.value, file: path,
+        title: title,
+        desc: { tr: docF.dtr.value, en: docF.den.value, ru: docF.dru.value },
+        meta: { tr: docF.mtr.value, en: docF.men.value, ru: docF.mru.value }
+      }, USER.name);
+      if (!id) {
+        toast(T("portal.doc.addFail", "Doküman eklenemedi — kategoriyi, üç dildeki başlığı ve dosya yolunu kontrol edin."));
+        return;
+      }
+      ["tr", "en", "ru", "dtr", "den", "dru", "mtr", "men", "mru", "file"].forEach(function (k) { docF[k].value = ""; });
+      toast(T("portal.doc.added", "Doküman bu tarayıcıya eklendi — yayına çıkması için dışa aktarın.") + " #" + id);
+      renderAll();
+    });
+    fp.appendChild(form);
+
+    /* --- Portalda eklenenlerin listesi --- */
+    lp.textContent = "";
+    docCountEl = el("span", "ops-note", "");
+    lp.appendChild(panelHead(T("portal.doc.listTitle", "Portalda eklenen dokümanlar"), docCountEl));
+    var wrap = el("div", "tbl-wrap");
+    var tbl = el("table", "ptbl");
+    var thead = el("thead"), htr = el("tr");
+    [
+      T("portal.doc.colId", "KİMLİK"),
+      T("portal.doc.colTitle", "BAŞLIK (TR / EN / RU)"),
+      T("portal.doc.colCat", "KATEGORİ"),
+      T("portal.doc.colExt", "TÜR"),
+      T("portal.doc.colFile", "DOSYA"),
+      T("portal.cat.colAction", "İŞLEM")
+    ].forEach(function (c) { htr.appendChild(el("th", null, c)); });
+    thead.appendChild(htr);
+    docBodyEl = el("tbody");
+    tbl.appendChild(thead); tbl.appendChild(docBodyEl);
+    wrap.appendChild(tbl);
+    lp.appendChild(wrap);
+
+    /* --- data.js'e aktarım --- */
+    buildExportPanel(xp, {
+      title: T("portal.doc.expTitle", "data.js'e aktar"),
+      note: T("portal.doc.expNote", "HK_DOCS dizisine yapıştırılacak satırlar"),
+      warn: T("portal.doc.expWarn",
+        "Portalda eklenen doküman kayıtları yalnızca bu tarayıcıda, bu cihazda durur. Başka bir bilgisayardan siteye giren ziyaretçi onları görmez. Yayındaki siteye ulaşmalarının tek yolu: aşağıdaki kodu üretip assets/js/data.js dosyasındaki HK_DOCS dizisine yapıştırmak, dosya yolu yazdıysanız dosyanın kendisini de assets/docs/ altına koymak, sonra değişikliği commit edip push etmek."),
+      label: T("portal.doc.expLabel", "Üretilen doküman kodu"),
+      empty: T("portal.doc.expEmpty", "Aktarılacak doküman yok — önce yukarıdan kayıt ekleyin."),
+      build: function () { return hgpExportDocs(); }
+    });
+  }
+
+  function docRow(d) {
+    var tr = el("tr");
+    tr.style.cursor = "default";
+    tr.appendChild(el("td", "mono", "#" + d.id));
+    var td2 = el("td");
+    td2.appendChild(el("b", null, (d.title && d.title.tr) || "—"));
+    td2.appendChild(el("span", "t-cust", ((d.title && d.title.en) || "—") + " · " + ((d.title && d.title.ru) || "—")));
+    tr.appendChild(td2);
+    tr.appendChild(el("td", null, docCatLabel(d.cat)));
+    tr.appendChild(el("td", "mono", d.ext || "—"));
+    tr.appendChild(el("td", "mono", d.file || T("portal.doc.noFile", "dosyasız — “talep et” kartı")));
+    var tda = el("td");
+    var del = el("button", "advance-btn", T("portal.cat.del", "Sil"));
+    del.type = "button";
+    del.addEventListener("click", function () {
+      if (!window.confirm(T("portal.doc.delConfirm",
+        "Bu doküman kaydı bu tarayıcıdan silinecek. Dışa aktarılmadıysa geri getirilemez. Silinsin mi?"))) return;
+      if (hgpDeleteDoc(d.id, USER.name)) toast(T("portal.doc.deleted", "Doküman kaydı silindi."));
+      renderAll();
+    });
+    tda.appendChild(del);
+    tr.appendChild(tda);
+    return tr;
+  }
+
+  function renderDocs() {
+    if (!USER || !CAN_EDIT_CATALOG[USER.role]) return;
+    buildDocScreen();
+    if (!docBodyEl) return;
+    var list = hgpListDocs();
+    if (docCountEl) docCountEl.textContent = countsLine(baseDocs().length, list.length);
+    docBodyEl.textContent = "";
+    if (!list.length) {
+      var tr = el("tr"), td = el("td", "empty2",
+        T("portal.doc.empty", "Bu tarayıcıda eklenmiş doküman kaydı yok. Yukarıdaki formla ekleyin."));
+      td.colSpan = DOC_COLS; tr.appendChild(td); docBodyEl.appendChild(tr);
+      return;
+    }
+    list.forEach(function (d) { docBodyEl.appendChild(docRow(d)); });
+  }
+
+  /* ---------- 17. Sipariş çekmecesi ---------- */
   var ov = $("#ov2"), dwo = $("#dw-order"), dwc = $("#dw-cust");
   function closeDws() {
     if (ov) ov.classList.remove("open");
@@ -910,7 +1363,7 @@
         });
         act.appendChild(b1);
         var note = el("p", "cart-note", "Onaylanan sipariş anında depo/üretim panosunda görünür.");
-        note.style.marginTop = "10px";
+        note.style.marginTop = "var(--space-sm)";
         act.appendChild(note);
       }
       if (USER.role === "depo" && o.step >= STEP_ONAYLANDI && o.step <= STEP_SEVK) {
@@ -927,7 +1380,7 @@
     if (dwo) dwo.classList.add("open");
   }
 
-  /* ---------- 16. Müşteri kartı çekmecesi ---------- */
+  /* ---------- 18. Müşteri kartı çekmecesi ---------- */
   var curCust = null;
   /* DİKKAT (borç): görüşme notları aktivite akışında serbest metin olarak saklanıp
      ("<firma> — görüşme notu: <metin>") burada tekrar ayrıştırılıyor. Firma adında bu
@@ -1006,20 +1459,23 @@
     openCust(curCust); renderAll();
   });
 
-  /* ---------- 17. Toplu çizim + başlatma ---------- */
-  /* Künye metni: müşteri kendi firma adını, Herkim çalışanları şirketi görür */
+  /* ---------- 19. Toplu çizim + başlatma ---------- */
+  /* Künye metni: portalda yalnız Herkim personeli vardır, künye sabittir */
   var HOUSE_SCOPE = "Herkim Kimya";
-  /* Temsilci adı kadro tablosundan okunur; HGP_USERS güncellenince burası da düzelir */
-  function salesRepName() {
-    return (typeof HGP_USERS !== "undefined" && HGP_USERS.satis && HGP_USERS.satis.name) || "Ayşe Yılmaz";
-  }
 
   function renderAll() {
     if (!USER) return;
     buildNav();
     renderKpis(); renderFunnel(); renderFeed(); renderDash();
     renderOrders(); renderRequests(); renderCustomers(); renderOps();
-    renderCatalog(); renderCart();
+    // Katalog yönetimi: yalnız yetkili rollerde çalışır, diğerlerinde anında döner
+    renderProducts(); renderDocs();
+  }
+
+  /* Giriş ekranını göster, uygulamayı gizle (oturuma DOKUNMAZ) */
+  function showLogin(loginView, appView) {
+    if (loginView) loginView.style.display = "";
+    if (appView) appView.style.display = "none";
   }
 
   function boot() {
@@ -1027,40 +1483,38 @@
     // Boşta kalma süresi dolmuşsa oturumu düşürürüz (site-auth.js ile aynı kural, aynı anahtar)
     if (s && nowMs() - (s.touched || s.at) > HGP_IDLE_MS) { localStorage.removeItem(HGP_SESSION_KEY); s = null; }
     var loginView = need("#login-view"), appView = need("#app-view");
-    if (!s || !HGP_USERS[s.role]) {
-      if (loginView) loginView.style.display = "";
-      if (appView) appView.style.display = "none";
+    /* MÜŞTERİ OTURUMU — portal açılmaz.
+       Ana sitede giriş yapan müşteri (site-auth.js) AYNI oturum anahtarını
+       "musteri" rolüyle yazar; adres çubuğuna portal.html yazarsa buraya düşer.
+       Rol portalda artık tanımlı olmadığı için NAV/TITLES boş kalır ve kabuk
+       bomboş çizilirdi. Onun yerine giriş ekranını açıklamayla gösteriyoruz.
+       OTURUMU SİLMİYORUZ: kullanıcı ana sitede hâlâ açık, oradan atmak olurdu. */
+    if (s && s.role === "musteri") {
+      showLogin(loginView, appView);
+      showCustomerNotice(T("portal.login.staffOnlyBoot",
+        "Bu portal Herkim personeline özeldir. Ana site hesabınız açık; siparişlerinizi ve durumlarını buradan izleyebilirsiniz:"));
+      return;
+    }
+    // Tanınmayan / kaldırılmış rol de giriş ekranına düşer (NAV yoksa çizilecek menü de yok)
+    if (!s || !HGP_USERS[s.role] || !NAV[s.role]) {
+      showLogin(loginView, appView);
       return;
     }
     USER = HGP_USERS[s.role];
-    // Ana siteden onaylı web hesabıyla giriş: oturumdaki hesap bilgisi baskındır
-    if (s.acct && s.role === "musteri") {
-      USER = { role: "musteri", name: s.acct.name, title: "Satın Alma",
-               company: s.acct.company, initials: s.acct.initials || "MK",
-               rep: s.acct.rep || salesRepName() };
-    }
     if (loginView) loginView.style.display = "none";
     if (appView) appView.style.display = "";
     setText("#u-initials", USER.initials);
     setText("#u-name", USER.name);
     setText("#u-title", USER.title + " · " + USER.company);
     setText("#role-pill", ROLE_LABEL[USER.role] || "");
-    setText("#scope", USER.role === "musteri" ? USER.company : HOUSE_SCOPE);
+    setText("#scope", HOUSE_SCOPE);
     var last = localStorage.getItem(HGP_LAST_LOGIN + USER.role);
     setText("#u-last", last ? "Son giriş: " + last : "");
-    // Başlıktaki birincil aksiyon: hangi rol nereye gidiyor, PRIMARY_ACTION tablosunda yazar
-    var pa = $("#btn-primary-action");
-    if (pa) {
-      var target = PRIMARY_ACTION[USER.role];
-      pa.style.display = vis(!!target);
-      pa.onclick = target ? function () { show(target); } : null;
-    }
     curView = "dash";
     show("dash");
     // Ana siteden derin bağlantı: portal.html#orders → ilgili görünüm
     var hv = (location.hash || "").replace("#", "");
     if (hv && NAV[USER.role].some(function (n) { return n.v === hv; })) show(hv);
-    consumePrefill();
   }
   boot();
 })();
