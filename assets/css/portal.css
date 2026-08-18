@@ -1,6 +1,100 @@
 /* ============================================================
    HERKİM PORTAL — Uygulama arayüzü (uçtan uca akış demosu)
    Herkim tasarım sistemi üzerine kurulur (style.css ile birlikte yüklenir).
+
+   ------------------------------------------------------------
+   İÇİNDEKİLER
+   Bölüme gitmek için başlık metnini aratın; sıra dosyadaki gerçek sıradır.
+   Kurallara önce bakın: "PUNTO VE BOŞLUK ÖLÇEĞİ" ve "PORTAL BOŞLUK SİSTEMİ"
+   (ikisi de bu başlığın hemen altında).
+
+     01  Giriş                        (.lgw, .lg-*, .rolebar, .sec-strip)
+     02  Uygulama kabuğu              (.app, .sb, .main, .topline)
+     03  KPI                          (.kpis, .kpi)
+     04  Panel / tablo                (.panel, .ptbl, .tbl-wrap)
+     05  Durum çipleri                (.st, .st--*)
+     06  İlerleme                     (.prog)
+     07  Sipariş oluşturma (katalog)  (.order-grid, .cat-*, .qty, .cart-*)
+     08  Operasyon (depo)             (.ops-note, .advance-btn)
+     09  Müşteri kartları             (.cust-grid, .cust-card, .cust-mini)
+     10  Aktivite / geçmiş            (.feed, .feed-*)
+     11  Huni (funnel)                (.funnel, .fun-*)
+     12  Çekmece                      (.ov2, .dw, .dw-*, .tl2, .reply-box)
+     13  Duyarlılık                   (@media 1080 / 860 / 560)
+     14  Hesap başvuruları            (.app-row, .app-*)
+     15  Katalog yönetimi             (.form-grid, .dw-t, #prod/#doc-list-panel)
+
+   Renk ve tipografi belirteçleri style.css'in :root bloğundan gelir;
+   burada yeni belirteç tanımlanmaz.
+
+   ------------------------------------------------------------
+   PUNTO VE BOŞLUK ÖLÇEĞİ
+   Bu dosyadaki metin boyutları style.css :root bloğundaki --fs-* ve
+   --space-* basamaklarına bağlıdır; o bloğun başındaki uzun açıklama
+   hangi basamağın nerede kullanılacağını anlatır. Kısaca: portal bir
+   UYGULAMA yüzeyidir, gövde metni --fs-small (14px), etiketleri
+   --fs-label (12px), mikro rozetleri --fs-micro (11px) alır.
+   YENİ TEK SEFERLİK px DEĞERİ YAZMAYIN.
+   Ölçek dışında bilerek bırakılan değerler: .lg-mid h1, .topline h1,
+   .kpi b (uygulama kabuğunun kendi büyük figürleri), .sb .brand-name b
+   (kelime markası) ve sabit kutuya oturan glifler (.avatar, .qty button).
+
+   ------------------------------------------------------------
+   PORTAL BOŞLUK SİSTEMİ — beş kural
+   Yeni bir panel eklerken hiçbir yere bakmadan bu beş kuralı uygulayın.
+   Boşluklar SADECE --space-* basamaklarından gelir:
+   --space-2xs 4 · --space-xs 8 · --space-sm 16 · --space-md 24 · --space-lg 32
+
+   KURAL 0 — PANEL OLUĞU --space-md (24px).
+     Kendi iç boşluğunu taşıyan her panel çocuğu SOLDAN ve SAĞDAN 24px
+     girinti alır. İstisna yok; 18, 20, 22 yasak. Panelin içinde tek bir
+     dikey hizalama çizgisi olur: başlık metni, tablo hücresi, liste
+     satırı ve form alanı aynı x'ten başlar. (Eskiden 0/18/20/22 idi;
+     bitmemiş görüntünün asıl sebebi o tırtıklı sol kenardı.)
+
+   KURAL 1 — .panel'İN KENDİSİNE İÇ BOŞLUK VERİLMEZ. Asla.
+     Panel bir ÇERÇEVEDİR: 1.5px kural, 3px yarıçap, overflow:hidden.
+     Çocukları ya tam genişlik satırlardır (ayraç çizgileri panel
+     kenarına DEĞMELİ) ya da kendi girintisini veren blok gövdelerdir.
+     .panel'e padding koymak blok gövdeleri iki kez girintiler ve her
+     satır ayracını / tablo kenarını 24px içeri çeker.
+
+   KURAL 2 — PANEL İÇİNDE ÜÇ DİKEY BASAMAK VARDIR, SADECE ÜÇ.
+     a) BAŞLIK BANDI  padding: var(--space-sm) var(--space-md) + alt kural
+        çizgisi. Sınıfı .panel-head'dir; başlık bandını elde ÖRMEYİN.
+     b) BLOK GÖVDE    padding: var(--space-md). İçerik tek parça ise:
+        form, huni, dışa aktarım kutusu, talep detayı, sepet altlığı.
+     c) TAM GENİŞLİK SATIR  padding: var(--space-sm) var(--space-md) +
+        border-bottom + :last-child { border-bottom: 0 }. Tekrar eden her
+        şey: .ptbl th/td, .feed-item, .cat-item, .app-row, .dw-item.
+     Zaten girintili bir bloğun İÇİNDEKİ satır (.cart-line gibi)
+     var(--space-xs) 0 alır: oluğu kapsayıcısından devralır.
+
+   KURAL 3 — ARALIKLAR (gap) TAM ÜÇ BASAMAKTAN GELİR.
+     --space-2xs (4)  etiket ile değeri; sıkı üst üste meta satırları.
+     --space-xs  (8)  birbirine ait KOMŞU DENETİMLER (düğme sıraları).
+     --space-sm  (16) bir satırın/yığının içindeki AYRI GRUPLAR.
+     Başka basamak yok. 10, 12 veya 14 "isteyen" bir aralık 8 ya da 16 ister.
+
+   KURAL 4 — PANELLER ARASI HER ZAMAN --space-md (24px).
+     .panel + .panel bunu zaten yapar. Panelleri bir grid/flex listeye
+     koyarsanız kapsayıcıya gap: var(--space-md) verin VE o listenin
+     içinde devralınan margin-top'u sıfırlayın; yoksa ikisi üst üste
+     biner (#req-list'te böyleydi). PANEL değil KART tutan ızgaralar
+     (.kpis, .cust-grid) gap: var(--space-sm) alır.
+
+   KURAL 5 — FORM ALANLARI ANA SİTENİN MOBİLYASIDIR; ELLENMEZ.
+     .form-grid ve .field style.css'ten gelir ve ana site formlarıyla
+     ortaktır. Portal yalnızca formu SARAN ögenin padding'ini verir.
+
+   ÖLÇEK DIŞI KALANLAR (style.css'in de muaf tuttuğu kategoriler):
+     çip/rozet geometrisi (.st, .demo-badge, .role-pill padding,
+     .sec-strip span, .sb-link .cnt), sabit kutuya ortalanmış glifler
+     (.avatar, .qty button, .lg-step .no, .feed-dot), sabit denetim
+     genişlikleri (.cat-item / .fun-row sütunları, .prog min-width),
+     ray geometrisi (.tl2 padding-left 26px ile .tl2-step::before -26px),
+     textarea min-height değerleri ve giriş ekranının hero clamp'leri.
+     Bunlar okuma ritmi değil, GRAFİK ölçülerdir.
    ============================================================ */
 
 .pt-body { background: #F3EEE6; min-height: 100vh; }
@@ -11,94 +105,142 @@
 .lg-side .brand-name b { color: var(--crimson-hot); }
 .lg-side .brand-name span { color: rgba(250,246,241,0.6); }
 .lg-mid { margin: auto 0; max-width: 48ch; position: relative; }
-.lg-mid h1 { font-family: var(--font-display); font-weight: 800; font-stretch: 112%; font-size: clamp(1.9rem, 3.2vw, 2.8rem); line-height: 1.1; color: var(--paper); margin-bottom: 16px; }
+/* font-size ölçek dışı: portal kabuğunun kendi giriş figürü (bkz. dosya
+   başlığındaki ölçek notu). Yalnız aralık belirtece bağlandı. */
+.lg-mid h1 { font-family: var(--font-display); font-weight: 800; font-stretch: 112%; font-size: clamp(1.9rem, 3.2vw, 2.8rem); line-height: 1.1; color: var(--paper); margin-bottom: var(--space-sm); }
 .lg-mid h1 em { font-style: normal; color: var(--crimson-hot); }
-.lg-mid p { color: rgba(250,246,241,0.68); font-size: 15.5px; }
-.lg-flow { margin-top: 30px; display: grid; gap: 9px; }
-.lg-step { display: flex; align-items: center; gap: 12px; background: rgba(250,246,241,0.05); border: 1px solid rgba(250,246,241,0.12); border-radius: 4px; padding: 11px 15px; opacity: 0; transform: translateY(10px); animation: lgin 0.5s var(--ease-out) forwards; }
+.lg-mid p { color: rgba(250,246,241,0.68); font-size: var(--fs-body); }
+.lg-flow { margin-top: var(--space-lg); display: grid; gap: var(--space-xs); }
+.lg-step { display: flex; align-items: center; gap: var(--space-sm); background: rgba(250,246,241,0.05); border: 1px solid rgba(250,246,241,0.12); border-radius: 4px; padding: var(--space-sm); opacity: 0; transform: translateY(10px); animation: lgin 0.5s var(--ease-out) forwards; }
 .lg-step:nth-child(2) { animation-delay: 0.1s; } .lg-step:nth-child(3) { animation-delay: 0.2s; }
 .lg-step:nth-child(4) { animation-delay: 0.3s; } .lg-step:nth-child(5) { animation-delay: 0.4s; }
 @keyframes lgin { to { opacity: 1; transform: none; } }
-.lg-step b { color: var(--paper); font-size: 13.5px; font-weight: 600; }
-.lg-step .no { width: 26px; height: 26px; border-radius: 50%; background: var(--crimson); color: #fff; display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; font-weight: 600; flex-shrink: 0; }
-.lg-back { color: rgba(250,246,241,0.55); font-size: 13.5px; position: relative; }
+.lg-step b { color: var(--paper); font-size: var(--fs-small); font-weight: 600; }
+/* 26px ölçek dışı: numaranın oturduğu sabit daire — grafik ölçü, boşluk değil. */
+.lg-step .no { width: 26px; height: 26px; border-radius: 50%; background: var(--crimson); color: #fff; display: grid; place-items: center; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 600; flex-shrink: 0; }
+.lg-back { color: rgba(250,246,241,0.55); font-size: var(--fs-small); position: relative; }
 .lg-back:hover { color: var(--crimson-hot); }
 .lg-hex { position: absolute; right: -80px; bottom: -60px; width: 420px; opacity: 0.06; pointer-events: none; }
 
+/* .lg-side ve .lg-form-wrap'in clamp() iç boşlukları ölçek dışıdır: bunlar
+   ana sitedeki --gutter ile aynı kategoride, bölünmüş ekran kompozisyonuyla
+   birlikte ölçeklenen HERO oluklarıdır, panel sistemine ait değildir.
+   İçlerindeki .lg-card / .lg-err / .lg-step / .rolebtn belirtece bağlıdır. */
 .lg-form-wrap { display: grid; place-items: center; padding: clamp(24px, 4vw, 52px); }
-.lg-card { width: min(440px, 100%); background: var(--white); border: 2px solid var(--ink); border-radius: var(--radius); padding: 34px 32px; box-shadow: var(--shadow-offset); }
-.lg-card h2 { font-family: var(--font-display); font-weight: 800; font-stretch: 110%; font-size: 24px; }
-.lg-card .sub { font-size: 14px; color: var(--ink-3); margin: 4px 0 22px; }
-.lg-err { display: none; margin-bottom: 14px; background: #FDECEC; border: 1px solid #F3B8B8; color: #A31C1C; border-radius: var(--radius); padding: 11px 14px; font-size: 13.5px; font-weight: 600; }
+.lg-card { width: min(440px, 100%); background: var(--white); border: 2px solid var(--ink); border-radius: var(--radius); padding: var(--space-lg); box-shadow: var(--shadow-offset); }
+.lg-card h2 { font-family: var(--font-display); font-weight: 800; font-stretch: 110%; font-size: var(--fs-h3); }
+.lg-card .sub { font-size: var(--fs-small); color: var(--ink-3); margin: var(--space-2xs) 0 var(--space-md); }
+.lg-err { display: none; margin-bottom: var(--space-sm); background: #FDECEC; border: 1px solid #F3B8B8; color: #A31C1C; border-radius: var(--radius); padding: var(--space-sm); font-size: var(--fs-small); font-weight: 600; }
 .lg-err.show { display: block; animation: lgshake 0.3s; }
 @keyframes lgshake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-.rolebar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
-.rolebtn { border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--white); padding: 13px 12px; text-align: left; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+.rolebar { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xs); margin-top: var(--space-sm); }
+.rolebtn { border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--white); padding: var(--space-sm); text-align: left; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
 .rolebtn:hover { border-color: var(--ink); transform: translateY(-2px); box-shadow: var(--shadow-offset-sm); }
-.rolebtn b { display: block; font-size: 13.5px; color: var(--ink); }
-.rolebtn span { font-size: 11.5px; color: var(--ink-3); }
-.sec-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-.sec-strip span { font-size: 10.5px; font-weight: 600; font-family: var(--font-mono); color: var(--ink-3); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; background: var(--paper); }
+.rolebtn b { display: block; font-size: var(--fs-small); color: var(--ink); }
+.rolebtn span { font-size: var(--fs-label); color: var(--ink-3); }
+.sec-strip { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-sm); }
+/* padding 4px 10px ölçek dışı: çip geometrisi metnine göre ayarlanır. */
+.sec-strip span { font-size: var(--fs-micro); font-weight: 600; font-family: var(--font-mono); color: var(--ink-3); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; background: var(--paper); }
 
 /* ---------- Uygulama kabuğu ---------- */
 .app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
-.sb { background: var(--ink); color: rgba(250,246,241,0.75); padding: 24px 16px; display: flex; flex-direction: column; gap: 3px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-.sb .brand { padding: 0 8px 20px; }
+.sb { background: var(--ink); color: rgba(250,246,241,0.75); padding: var(--space-md) var(--space-sm); display: flex; flex-direction: column; gap: var(--space-2xs); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+/* Kenar çubuğunun yatay girintisi TEK bir değerdir: --space-xs (8px).
+   Kelime markası, rol pili, MENÜ etiketi, bağlantılar, avatar ve son
+   giriş satırı bu sayede aynı x'ten başlar (eskiden 24/26/28 idi). */
+.sb .brand { padding: 0 var(--space-xs) var(--space-md); }
+/* 18px kelime markası ölçüsüdür, --fs-h4 ile aynı sayı olması tesadüftür;
+   ölçek dışı bırakıldı (bkz. style.css'teki .brand-name notu). */
 .sb .brand-name b { color: var(--crimson-hot); font-size: 18px; }
 .sb .brand-name span { color: rgba(250,246,241,0.5); }
-.sb-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; color: rgba(250,246,241,0.4); padding: 12px 10px 5px; text-transform: uppercase; }
-.sb-link { display: flex; align-items: center; gap: 11px; padding: 11px 12px; border-radius: 4px; font-size: 14.5px; font-weight: 500; color: rgba(250,246,241,0.8); width: 100%; text-align: left; transition: background 0.14s, color 0.14s; }
+.sb-label { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.2em; color: rgba(250,246,241,0.4); padding: var(--space-sm) var(--space-xs) var(--space-2xs); text-transform: uppercase; }
+.sb-link { display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs); border-radius: 4px; font-size: var(--fs-small); font-weight: 500; color: rgba(250,246,241,0.8); width: 100%; text-align: left; transition: background 0.14s, color 0.14s; }
 .sb-link:hover { background: rgba(250,246,241,0.08); color: #fff; }
 .sb-link.on { background: var(--crimson); color: #fff; }
-.sb-link .cnt { margin-left: auto; background: rgba(250,246,241,0.16); border-radius: 999px; font-family: var(--font-mono); font-size: 11px; padding: 1px 8px; }
+/* padding 1px 8px ölçek dışı: sayaç rozetinin çip geometrisi. */
+.sb-link .cnt { margin-left: auto; background: rgba(250,246,241,0.16); border-radius: 999px; font-family: var(--font-mono); font-size: var(--fs-micro); padding: 1px 8px; }
 .sb-link.on .cnt { background: rgba(0,0,0,0.25); }
-.sb-foot { margin-top: auto; border-top: 1px solid rgba(250,246,241,0.14); padding-top: 12px; }
-.sb-user { display: flex; gap: 11px; align-items: center; padding: 8px 8px 2px; }
+.sb-foot { margin-top: auto; border-top: 1px solid rgba(250,246,241,0.14); padding-top: var(--space-sm); }
+.sb-user { display: flex; gap: var(--space-xs); align-items: center; padding: var(--space-xs) var(--space-xs) var(--space-2xs); }
+/* 13px ölçek dışı: 38px'lik daireye ortalanmış baş harf. */
 .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--crimson); color: #fff; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 13px; flex-shrink: 0; }
-.sb-user b { display: block; color: #fff; font-size: 13.5px; line-height: 1.2; }
-.sb-user span { font-size: 11.5px; color: rgba(250,246,241,0.5); }
-.sb-last { font-family: var(--font-mono); font-size: 10px; color: rgba(250,246,241,0.38); padding: 4px 8px 0; }
-.role-pill { margin: 0 8px 10px; display: inline-flex; align-items: center; gap: 7px; background: rgba(196,36,73,0.18); border: 1px solid rgba(196,36,73,0.45); color: #FF7A93; border-radius: 999px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em; padding: 4px 11px; }
+.sb-user b { display: block; color: #fff; font-size: var(--fs-small); line-height: 1.2; }
+.sb-user span { font-size: var(--fs-label); color: rgba(250,246,241,0.5); }
+.sb-last { font-family: var(--font-mono); font-size: var(--fs-micro); color: rgba(250,246,241,0.38); padding: var(--space-2xs) var(--space-xs) 0; }
+/* padding 4px 11px ölçek dışı: pil geometrisi (kenar boşluğu belirtece bağlı). */
+.role-pill { margin: 0 var(--space-xs) var(--space-sm); display: inline-flex; align-items: center; gap: var(--space-xs); background: rgba(196,36,73,0.18); border: 1px solid rgba(196,36,73,0.45); color: #FF7A93; border-radius: 999px; font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.1em; padding: 4px 11px; }
 
-.main { padding: clamp(20px, 3vw, 38px); }
-.topline { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.main { padding: clamp(var(--space-md), 3vw, var(--space-lg)); }
+.topline { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); margin-bottom: var(--space-md); flex-wrap: wrap; }
+/* font-size ölçek dışı: uygulama kabuğunun kendi sayfa başlığı. */
 .topline h1 { font-family: var(--font-display); font-weight: 800; font-stretch: 112%; font-size: clamp(1.5rem, 2.6vw, 2rem); }
-.topline .crumb { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); text-transform: uppercase; }
-.top-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.demo-badge { display: inline-flex; align-items: center; gap: 7px; background: #FFF6E3; border: 1px solid #EAD199; color: #8A5E0A; font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; border-radius: 999px; padding: 5px 12px; }
+.topline .crumb { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.12em; color: var(--ink-3); text-transform: uppercase; }
+.top-actions { display: flex; gap: var(--space-xs); align-items: center; flex-wrap: wrap; }
+/* padding 5px 12px ölçek dışı: rozet geometrisi. */
+.demo-badge { display: inline-flex; align-items: center; gap: 7px; background: #FFF6E3; border: 1px solid #EAD199; color: #8A5E0A; font-family: var(--font-mono); font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.1em; border-radius: 999px; padding: 5px 12px; }
 .demo-badge i { width: 7px; height: 7px; border-radius: 50%; background: #E3A31C; animation: hgblink 1.6s infinite; }
 @keyframes hgblink { 50% { opacity: 0.25; } }
 
 /* ---------- KPI ---------- */
-.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-bottom: 22px; }
-.kpi { background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out); }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm); margin-bottom: var(--space-md); }
+.kpi { background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius); padding: var(--space-md); position: relative; overflow: hidden; transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out); }
 .kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow-offset-sm); }
+/* 30px ölçek dışı: gösterge panelinin büyük figürü. */
 .kpi b { display: block; font-family: var(--font-display); font-weight: 800; font-stretch: 112%; font-size: 30px; color: var(--ink); line-height: 1.1; font-variant-numeric: tabular-nums; }
-.kpi span { font-size: 12.5px; color: var(--ink-3); font-weight: 500; }
+/* Torun seçici tuzağı burada YOK: .kpi b'nin içinde iç içe <span> değil
+   düz metin düğümü var (portal-app.js, kpi() üreteci), yani bu kural
+   figürü yakalamıyor — sadece etiketi. */
+.kpi span { font-size: var(--fs-label); color: var(--ink-3); font-weight: 500; }
 .kpi::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--crimson); transform: scaleX(0); transform-origin: left; transition: transform 0.25s var(--ease-out); }
 .kpi:hover::after { transform: none; }
 
 /* ---------- Panel / tablo ---------- */
+/* KURAL 1 — .panel'e İÇ BOŞLUK VERİLMEZ; burası bir çerçevedir.
+   Çocuklarının çoğu TAM GENİŞLİK satırdır (.panel-head, .ptbl th/td,
+   .feed-item, .cat-item, .app-row, .cart-lines, .cart-foot): 1px ayraç
+   çizgileri ve tablo kenarları panel kenarına DEĞMELİDİR. Geri kalanlar
+   (form.form-grid, .funnel, dışa aktarım gövdesi, talep gövdesi) kendi
+   girintisini KENDİ verir. Buraya padding koyarsanız o gövdeler iki kez
+   girintilenir ve her satır ayracı 24px içeri kaçar — kartın en
+   karakteristik ayrıntısı bozulur. Lütfen "düzeltmeyin". */
 .panel { background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-.panel + .panel { margin-top: 20px; }
-.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-.panel-head h2 { font-family: var(--font-display); font-weight: 800; font-stretch: 108%; font-size: 16.5px; }
-.panel-tools { display: flex; gap: 10px; flex-wrap: wrap; }
-.panel-tools input, .panel-tools select { padding: 9px 12px; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--paper); font-size: 13.5px; }
+.panel + .panel { margin-top: var(--space-md); }
+/* KURAL 2a — başlık bandı: 16/24 + alt kural çizgisi. */
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+/* h3 de kapsanır: başvuru paneli başlığı (portal-app.js, renderApplications)
+   belge sırası gereği <h3>'tür ve tarayıcı varsayılanına düşüyordu. */
+/* Talep kartlarının başlığı <b> ile kuruluyor (portal-app.js, renderRequests).
+   Buraya dahil edilmezse gövde yazı tipiyle çıkar ve aynı ekranda duran diğer
+   panel başlıklarıyla uyuşmaz — ölçüldü: 15 başlık Archivo 800, 3 tanesi IBM
+   Plex Sans 700. Punto zaten aynıydı, ayrışan yazı tipiydi. */
+.panel-head h2, .panel-head h3, .panel-head b { font-family: var(--font-display); font-weight: 800; font-stretch: 108%; font-size: var(--fs-h4); color: var(--ink); display: block; }
+.panel-tools { display: flex; gap: var(--space-xs); flex-wrap: wrap; }
+/* 8/16: başlık bandında yanlarında duran .btn--sm (9px 16px) ile uyumlu. */
+.panel-tools input, .panel-tools select { padding: var(--space-xs) var(--space-sm); border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--paper); font-size: var(--fs-small); }
 .ptbl { width: 100%; border-collapse: collapse; }
-.ptbl th { text-align: left; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.12em; color: var(--ink-3); padding: 11px 20px; border-bottom: 1px solid var(--line); background: var(--paper); white-space: nowrap; }
-.ptbl td { padding: 13px 20px; border-bottom: 1px solid var(--line-soft); font-size: 14px; vertical-align: middle; }
+/* --fs-label: portal tablo başlıkları artık ana sitedeki .ptable thead th
+   ile aynı basamakta. 0.12em aralıkla sütunlar birkaç px genişler,
+   .tbl-wrap yatay kaydırdığı için taşma olmaz. */
+.ptbl th { text-align: left; font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.12em; color: var(--ink-3); padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--line); background: var(--paper); white-space: nowrap; }
+/* KURAL 2c — hücreler de tam genişlik satır basamağını kullanır: yatayda
+   panel oluğu (24px), dikeyde 16px. Başlık ve gövde tek ritimde. */
+.ptbl td { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--line-soft); font-size: var(--fs-small); vertical-align: middle; }
 .ptbl tr:last-child td { border-bottom: 0; }
+/* 3px saydam kenarlık yer AYIRIR: imleç üstüne gelince crimson şeride
+   dönüşür. Kaldırırsanız her satır hover'da yatay olarak zıplar. */
 .ptbl tbody tr { cursor: pointer; border-left: 3px solid transparent; transition: background 0.12s, border-color 0.12s; }
 .ptbl tbody tr:hover { background: var(--crimson-soft); border-left-color: var(--crimson); }
 .ptbl .t-id { font-family: var(--font-mono); font-weight: 600; color: var(--ink); white-space: nowrap; }
-.ptbl .t-cust { font-size: 12px; color: var(--ink-3); display: block; }
+.ptbl .t-cust { font-size: var(--fs-label); color: var(--ink-3); display: block; }
 .tbl-wrap { overflow-x: auto; }
-.link-crimson { color: var(--crimson); font-weight: 700; font-size: 13.5px; }
+.link-crimson { color: var(--crimson); font-weight: 700; font-size: var(--fs-small); }
 .link-crimson:hover { text-decoration: underline; }
 
-/* ---------- Durum çipleri ---------- */
-.st { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+/* ---------- Durum çipleri ----------
+   padding 4px 12px ve gap 7px ölçek DIŞIDIR ve öyle kalmalı: bu çip
+   sipariş tablosundaki DURUM sütununun min-content genişliğini belirler.
+   16px'e çıkarmak portaldaki her tabloyu genişletir. */
+.st { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 999px; font-size: var(--fs-label); font-weight: 600; white-space: nowrap; }
 .st::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .st--bekliyor { background: #FDECEC; color: #A31C1C; }
 .st--onay { background: #E8F0FB; color: #1D4ED8; }
@@ -110,65 +252,84 @@
 .st--landing { background: #FFF6E3; color: #8A5E0A; }
 
 /* İlerleme */
-.prog { display: flex; align-items: center; gap: 9px; min-width: 120px; }
+/* min-width 120px bir DÜZEN kısıtıdır (çubuk tablo hücresinde okunur
+   kalsın), boşluk basamağı değil. */
+.prog { display: flex; align-items: center; gap: var(--space-xs); min-width: 120px; }
 .prog .bar { flex: 1; height: 6px; border-radius: 999px; background: #EFEAE1; overflow: hidden; }
 .prog .bar i { display: block; height: 100%; background: var(--crimson); }
-.prog span { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.prog span { font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--ink-3); }
 
 /* ---------- Sipariş oluşturma (katalog) ---------- */
-.order-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+/* KURAL 4 — iki çocuğu da .panel olduğu için aralık panel aralığıdır. */
+.order-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-md); align-items: start; }
 .cat-list { display: grid; gap: 0; }
-.cat-item { display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--line-soft); }
+/* 130px / 110px sütunları içeriğine göre ölçülmüş SABİT raylardır (adet
+   basamağı ve "Ekle" düğmesi); belirtece bağlanmaz. */
+.cat-item { display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px; gap: var(--space-sm); align-items: center; padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--line-soft); }
 .cat-item:last-child { border-bottom: 0; }
-.cat-item b { font-size: 14px; color: var(--ink); display: block; }
-.cat-item .mono { font-size: 11px; color: var(--ink-3); }
+.cat-item b { font-size: var(--fs-small); color: var(--ink); display: block; }
+.cat-item .mono { font-size: var(--fs-micro); color: var(--ink-3); }
 .qty { display: flex; border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+/* 16px ölçek dışı: 32px'lik kutuya ortalanmış +/- glifi. */
 .qty button { width: 32px; font-size: 16px; font-weight: 700; color: var(--crimson); background: var(--paper); }
 .qty button:hover { background: var(--crimson-soft); }
-.qty input { width: 100%; border: 0; text-align: center; font-family: var(--font-mono); font-size: 13px; padding: 8px 2px; background: var(--white); }
+/* 2px yatay iç boşluk ölçek dışı: 3 haneli adedi kutuda ortalı tutan ölçü. */
+.qty input { width: 100%; border: 0; text-align: center; font-family: var(--font-mono); font-size: var(--fs-small); padding: 8px 2px; background: var(--white); }
 .qty input:focus { outline: none; }
-.cart-box { position: sticky; top: 20px; }
-.cart-lines { padding: 6px 20px; }
-.cart-line { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 13.5px; }
+.cart-box { position: sticky; top: var(--space-md); }
+.cart-lines { padding: var(--space-xs) var(--space-md); }
+/* KURAL 2c istisnası: zaten girintili bir bloğun içindeki satır. Yatayda 0
+   kalır ki kesik çizgi kapsayıcının içerik kutusunu baştan sona geçsin. */
+.cart-line { display: flex; justify-content: space-between; gap: var(--space-xs); padding: var(--space-xs) 0; border-bottom: 1px dashed var(--line); font-size: var(--fs-small); }
 .cart-line:last-child { border-bottom: 0; }
 .cart-line b { color: var(--ink); font-weight: 600; }
 .cart-line .mono { color: var(--crimson); }
-.cart-foot { padding: 16px 20px; border-top: 1.5px solid var(--line); display: grid; gap: 10px; }
-.cart-note { font-size: 11.5px; color: var(--ink-3); font-family: var(--font-mono); }
+.cart-foot { padding: var(--space-md); border-top: 1.5px solid var(--line); display: grid; gap: var(--space-sm); }
+.cart-note { font-size: var(--fs-label); color: var(--ink-3); font-family: var(--font-mono); }
 
 /* ---------- Operasyon (depo) ---------- */
-.ops-note { font-size: 12.5px; color: var(--ink-3); }
-.advance-btn { font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; border: 1.5px solid var(--crimson); color: var(--crimson); border-radius: var(--radius); padding: 7px 12px; white-space: nowrap; transition: all 0.13s; }
+.ops-note { font-size: var(--fs-label); color: var(--ink-3); }
+.advance-btn { font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 600; border: 1.5px solid var(--crimson); color: var(--crimson); border-radius: var(--radius); padding: var(--space-xs) var(--space-sm); white-space: nowrap; transition: all 0.13s; }
 .advance-btn:hover { background: var(--crimson); color: #fff; }
 .advance-btn[disabled] { border-color: var(--line); color: var(--ink-3); cursor: default; }
 .advance-btn[disabled]:hover { background: none; color: var(--ink-3); }
 
 /* ---------- Müşteri kartları ---------- */
-.cust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.cust-card { background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 22px; cursor: pointer; transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out), border-color 0.18s; }
+.cust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); }
+.cust-card { background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius); padding: var(--space-md); cursor: pointer; transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out), border-color 0.18s; }
 .cust-card:hover { transform: translateY(-4px); border-color: var(--ink); box-shadow: var(--shadow-offset); }
-.cust-card h3 { font-family: var(--font-display); font-weight: 800; font-stretch: 108%; font-size: 16.5px; margin-bottom: 3px; }
-.cust-card .mono { font-size: 11px; color: var(--ink-3); }
-.cust-mini { display: flex; gap: 14px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
-.cust-mini div b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 19px; color: var(--crimson); }
-.cust-mini div span { font-size: 10.5px; font-family: var(--font-mono); color: var(--ink-3); }
+.cust-card h3 { font-family: var(--font-display); font-weight: 800; font-stretch: 108%; font-size: var(--fs-h4); margin-bottom: var(--space-2xs); }
+.cust-card .mono { font-size: var(--fs-micro); color: var(--ink-3); }
+.cust-mini { display: flex; gap: var(--space-sm); margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--line-soft); }
+.cust-mini div b { display: block; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-h4); color: var(--crimson); }
+.cust-mini div span { font-size: var(--fs-micro); font-family: var(--font-mono); color: var(--ink-3); }
 
 /* ---------- Aktivite / geçmiş ---------- */
 .feed { display: grid; gap: 0; }
-.feed-item { display: flex; gap: 13px; padding: 12px 20px; border-bottom: 1px solid var(--line-soft); align-items: flex-start; }
+.feed-item { display: flex; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--line-soft); align-items: flex-start; }
 .feed-item:last-child { border-bottom: 0; }
+/* 10px çap ve 6px üst boşluk ölçek dışı: noktayı 14px'lik satırın büyük
+   harf yüksekliğine OPTİK olarak ortalar; boşluk basamağı değildir. */
 .feed-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: var(--ink-3); }
 .feed-dot.siparis { background: var(--crimson); } .feed-dot.onay { background: #1D4ED8; }
 .feed-dot.uretim { background: #B45309; } .feed-dot.sevk { background: #6D28D9; }
 .feed-dot.teslim { background: #15803D; } .feed-dot.talep { background: #A31C1C; } .feed-dot.not { background: #0E7490; }
-.feed-item b { display: block; font-size: 13.5px; color: var(--ink); font-weight: 600; }
-.feed-item span { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.feed-item b { display: block; font-size: var(--fs-small); color: var(--ink); font-weight: 600; }
+/* BİLİNEN LATENT TUZAK — bu seçici .feed-dot span'ini de yakalar
+   (portal-app.js aktivite noktasını <span> olarak ekler). Bugün zararsız,
+   çünkü kural yalnız yazı tipi özellikleri veriyor ve nokta 10px'lik boş
+   bir daire. Buraya YAZI DIŞI bir bildirim (display, margin, padding,
+   color...) eklerseniz nokta bozulur; o gün seçiciyi
+   `.feed-item > .when, .feed-item > time` gibi daraltın. */
+.feed-item span { font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--ink-3); }
 .feed-item .when { margin-left: auto; white-space: nowrap; }
 
 /* ---------- Huni (funnel) ---------- */
-.funnel { padding: 18px 20px; display: grid; gap: 10px; }
-.fun-row { display: grid; grid-template-columns: 150px 1fr 46px; gap: 12px; align-items: center; }
-.fun-row .mono { font-size: 11px; color: var(--ink-3); }
+/* KURAL 2b — huni tek parça blok gövdedir: her yandan 24px. */
+.funnel { padding: var(--space-md); display: grid; gap: var(--space-sm); }
+/* 150px / 46px sabit raylardır (46px tam üç haneye yeter); belirtece bağlanmaz. */
+.fun-row { display: grid; grid-template-columns: 150px 1fr 46px; gap: var(--space-sm); align-items: center; }
+.fun-row .mono { font-size: var(--fs-micro); color: var(--ink-3); }
 .fun-bar { height: 22px; background: #EFEAE1; border-radius: 3px; overflow: hidden; }
 .fun-bar i { display: block; height: 100%; background: var(--crimson); border-radius: 3px; transition: width 0.6s var(--ease-out); }
 .fun-row:nth-child(2) .fun-bar i { background: #C42449; }
@@ -181,52 +342,76 @@
 .ov2.open { opacity: 1; visibility: visible; }
 .dw { position: fixed; top: 0; right: 0; bottom: 0; z-index: 95; width: min(560px, 100vw); background: var(--paper); border-left: 2px solid var(--ink); transform: translateX(100%); transition: transform 0.3s var(--ease-out); display: flex; flex-direction: column; }
 .dw.open { transform: none; }
-.dw-head { padding: 20px 24px; border-bottom: 2px solid var(--ink); background: var(--white); display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
-.dw-head h2 { font-family: var(--font-display); font-weight: 800; font-stretch: 110%; font-size: 20px; }
-.dw-head .sub { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
-.dw-x { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--crimson); letter-spacing: 0.08em; }
-.dw-body { flex: 1; overflow-y: auto; padding: 24px; }
-.dw-t { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; color: var(--ink-3); margin: 24px 0 12px; text-transform: uppercase; }
+/* KURAL 2a değil 2b: çekmece başlığı 2px'lik --ink kuralı ve iki satırlık
+   bir başlık bloğu taşır, bu yüzden blok gövde basamağını (24px) alır. */
+.dw-head { padding: var(--space-md); border-bottom: 2px solid var(--ink); background: var(--white); display: flex; justify-content: space-between; gap: var(--space-sm); align-items: flex-start; }
+.dw-head h2 { font-family: var(--font-display); font-weight: 800; font-stretch: 110%; font-size: var(--fs-h3); }
+.dw-head .sub { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-3); margin-top: var(--space-2xs); }
+.dw-x { font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 600; color: var(--crimson); letter-spacing: 0.08em; }
+.dw-body { flex: 1; overflow-y: auto; padding: var(--space-md); }
+/* text-transform: uppercase KALDIRILDI. Bu başlıklar Türkçe cümle
+   parçaları ("Sipariş durumu", "Görüşme geçmişi", "İletişim"); CSS ile
+   büyütmek noktalı İ'yi bozma riskini taşıyor. Büyük harf isteniyorsa
+   metnin kendisi kaynakta büyük yazılmalı — o metin portal.html ve
+   i18n'de, bu dosyada değil. */
+.dw-t { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.16em; color: var(--ink-3); margin: var(--space-md) 0 var(--space-sm); }
 .dw-t:first-child { margin-top: 0; }
+/* RAY GEOMETRİSİ — .tl2 padding-left 26px, .tl2::before left 7px ve
+   .tl2-step::before left -26px TEK bir ölçüdür. Yalnız birini değiştirmek
+   noktaları dikey çizgiden koparır. (padding-BOTTOM ritimdir, o bağlandı.) */
 .tl2 { position: relative; padding-left: 26px; }
 .tl2::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
-.tl2-step { position: relative; padding-bottom: 20px; }
+.tl2-step { position: relative; padding-bottom: var(--space-md); }
 .tl2-step:last-child { padding-bottom: 0; }
 .tl2-step::before { content: ""; position: absolute; left: -26px; top: 3px; width: 15px; height: 15px; border-radius: 50%; background: var(--paper); border: 3px solid #D8D2C7; }
 .tl2-step.done::before { background: #15803D; border-color: #15803D; }
 .tl2-step.now::before { border-color: var(--crimson); box-shadow: 0 0 0 4px rgba(163,28,60,0.15); }
-.tl2-step b { display: block; font-size: 14px; color: var(--ink); }
+.tl2-step b { display: block; font-size: var(--fs-small); color: var(--ink); }
 .tl2-step.now b { color: var(--crimson); }
-.tl2-step span { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); }
+.tl2-step span { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-3); }
 .dw-items { border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--white); overflow: hidden; }
-.dw-item { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; font-size: 13.5px; }
+/* KURAL 2c'nin iç içe hâli: .dw-item zaten 24px girintili çekmece
+   gövdesindeki kenarlıklı .dw-items kutusunun içinde, o yüzden 16px. */
+.dw-item { display: flex; justify-content: space-between; gap: var(--space-sm); padding: var(--space-sm); font-size: var(--fs-small); }
 .dw-item + .dw-item { border-top: 1px solid var(--line-soft); }
 .dw-item b { color: var(--ink); font-weight: 600; }
 .dw-item span { font-family: var(--font-mono); color: var(--ink-3); white-space: nowrap; }
-.dw-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.dw-meta .box { border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--white); padding: 12px 14px; }
-.dw-meta .box b { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 3px; }
-.dw-meta .box span { font-size: 13.5px; font-weight: 600; color: var(--ink); }
-.reply-box textarea { width: 100%; border: 1.5px solid var(--line); border-radius: var(--radius); padding: 11px 13px; font-size: 13.5px; min-height: 74px; resize: vertical; background: var(--white); }
+.dw-meta { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
+.dw-meta .box { border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--white); padding: var(--space-sm); }
+.dw-meta .box b { display: block; font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: var(--space-2xs); }
+.dw-meta .box span { font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+/* min-height 74px BİLEREK ölçek dışı: alanın kendi yüksekliği, boşluk değil. */
+.reply-box textarea { width: 100%; border: 1.5px solid var(--line); border-radius: var(--radius); padding: var(--space-sm); font-size: var(--fs-small); min-height: 74px; resize: vertical; background: var(--white); }
 .reply-box textarea:focus { outline: none; border-color: var(--crimson); }
-.crm-note2 { display: flex; gap: 11px; background: var(--crimson-soft); border: 1px solid #E8B7C2; border-radius: var(--radius); padding: 13px 16px; font-size: 13px; color: #6E1A31; }
+.crm-note2 { display: flex; gap: var(--space-sm); background: var(--crimson-soft); border: 1px solid #E8B7C2; border-radius: var(--radius); padding: var(--space-sm); font-size: var(--fs-small); color: #6E1A31; }
 .crm-note2 b { color: var(--crimson); }
-.empty2 { text-align: center; padding: 40px 20px; color: var(--ink-3); font-size: 14px; }
+.empty2 { text-align: center; padding: var(--space-lg) var(--space-md); color: var(--ink-3); font-size: var(--fs-small); }
 
 /* ---------- Duyarlılık ---------- */
 @media (max-width: 1080px) {
   .kpis { grid-template-columns: repeat(2, 1fr); }
   .cust-grid { grid-template-columns: 1fr 1fr; }
-  .app { grid-template-columns: 210px 1fr; }
+  /* minmax(0, 1fr) ŞART. Izgara ögesinin varsayılan min-width:auto değeri
+     .main'in içeriğinden küçülmesini engeller; tablo .tbl-wrap'in içinde
+     kaymak yerine SAYFAYI yatay kaydırırdı (1000px'te ölçüldü: belge
+     genişliği 1176). Aşağıdaki 860px kuralı ve dosya sonundaki "min-width
+     VERİLMEDİ" notu aynı mekanizmayı anlatır. */
+  .app { grid-template-columns: 210px minmax(0, 1fr); }
 }
 @media (max-width: 860px) {
   .lgw { grid-template-columns: 1fr; }
   .lg-side { display: none; }
-  .app { grid-template-columns: 1fr; }
-  .sb { position: fixed; inset: auto 0 0 0; height: auto; flex-direction: row; align-items: center; padding: 6px 8px; gap: 2px; z-index: 70; overflow-x: auto; }
+  /* minmax(0, 1fr) ŞART — bkz. yukarıdaki 1080px notu. Telefonda .main
+     390px'lik ekranda 699px'e şişiyor, alttaki sabit sekme çubuğunu da
+     birlikte kaydırıyordu. */
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .sb { position: fixed; inset: auto 0 0 0; height: auto; flex-direction: row; align-items: center; padding: var(--space-2xs) var(--space-xs); gap: var(--space-2xs); z-index: 70; overflow-x: auto; }
   .sb .brand, .sb-label, .sb-foot, .role-pill { display: none; }
-  .sb-link { flex-direction: column; gap: 3px; font-size: 10.5px; padding: 8px 9px; flex: 1; text-align: center; }
+  .sb-link { flex-direction: column; gap: var(--space-2xs); font-size: var(--fs-micro); padding: var(--space-xs); flex: 1; text-align: center; }
   .sb-link .cnt { display: none; }
+  /* 92px bir boşluk basamağı DEĞİL, sabit sekme çubuğunun yüksekliğini
+     ölçen işlevsel bir paydır. Çubuğun punto/ikon ölçüsü değişirse
+     yeniden ölçün. */
   .main { padding-bottom: 92px; }
   .order-grid { grid-template-columns: 1fr; }
   .cart-box { position: static; }
@@ -238,11 +423,139 @@
 @media (max-width: 560px) { .kpis { grid-template-columns: 1fr 1fr; } }
 
 /* ---------- Hesap başvuruları (satış onay kutusu) ---------- */
-.app-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); flex-wrap: wrap; }
+.app-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--line-soft); flex-wrap: wrap; }
 .app-row:last-child { border-bottom: 0; }
-.app-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.app-info b { font-size: 14.5px; }
-.app-info .mono { font-size: 11.5px; color: var(--ink-3); }
-.app-msg { font-size: 12.5px; color: var(--ink-2); font-style: italic; margin-top: 2px; }
-.app-links a { margin-right: 12px; font-weight: 600; }
-.app-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.app-info { display: flex; flex-direction: column; gap: var(--space-2xs); min-width: 0; }
+.app-info b { font-size: var(--fs-small); }
+.app-info .mono { font-size: var(--fs-label); color: var(--ink-3); }
+.app-msg { font-size: var(--fs-small); color: var(--ink-2); font-style: italic; margin-top: var(--space-2xs); }
+.app-links a { margin-right: var(--space-sm); font-weight: 600; }
+.app-actions { display: flex; gap: var(--space-xs); align-items: center; flex-shrink: 0; }
+
+/* Talepler ekranı: #req-list kendi ritmini ızgara aralığıyla kurar
+   (portal.html'de gap: var(--space-md)). Çocukları .panel olduğu için
+   .panel + .panel'in margin-top'u ARALIĞIN ÜSTÜNE biniyordu — kartlar
+   arası 37px, diğer her yerde 24px. KURAL 4: devralınan payı sıfırla. */
+#req-list > .panel + .panel { margin-top: 0; }
+
+/* ---------- Katalog yönetimi (Ürünler / Dokümanlar ekranları) ----------
+   İki yeni ekran (#view-products, #view-docs) üç panelden oluşur: ekleme
+   formu, portalda eklenmiş kayıtların tablosu ve data.js'e yapıştırılacak
+   kodu veren dışa aktarım paneli. Düğümleri portal-app.js'in 15–17. bölümleri
+   kurar.
+
+   BURADA YENİ BİR SİSTEM KURULMAZ. Ekranların tamamı hazır sınıflardan
+   oluşuyor: .panel/.panel-head (çerçeve), .form-grid + .field (style.css'in
+   form düzeni), .ptbl + .tbl-wrap (portal tablosu), .crm-note2 (uyarı kutusu),
+   .reply-box (metin kutusu kabı), .btn/.advance-btn (düğmeler), .empty2 (boş
+   liste). Alan kutuları BİLEREK ana sitedeki ölçüsünde bırakıldı — kenarlık
+   kalınlığı, köşe yarıçapı, odak gölgesi ve <select> okunun tamamı
+   style.css'teki .field kurallarından gelir. Aşağıdakiler yalnızca o hazır
+   parçaların bu ekranlardaki davranışını düzeltir.
+
+   Bu dosya YALNIZCA portal.html'de yüklenir; .form-grid'i burada ele almak
+   ana siteyi etkilemez. Portalde .form-grid'i başka kullanan yoktur
+   (talep formu kendi tek sütunlu ızgarasını kullanır). */
+
+/* Üç dilli alan gruplarının başlığı (h3.dw-t.field--full). Izgara zaten 16px
+   boşluk veriyor; .dw-t'nin çekmece için tanımlı 24/16 kenar boşlukları üste
+   binince gruplar dağılıyordu. Onun yerine ince bir çizgi: gruplar arasındaki
+   ayrım dosyanın geri kalanındaki 1px kural diliyle aynı olsun. */
+.main .form-grid > .dw-t { margin: var(--space-xs) 0 0; padding-top: var(--space-sm); border-top: 1px solid var(--line-soft); }
+.main .form-grid > .dw-t:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+/* Form içindeki açıklama satırları (.cart-note) tek aralıklı yazıdır; satır
+   yüksekliği ve ölçü verilmezse iki cümlelik dosya yolu notu okunmaz olur. */
+.main .form-grid .cart-note { line-height: 1.55; max-width: 78ch; }
+
+/* Katalog tablolarına min-width VERİLMEDİ — bilerek. Denendi ve geri alındı:
+   .main bir ızgara ögesi olduğu için varsayılan min-width:auto ile içeriğinden
+   küçülemiyor, tablo genişliği .tbl-wrap'in içinde kalmak yerine SAYFAYI yatay
+   kaydırıyordu (768px'te ölçüldü). Portaldeki diğer .ptbl tabloları da
+   min-width taşımaz; sütunlar dar ekranda sıkışır, taşmaz. */
+
+/* Bu satırlar TIKLANABİLİR DEĞİL (sipariş tablosunun aksine; portal-app.js
+   satır başına cursor:default yazar). Soldaki crimson şerit "aç beni" demek
+   olduğu için burada kapatıldı, yerine yalnız satır izini gösteren nötr bir
+   zemin kaldı. */
+#prod-list-panel .ptbl tbody tr:hover,
+#doc-list-panel .ptbl tbody tr:hover { background: var(--paper); border-left-color: transparent; }
+/* Silme düğmesi .advance-btn'i devralır (depo "ilerlet" düğmesiyle aynı kutu).
+   İç araçtır, tehlike kutusu değil: durağan halde nötr durur, niyeti ancak
+   imleç üstüne gelince crimson'a döner. Onay penceresini portal-app.js sorar. */
+#prod-list-panel .advance-btn, #doc-list-panel .advance-btn { border-color: var(--line); color: var(--ink-3); background: var(--white); }
+#prod-list-panel .advance-btn:hover, #doc-list-panel .advance-btn:hover { border-color: var(--crimson); color: var(--crimson); background: var(--crimson-soft); }
+
+/* Dışa aktarım kutusu: salt okunur, yapıştırılacak kodun kendisi. Tek aralıklı
+   yazıyı, kâğıt zeminini ve yüksekliğini portal-app.js satır içinde veriyor;
+   burada kodun okunurluğu tamamlanır. white-space:pre satırları KIRMAZ — kod
+   olduğu gibi görünsün, uzun satır yatay kaysın. Odakta crimson kenarlık yok:
+   bu dosyada crimson odak "buraya yazabilirsin" işaretidir. */
+.reply-box textarea[readonly] { white-space: pre; overflow: auto; line-height: 1.65; color: var(--ink-2); cursor: text; }
+.reply-box textarea[readonly]:focus { border-color: var(--ink); }
+
+@media (max-width: 860px) {
+  /* Tablet ve altında iki sütunluk form dar kalıyor; alanlar tek sütuna iner.
+     .field--full zaten 1/-1 olduğu için bu satırdan etkilenmez. */
+  .main .form-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Satış birimi onay kutusu (ürün formu) ---------- */
+/* Yerel onay kutusu diğer form alanlarının yanında bitmiş görünmüyordu: çerçevesiz,
+   hizasız ve işletim sistemi mavisiyle. Burada alanın kendisi gibi bir kutuya
+   oturtulur, işaret rengi kurumsal bordoya çekilir ve tıklama alanı tüm satırdır. */
+.unit-check {
+  /* flex-wrap ŞART: kutunun içine sonradan "varil başına kg" satırı eklendi ve
+     sarma olmadan o satır metnin SAĞINA üçüncü sütun olarak düşüyordu. */
+  display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+/* ÖZGÜLLÜK NOTU: style.css'teki ".field label" kuralı (0,1,1) büyük harf,
+   harf aralığı ve mono yazı tipi veriyor; ".unit-check" tek başına (0,1,0)
+   olduğu için ONU YENEMİYORDU — kutu içindeki metin BÜYÜK HARF ve mono
+   çıkıyordu (ekran görüntüsünde yakalandı). ".field label.unit-check" (0,2,1)
+   ile geri alınır. text-transform mirasla çocuklara da geçtiği için burada
+   sıfırlamak <b> ve <span>'i de düzeltir. */
+.field label.unit-check {
+  text-transform: none; letter-spacing: 0;
+  font-family: var(--font-body); color: var(--ink);
+}
+.unit-check:hover { border-color: var(--ink-3); }
+/* Seçili vurgusu SINIFLA sürülür, :has() ile değil. İki gerekçe:
+   1) :has() desteklemeyen tarayıcıda (eski Safari/Firefox) vurgu hiç çalışmazdı;
+   2) JS ile checked atandığında bazı motorlar :has() stilini yeniden
+      hesaplamıyor — ölçüldü: seçici eşleşiyor ama stil uygulanmıyordu.
+   Sınıf, portal-app.js'te change olayında güncellenir. */
+.unit-check.is-on { border-color: var(--crimson); background: var(--crimson-soft); }
+.unit-check input {
+  width: 18px; height: 18px; margin: 0; flex: 0 0 auto;
+  accent-color: var(--crimson);   /* yerel kutuyu kurumsal renge çeker */
+  cursor: pointer;
+}
+.unit-check input:focus-visible { outline: 2px solid var(--crimson); outline-offset: 2px; }
+.unit-check-txt { display: flex; flex-direction: column; gap: var(--space-2xs); }
+.unit-check-txt b {
+  font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body);
+  color: var(--ink); line-height: 1.2; text-transform: none; letter-spacing: 0;
+}
+.unit-check-txt span { font-family: var(--font-body); font-size: var(--fs-small); color: var(--ink-2); line-height: 1.45; text-transform: none; letter-spacing: 0; }
+
+/* Varil başına kilo satırı — onay kutusunun içinde, ona bağlı ikincil alan.
+   Kapalıyken soluk ve devre dışı: kilo ile satılan üründe doldurulamaz. */
+/* Tam satır kaplar: onay kutusu + açıklamanın ALTINA iner, yanına değil.
+   Sol boşluk, kutunun genişliği + gap kadar; metinle aynı hizada başlar. */
+.unit-kg { flex: 1 0 100%; margin-left: calc(18px + var(--space-sm)); display: flex; align-items: center; gap: var(--space-xs); margin-top: var(--space-sm); opacity: 0.45; transition: opacity 0.15s; }
+.unit-kg.is-on { opacity: 1; }
+.unit-kg label { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2); text-transform: none; letter-spacing: 0; }
+.unit-kg input {
+  width: 96px; padding: 8px 10px; text-align: right;
+  font-family: var(--font-mono); font-size: var(--fs-small); color: var(--ink);
+  background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius);
+}
+.unit-kg input:focus { outline: none; border-color: var(--crimson); }
+.unit-kg input:disabled { background: var(--paper-2); cursor: not-allowed; }
+.unit-kg-suffix { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-3); }

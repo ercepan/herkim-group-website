@@ -2,10 +2,38 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <!-- Güvenlik: İçerik Güvenliği Politikası (CSP). Tarayıcı yalnızca aşağıda izin verilen
+       kaynakları yükler; XSS ve veri sızdırma yüzeyini daraltır. YENİ bir dış origin (font, API,
+       iframe, görsel) eklerken BURAYA da eklenmezse istek sessizce engellenir. Aynı politika 11
+       HTML dosyasının hepsinde birebir aynıdır; değişiklik hepsine uygulanmalıdır.
+       Not: meta ile verilen CSP'de frame-ancestors, report-uri, report-to ve sandbox yok sayılır;
+       bunlar HTTP başlığı gerektirir ve GitHub Pages özel başlık gönderemez. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://img.youtube.com; connect-src 'self' https://open.er-api.com https://api.web3forms.com; frame-src https://www.google.com https://maps.google.com https://www.youtube-nocookie.com; form-action 'self'; base-uri 'none'; object-src 'none'; manifest-src 'self'">
+  <!-- Dış sitelere giderken tam URL değil yalnızca origin sızsın (HTTPS -> HTTP'de hiç sızmasın). -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Müşteri Hesap Başvurusu — Herkim Kimya</title>
   <meta name="description" content="Herkim Group müşteri hesabı başvurusu: fiyat teklifi ve sipariş için onaylı hesap açın.">
   <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ercepan.github.io/herkim-group-website/hesap.html">
+  <!-- Open Graph / sosyal paylaşım -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Herkim Kimya">
+  <meta property="og:title" content="Müşteri Hesap Başvurusu — Herkim Kimya">
+  <meta property="og:description" content="Herkim Group müşteri hesabı başvurusu: fiyat teklifi ve sipariş için onaylı hesap açın.">
+  <meta property="og:url" content="https://ercepan.github.io/herkim-group-website/hesap.html">
+  <meta property="og:image" content="https://ercepan.github.io/herkim-group-website/assets/img/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Herkim Kimya — Deri &amp; Tekstil Kimyasalları">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="ru_RU">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Müşteri Hesap Başvurusu — Herkim Kimya">
+  <meta name="twitter:description" content="Herkim Group müşteri hesabı başvurusu: fiyat teklifi ve sipariş için onaylı hesap açın.">
+  <meta name="twitter:image" content="https://ercepan.github.io/herkim-group-website/assets/img/og-cover.png">
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,9 +42,20 @@
 </head>
 <body>
 
+  <!-- Erişilebilirlik: içeriğe atlama bağlantısı. Odaklanmadıkça görünmez (.skip-link).
+       Başlıktaki 15+ bağlantıyı klavye ile teker teker geçmeyi önler. -->
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">İçeriğe geç</a>
+
+  <!-- ===== ORTAK BAŞLIK (üst bant + site başlığı + mobil menü) =====
+       DİKKAT: Bu blok index.html, kurumsal.html, urunler.html, urun-listesi.html, hizmetler.html,
+       dokumanlar.html, iletisim.html, hesap.html, siparislerim.html ve kvkk.html dosyalarında
+       kopyalanmıştır. Derleme adımı olmadığı için senkronu sağlayan tek şey bu nottur:
+       burada yapılan her değişiklik on dosyanın hepsine aynen uygulanmalıdır.
+       Sayfaya özgü tek farklar: aktif menü ögesindeki class="active" ve kurumsal.html'de
+       sayfa içi #çapa bağlantıları. -->
   <div class="topbar">
     <div class="wrap">
-      <div class="tb-rates" aria-label="Döviz kurları">
+      <div class="tb-rates" role="group" data-i18n-aria="a11y.rates" aria-label="Döviz kurları">
         <span class="rate">USD/TRY <b id="rate-usd">—</b></span>
         <span class="rate">EUR/TRY <b id="rate-eur">—</b></span>
         <span class="tb-note" id="rate-note">indikatif</span>
@@ -24,11 +63,11 @@
       <div class="tb-links">
         <a class="tb-hide" href="tel:4445658">444 56 58</a>
         <a class="tb-hide" href="mailto:info@herkimgroup.com">info@herkimgroup.com</a>
-        <a class="tb-hide tb-group" href="https://www.herkimgroup.com" target="_blank" rel="noopener">herkimgroup.com ↗</a>
-        <span class="tb-lang" role="group" aria-label="Dil">
-          <button type="button" data-lang="tr" class="on">TR</button>
-          <button type="button" data-lang="en">EN</button>
-          <button type="button" data-lang="ru">RU</button>
+        <a class="tb-hide tb-group" href="https://www.herkimgroup.com" target="_blank" rel="noopener noreferrer">herkimgroup.com ↗</a>
+        <span class="tb-lang" role="group" data-i18n-aria="a11y.lang" aria-label="Dil / Language / Язык">
+          <button type="button" data-lang="tr" class="on" aria-pressed="true">TR</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+          <button type="button" data-lang="ru" aria-pressed="false">RU</button>
         </span>
       </div>
     </div>
@@ -40,35 +79,59 @@
         <svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true"><circle cx="160" cy="160" r="148" fill="#FFFFFF" stroke="#A31C3C" stroke-width="10"/><g fill="#A31C3C"><rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/><polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/></g></svg>
         <span class="brand-name"><b>HERKİM</b><span>KİMYA</span></span>
       </a>
-      <nav aria-label="Ana menü">
+      <nav data-i18n-aria="a11y.mainNav" aria-label="Ana menü">
         <ul class="nav">
           <li><a href="index.html" data-i18n="nav.home">Anasayfa</a></li>
-          <li><a href="kurumsal.html" data-i18n="nav.corporate">Kurumsal</a></li>
-          <li><a href="urunler.html" data-i18n="nav.products">Ürünler</a></li>
+          <li>
+            <a href="kurumsal.html"><span data-i18n="nav.corporate">Kurumsal</span> <span class="caret"></span></a>
+            <div class="dropdown">
+              <a href="kurumsal.html#biz-kimiz" data-i18n="nav.about">Hakkımızda</a>
+              <a href="kurumsal.html#misyon" data-i18n="nav.mission">Misyon &amp; Vizyon</a>
+              <a href="kurumsal.html#prensipler" data-i18n="nav.principles">İlke ve Değerlerimiz</a>
+              <a href="kurumsal.html#tarihce" data-i18n="nav.history">Tarihçe</a>
+              <a href="kurumsal.html#kalite" data-i18n="nav.quality">Kalite &amp; Sertifikalar</a>
+            </div>
+          </li>
+          <li>
+            <a href="urunler.html"><span data-i18n="nav.products">Ürünler</span> <span class="caret"></span></a>
+            <div class="dropdown">
+              <a href="urunler.html" data-i18n="nav.catalog">Ürün Kataloğu</a>
+              <a href="urun-listesi.html" data-i18n="nav.productList">Ürün Listesi</a>
+              <hr>
+              <a href="urunler.html?kat=asit" data-i18n="cat.asit">Asitler</a>
+              <a href="urunler.html?kat=alkol" data-i18n="cat.alkol">Alkoller &amp; Glikoller</a>
+              <a href="urunler.html?kat=amonyum" data-i18n="cat.amonyum">Amonyum Bazlı Ürünler</a>
+              <a href="urunler.html?kat=deri" data-i18n="cat.deri">Deri &amp; Tabaklama</a>
+              <a href="urunler.html?kat=sodyum" data-i18n="cat.sodyum">Sodyum Bazlı Kimyasallar</a>
+              <a href="urunler.html?kat=solvent" data-i18n="cat.solvent">Solventler &amp; Endüstriyel</a>
+            </div>
+          </li>
           <li><a href="hizmetler.html" data-i18n="nav.services">Hizmetlerimiz</a></li>
           <li><a href="dokumanlar.html" data-i18n="nav.docs">Doküman Merkezi</a></li>
           <li><a href="iletisim.html" data-i18n="nav.contact">İletişim</a></li>
         </ul>
       </nav>
       <div class="header-actions">
-        <button class="icon-btn" data-open-search data-i18n-aria="search.iconLabel" aria-label="Ara"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg></button>
-        <button class="icon-btn" data-open-basket data-i18n-aria="basket.title" aria-label="Sepet"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l1 4H8l1-4zM6 7h12l-1.2 12.6a1.5 1.5 0 0 1-1.5 1.4H8.7a1.5 1.5 0 0 1-1.5-1.4L6 7z"/></svg><span class="count basket-count" style="display:none">0</span></button>
-        <button class="icon-btn burger" data-i18n-aria="nav.openMenu" aria-label="Menü"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <button class="icon-btn" data-open-search aria-controls="search-overlay" aria-expanded="false" data-i18n-title="search.iconLabel" data-i18n-aria="search.iconLabel" title="Site içi arama" aria-label="Site içi arama"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg></button>
+        <button class="icon-btn" data-open-basket aria-controls="basket-drawer" aria-expanded="false" data-i18n-title="basket.title" data-i18n-aria="basket.title" title="Teklif Sepeti" aria-label="Teklif Sepeti"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l1 4H8l1-4zM6 7h12l-1.2 12.6a1.5 1.5 0 0 1-1.5 1.4H8.7a1.5 1.5 0 0 1-1.5-1.4L6 7z"/></svg><span class="count basket-count" style="display:none">0</span></button>
+        <button class="icon-btn burger" aria-controls="mobile-nav" aria-expanded="false" data-i18n-aria="nav.openMenu" aria-label="Menüyü aç"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       </div>
     </div>
   </header>
 
-  <div class="mobile-nav" aria-label="Mobil menü">
+  <div class="mobile-nav" id="mobile-nav" role="dialog" data-i18n-aria="a11y.mobileMenu" aria-label="Mobil menü">
     <button class="mn-close" data-i18n="nav.close">KAPAT ×</button>
     <a href="index.html" data-i18n="nav.home">Anasayfa</a>
     <a href="kurumsal.html" data-i18n="nav.corporate">Kurumsal</a>
+    <a class="sub" href="kurumsal.html#prensipler" data-i18n="nav.principles">İlke ve Değerlerimiz</a>
     <a href="urunler.html" data-i18n="nav.catalog">Ürün Kataloğu</a>
+    <a href="urun-listesi.html" data-i18n="nav.productList">Ürün Listesi</a>
     <a href="hizmetler.html" data-i18n="nav.services">Hizmetlerimiz</a>
     <a href="dokumanlar.html" data-i18n="nav.docs">Doküman Merkezi</a>
     <a href="iletisim.html" data-i18n="nav.contact">İletişim</a>
   </div>
 
-  <main>
+  <main id="main">
     <section class="page-hero">
       <div class="wrap">
         <p class="crumbs"><a href="index.html" data-i18n="nav.home">Anasayfa</a><span class="sep">/</span><span data-i18n="acct.title">Müşteri Hesap Başvurusu</span></p>
@@ -82,19 +145,21 @@
 
         <!-- Süreç şeridi -->
         <div class="reveal in" style="border:2px solid var(--ink);border-radius:var(--radius);background:var(--white);box-shadow:var(--shadow-offset);padding:22px 24px;margin-bottom:34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px">
-          <div><b class="mono accent">1</b><p style="font-size:13.5px;margin-top:4px" data-i18n="acct.s1">Formu doldurun — vergi numaranız anında biçim denetiminden geçer.</p></div>
-          <div><b class="mono accent">2</b><p style="font-size:13.5px;margin-top:4px" data-i18n="acct.s2">Satış ekibimiz firmanızı resmî kayıtlardan doğrular.</p></div>
-          <div><b class="mono accent">3</b><p style="font-size:13.5px;margin-top:4px" data-i18n="acct.s3">Onayla birlikte hesabınız açılır, e-posta ile bilgilendirilirsiniz.</p></div>
-          <div><b class="mono accent">4</b><p style="font-size:13.5px;margin-top:4px" data-i18n="acct.s4">Girişinizle fiyat teklifi isteyin, sipariş verin, portaldan takip edin.</p></div>
+          <div><b class="mono accent">1</b><p style="font-size:var(--fs-small);margin-top:4px" data-i18n="acct.s1">Formu doldurun — vergi numaranız anında biçim denetiminden geçer.</p></div>
+          <div><b class="mono accent">2</b><p style="font-size:var(--fs-small);margin-top:4px" data-i18n="acct.s2">Satış ekibimiz firmanızı resmî kayıtlardan doğrular.</p></div>
+          <div><b class="mono accent">3</b><p style="font-size:var(--fs-small);margin-top:4px" data-i18n="acct.s3">Onayla birlikte hesabınız açılır, e-posta ile bilgilendirilirsiniz.</p></div>
+          <div><b class="mono accent">4</b><p style="font-size:var(--fs-small);margin-top:4px" data-i18n="acct.s4">Girişinizle fiyat teklifi isteyin, sipariş verin, portaldan takip edin.</p></div>
         </div>
 
         <!-- Başarı paneli -->
         <div id="acct-ok" style="display:none;text-align:center;border:2px solid #15803D;border-radius:var(--radius);background:#F0FAF3;box-shadow:var(--shadow-offset);padding:44px 28px">
+          <!-- 26px ÖLÇEK DIŞIDIR ve bilinçlidir: bu bir metin değil, 62px'lik daireye
+               ortalanmış onay glifidir; ölçü tipografi ölçeğine değil kutuya bağlıdır. -->
           <div style="width:62px;height:62px;margin:0 auto 14px;border-radius:50%;border:3px solid #15803D;color:#15803D;display:grid;place-items:center;font-size:26px;font-weight:800">✓</div>
-          <h2 class="display" style="font-size:24px" data-i18n="acct.okTitle">Başvurunuz alındı!</h2>
-          <p class="mono" style="margin:10px 0 4px;color:var(--ink-3);font-size:12px" data-i18n="acct.okNo">Başvuru No</p>
-          <p class="mono accent" style="font-size:20px;font-weight:600" id="acct-ok-no">—</p>
-          <p style="max-width:460px;margin:14px auto 0;color:var(--ink-2);font-size:14.5px" data-i18n="acct.okBody">Firma bilgileriniz doğrulandıktan sonra hesabınız aktifleştirilir ve e-posta ile bilgilendirilirsiniz.</p>
+          <h2 class="display" style="font-size:var(--fs-h3)" data-i18n="acct.okTitle">Başvurunuz alındı!</h2>
+          <p class="mono" style="margin:10px 0 4px;color:var(--ink-3);font-size:var(--fs-label)" data-i18n="acct.okNo">Başvuru No</p>
+          <p class="mono accent" style="font-size:var(--fs-h4);font-weight:600" id="acct-ok-no">—</p>
+          <p style="max-width:460px;margin:14px auto 0;color:var(--ink-2);font-size:var(--fs-small)" data-i18n="acct.okBody">Firma bilgileriniz doğrulandıktan sonra hesabınız aktifleştirilir ve e-posta ile bilgilendirilirsiniz.</p>
           <a class="btn btn--primary" href="urunler.html" style="margin-top:22px" data-i18n="acct.okBtn">Ürünlere Göz Atın</a>
         </div>
 
@@ -150,11 +215,11 @@
           </div>
 
           <div class="field field--full" style="gap:10px">
-            <label style="display:flex;align-items:flex-start;gap:9px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--ink-2);cursor:pointer">
+            <label style="display:flex;align-items:flex-start;gap:9px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:var(--fs-small);color:var(--ink-2);cursor:pointer">
               <input type="checkbox" id="ac-kvkk" style="margin-top:3px;accent-color:var(--crimson)">
-              <span><span data-i18n="acct.kvkk">Aydınlatma Metni'ni okudum, kişisel verilerimin işlenmesini onaylıyorum.</span> <a class="accent" href="kvkk.html" target="_blank"><b data-i18n="acct.kvkkLink">Metni aç ↗</b></a></span>
+              <span><span data-i18n="acct.kvkk">Aydınlatma Metni'ni okudum, kişisel verilerimin işlenmesini onaylıyorum.</span> <a class="accent" href="kvkk.html" target="_blank" rel="noopener noreferrer"><b data-i18n="acct.kvkkLink">Metni aç ↗</b></a></span>
             </label>
-            <label style="display:flex;align-items:flex-start;gap:9px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--ink-2);cursor:pointer">
+            <label style="display:flex;align-items:flex-start;gap:9px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:var(--fs-small);color:var(--ink-2);cursor:pointer">
               <input type="checkbox" id="ac-eti" style="margin-top:3px;accent-color:var(--crimson)">
               <span data-i18n="acct.eti">Kampanya ve duyurular için ticari elektronik ileti almayı kabul ediyorum. (opsiyonel)</span>
             </label>
@@ -164,27 +229,40 @@
             <button type="submit" class="btn btn--primary" data-i18n="acct.submit">Başvuru Yap</button>
             <button type="button" class="btn btn--ghost" id="ac-demo" data-i18n="acct.demoFill">Demo verisiyle doldur</button>
           </div>
-          <p class="field--full muted mono" style="font-size:12px;border:1.5px dashed var(--line);border-radius:3px;padding:11px 14px" data-i18n="acct.note">Başvurular satış ekibimizce vergi kaydı üzerinden doğrulanır; onay sonrası giriş bilgileriniz e-posta ile iletilir.</p>
+          <p class="field--full muted mono" style="font-size:var(--fs-small);border:1.5px dashed var(--line);border-radius:3px;padding:11px 14px" data-i18n="acct.note">Başvurular satış ekibimizce vergi kaydı üzerinden doğrulanır; onay sonrası giriş bilgileriniz e-posta ile iletilir.</p>
         </form>
 
       </div>
     </section>
   </main>
 
+  <!-- ===== ORTAK ALT BİLGİ =====
+       DİKKAT: Bu blok index.html, kurumsal.html, urunler.html, urun-listesi.html, hizmetler.html,
+       dokumanlar.html, iletisim.html, hesap.html, siparislerim.html ve kvkk.html dosyalarında
+       kopyalanmıştır; burada yapılan değişiklik on dosyanın hepsine uygulanmalıdır.
+       Sayfaya özgü tek fark: .footer-cta bloğunun metni/düğmesi (bazı sayfalarda hiç yoktur). -->
   <footer class="footer">
-    <div class="footer-bottom" style="border-top:0">
-      <div class="wrap"><p data-i18n="foot.rights">© 2026 Herkim Kimya — Tüm hakları saklıdır.</p><nav><a href="index.html" data-i18n="nav.home">Anasayfa</a><a href="kvkk.html" data-i18n="foot.kvkk">KVKK</a><a href="iletisim.html" data-i18n="nav.contact">İletişim</a></nav></div>
+    <div class="wrap footer-main">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="Herkim Kimya"><svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true"><circle cx="160" cy="160" r="148" fill="#1B1216" stroke="#C42449" stroke-width="10"/><g fill="#FAF6F1"><rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/><polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/></g></svg><span class="brand-name"><b style="color:var(--crimson-hot)">HERKİM</b><span style="color:rgba(250,246,241,.6)">KİMYA</span></span></a>
+        <p data-i18n="foot.brand.desc">1975'ten bu yana güvenilir çözüm ortağı.</p>
+        <form class="footer-news" id="newsletter-form"><input type="email" data-i18n-ph="foot.newsPh" placeholder="E-posta" aria-label="E-posta"><button type="submit" data-i18n="btn.join">Katıl</button></form>
+      </div>
+      <div><h4 data-i18n="foot.sitemap">Site Haritası</h4><ul class="footer-links"><li><a href="kurumsal.html" data-i18n="nav.corporate">Kurumsal</a></li><li><a href="kurumsal.html#prensipler" data-i18n="nav.principles">İlke ve Değerlerimiz</a></li><li><a href="urunler.html" data-i18n="nav.catalog">Ürün Kataloğu</a></li><li><a href="hizmetler.html" data-i18n="nav.services">Hizmetlerimiz</a></li><li><a href="dokumanlar.html" data-i18n="nav.docs">Doküman Merkezi</a></li><li><a href="iletisim.html" data-i18n="nav.contact">İletişim</a></li></ul></div>
+      <div><h4 data-i18n="foot.groups">Ürün Grupları</h4><ul class="footer-links"><li><a href="urunler.html?kat=asit" data-i18n="cat.asit">Asitler</a></li><li><a href="urunler.html?kat=alkol" data-i18n="cat.alkol">Alkoller &amp; Glikoller</a></li><li><a href="urunler.html?kat=amonyum" data-i18n="cat.amonyum">Amonyum Bazlı Ürünler</a></li><li><a href="urunler.html?kat=deri" data-i18n="cat.deri">Deri &amp; Tabaklama</a></li><li><a href="urunler.html?kat=sodyum" data-i18n="cat.sodyum">Sodyum Bazlı Kimyasallar</a></li><li><a href="urunler.html?kat=solvent" data-i18n="cat.solvent">Solventler &amp; Endüstriyel</a></li><li><a href="urun-listesi.html" data-i18n="nav.productList">Ürün Listesi</a></li></ul></div>
+      <div><h4 data-i18n="foot.companies">Grup &amp; İştirakler</h4><div class="footer-ent"><div class="ent"><b data-i18n="foot.ent1">Herkim Kimya San. ve Tic.</b><span data-i18n="foot.ent1s">Merkez · Tuzla / İstanbul</span></div><div class="ent"><b><a href="https://www.herkimgroup.com" target="_blank" rel="noopener noreferrer" style="color:inherit" data-i18n="foot.ent2">Herkim Group</a></b><span data-i18n="foot.ent2s">herkimgroup.com</span></div><div class="ent"><b data-i18n="foot.ent3">Uzmanlık Alanları</b><span data-i18n="foot.ent3s">Deri · Tekstil · Binder Kimyasalları</span></div></div></div>
     </div>
+    <div class="footer-bottom"><div class="wrap"><p data-i18n="foot.rights">© 2026 Herkim Kimya — Tüm hakları saklıdır.</p><nav data-i18n-aria="a11y.footerNav" aria-label="Yasal bağlantılar"><a href="kvkk.html" data-i18n="foot.kvkk">KVKK Aydınlatma</a><a href="kvkk.html#cerez" data-i18n="foot.cookie">Çerez Politikası</a></nav></div></div>
   </footer>
 
   <div class="drawer-overlay"></div>
-  <aside class="basket-drawer" aria-label="Teklif sepeti">
+  <aside class="basket-drawer" id="basket-drawer" role="dialog" data-i18n-aria="basket.title" aria-label="Teklif Sepeti">
     <div class="bd-head"><div><h3 data-i18n="basket.title">Teklif Sepeti</h3><span class="mono" data-i18n="basket.sub">Fiyatlar teklifle netleşir</span></div><button class="bd-close" data-i18n="nav.close">KAPAT ×</button></div>
     <div class="bd-body" id="basket-body"></div>
     <div class="bd-foot"><button class="btn btn--primary" id="basket-wa" data-i18n="basket.wa">WhatsApp ile Teklif</button><button class="btn" id="basket-mail" data-i18n="basket.mail">E-posta ile Teklif</button><button class="btn btn--ghost btn--sm" id="basket-clear" data-i18n="basket.clear">Sepeti Temizle</button><p class="bd-note" data-i18n="basket.note">Talebiniz iletilir.</p></div>
   </aside>
 
-  <div class="search-overlay"><div class="search-panel"><input type="text" id="site-search" data-i18n-ph="search.ph" placeholder="Ara…" aria-label="Arama"><div class="search-results" id="search-results"></div><div class="search-hint" data-i18n="search.hint">Ctrl + K</div></div></div>
+  <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" data-i18n-aria="a11y.searchDialog" aria-label="Site içi arama"><div class="search-panel"><input type="text" id="site-search" data-i18n-ph="search.ph" placeholder="Ara…" aria-label="Arama"><div class="search-results" id="search-results"></div><div class="search-hint" data-i18n="search.hint">Ctrl + K</div></div></div>
 
   <div class="cookie-bar"><p><b data-i18n="cookie.title">Çerez Bildirimi.</b><span data-i18n="cookie.body"> Yalnızca gerekli çerezler. </span><a class="accent" href="kvkk.html#cerez"><b data-i18n="cookie.link">Çerez Politikamıza</b></a><span data-i18n="cookie.body2"> bakın.</span></p><div class="cb-actions"><button class="btn btn--primary btn--sm" id="cookie-ok" data-i18n="cookie.accept">Kabul Ediyorum</button><a class="btn btn--ghost btn--sm" href="kvkk.html#cerez" data-i18n="cookie.details">Detaylar</a></div></div>
 

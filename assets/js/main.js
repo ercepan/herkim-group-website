@@ -2,6 +2,33 @@
    HERKİM KİMYA — Etkileşim Katmanı
    Döviz kuru, dil (TR/EN/RU), teklif sepeti, arama, filtreler.
    Dinamik içerik güvenli DOM API'leri (createElement/textContent) ile üretilir.
+   ------------------------------------------------------------
+   İÇİNDEKİLER  (satır no'lar yaklaşıktır; bölüm başlıkları "==== n)" ile aranabilir)
+     —)  Yardımcılar, kısayollar ve türetilen sabitler ......... satır  36
+         Katalog kaynağı (data.js + portal ekleri) ........... satır  65
+     1)  Başlık davranışı ve mobil menü ....................... satır  94
+     2)  Dil değiştirici ...................................... satır 118
+     3)  Döviz kuru ........................................... satır 130
+     4)  Görünürlük animasyonları ve sayaçlar ................. satır 160
+     5)  Toast ................................................ satır 235
+     6)  Sepet: teklif + doğrudan sipariş ..................... satır 248
+         6a) Depo (localStorage) ve durum ..................... satır 250
+         6b) Sepete özel küçük yardımcılar .................... satır 295
+         6c) Görünümler: sepet / onay / misafir teklifi ....... satır 349
+         6d) Sipariş gönderimi ve e-posta yedeği .............. satır 497
+         6e) Çizim ve çekmece aç/kapa ......................... satır 577
+         6f) Teklif gönderimi (WhatsApp / e-posta) ............ satır 625
+     7)  Ürün kartı ........................................... satır 661
+     8)  Dinamik içerik (dil değişince yeniden çizilir) ....... satır 688
+     9)  Site içi arama ....................................... satır 878
+    10)  Çerez bildirimi ...................................... satır 928
+    11)  Formlar (iletişim + hesap başvurusu) ................. satır 937
+    12)  Siparişlerim + e-bülten .............................. satır 1062
+    13)  Tanıtım videosu ve WhatsApp bağlantıları ............. satır 1164
+
+   KATALOG: ürün ve doküman listeleri HK_PRODUCTS/HK_DOCS'tan DOĞRUDAN değil,
+   allProducts()/allDocs() üzerinden okunur; böylece portalda eklenen kayıtlar
+   da (yalnızca ekleyenin kendi tarayıcısında) listelerde görünür.
    ============================================================ */
 (function () {
   "use strict";
@@ -24,11 +51,45 @@
   const HK = (typeof HK_COMPANY !== "undefined" && HK_COMPANY) || window.HK_COMPANY || {};
   window.HK_CONFIG = HK;
 
+  /* Tecrübe yılı TEK yerden türetilir. Sayfalara elle yazılan rakam her yılbaşında
+     bayatlıyordu; kuruluş yılından hesaplanınca bir daha eskimez. */
+  const HK_YEARS = Math.max(0, new Date().getFullYear() - (HK.founded || new Date().getFullYear()));
+  window.HK_YEARS = HK_YEARS;
+
   const CAT_OF = (sub) => (HK_SUBS[sub] ? HK_SUBS[sub].cat : "");
   const CAT_LABEL = (catKey) => (HK_CATS[catKey] ? pick(HK_CATS[catKey]) : catKey);
   const SUB_LABEL = (sub) => (HK_SUBS[sub] ? pick(HK_SUBS[sub]) : sub);
   const SUB_CODE = (sub) => (HK_SUBS[sub] ? HK_SUBS[sub].code : "•");
   const PNAME = (p) => pick(p.n);
+
+  /* KATALOG KAYNAĞI — yayınlı liste (data.js) + portalda eklenenler.
+     portal-store.js her sayfada main.js'ten ÖNCE yüklenir, ama yüklenememiş,
+     bir eklenti tarafından engellenmiş ya da localStorage kapatılmış olabilir.
+     Böyle bir durumda yayınlı katalog EKRANDAN KAYBOLMAMALI: birleştirici yoksa
+     ya da beklenmedik bir şey dönerse doğrudan data.js dizisine düşülür.
+     Not: portal ekleri yalnızca EKLEYENİN kendi tarayıcısında durur; siteye
+     gerçekten yayınlanmaları için portalın dışa aktardığı kod data.js'e
+     yapıştırılıp commit'lenmelidir. */
+  function safeList(fn, base) {
+    if (typeof fn === "function") {
+      try {
+        const out = fn();
+        if (Array.isArray(out) && out.length) return out;
+      } catch (_) {}
+    }
+    return base;
+  }
+  /* Her çizimde yeniden okunur ki portalda eklenen kayıt, sayfa yenilenince
+     (ya da dil değişip yeniden çizilince) yerini alsın. */
+  const allProducts = () => safeList(window.hgpAllProducts, HK_PRODUCTS);
+  const allDocs = () => safeList(window.hgpAllDocs, HK_DOCS);
+
+  /* Açılır panellerin durumu ekran okuyucuya da bildirilsin: tetikleyicide
+     aria-expanded, panelin kendisinde aria-hidden güncellenir. */
+  function setExpanded(triggers, panel, open) {
+    (triggers || []).forEach(t => t.setAttribute("aria-expanded", open ? "true" : "false"));
+    if (panel) panel.setAttribute("aria-hidden", open ? "false" : "true");
+  }
 
   /* ============ 1) Başlık davranışı ============ */
   const header = $(".site-header");
@@ -42,11 +103,16 @@
 
   const mnav = $(".mobile-nav");
   const burger = $(".burger");
+  /* Mobil menü tek kapıdan açılıp kapanır ki aria durumu hiçbir yolda ıskalanmasın
+     (Escape tuşu ve menü içi bağlantılar da buradan geçer). */
+  function openMenu() { if (mnav) { mnav.classList.add("open"); setExpanded([burger], mnav, true); } }
+  function closeMenu() { if (mnav) { mnav.classList.remove("open"); setExpanded([burger], mnav, false); } }
   if (burger && mnav) {
-    burger.addEventListener("click", () => mnav.classList.add("open"));
+    setExpanded([burger], mnav, false);
+    burger.addEventListener("click", openMenu);
     const mc = $(".mn-close", mnav);
-    if (mc) mc.addEventListener("click", () => mnav.classList.remove("open"));
-    $$("a", mnav).forEach(a => a.addEventListener("click", () => mnav.classList.remove("open")));
+    if (mc) mc.addEventListener("click", closeMenu);
+    $$("a", mnav).forEach(a => a.addEventListener("click", closeMenu));
   }
 
   /* ============ 2) Dil değiştirici ============ */
@@ -54,8 +120,15 @@
     e.preventDefault();
     if (typeof window.hkSetLang === "function") window.hkSetLang(btn.getAttribute("data-lang"));
   }));
+  /* i18n.js yalnızca "on" sınıfını taşıyor; seçili dil ekran okuyucuya
+     aria-pressed ile de bildirilmeli. */
+  const syncLangButtons = () => $$("[data-lang]").forEach(b =>
+    b.setAttribute("aria-pressed", b.getAttribute("data-lang") === L() ? "true" : "false"));
+  syncLangButtons();
+  document.addEventListener("hk:langchange", syncLangButtons);
 
   /* ============ 3) Döviz kuru ============ */
+  const RATES_TIMEOUT_MS = 6000;   // kur servisi bu süre içinde yanıt vermezse yedeğe düşülür
   async function loadRates() {
     const usdEl = $("#rate-usd"), eurEl = $("#rate-eur"), noteEl = $("#rate-note");
     if (!usdEl) return;
@@ -66,44 +139,101 @@
         ? "canlı · " + new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })
         : T("top.rateNote");
     };
+    /* Şerit ÖNCE yedek değerlerle çizilir: servis yavaşsa/çökmüşse ziyaretçi boş
+       kutu görmez, sadece "indikatif" notu kalır. Canlı veri gelirse üzerine yazılır. */
     render(HK_RATES_FALLBACK.usd, HK_RATES_FALLBACK.eur, false);
     try {
-      const r = await fetch("https://open.er-api.com/v6/latest/USD", { signal: AbortSignal.timeout(6000) });
+      const r = await fetch("https://open.er-api.com/v6/latest/USD", { signal: AbortSignal.timeout(RATES_TIMEOUT_MS) });
       const j = await r.json();
       if (j && j.rates && j.rates.TRY) {
         const usdTry = j.rates.TRY;
         const eurTry = j.rates.EUR ? usdTry / j.rates.EUR : HK_RATES_FALLBACK.eur;
         render(usdTry, eurTry, true);
       }
-    } catch (_) { /* çevrimdışı: yedek değerler */ }
+    } catch (_) {
+      /* Ağ hatası, zaman aşımı ya da AbortSignal.timeout desteklemeyen eski tarayıcı:
+         yukarıda çizilen HK_RATES_FALLBACK değerleri ekranda kalır, hata yutulur. */
+    }
   }
   loadRates();
 
-  /* ============ 4) Görünürlük animasyonları ============ */
+  /* ============ 4) Görünürlük animasyonları ve sayaçlar ============ */
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
   }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
   const observeReveal = (root) => $$(".reveal", root).forEach(n => { if (!n.classList.contains("in")) io.observe(n); });
   observeReveal(document);
 
+  const COUNT_DUR_MS = 1400;   // sayaç animasyonunun toplam süresi
+  /* Sayaç animasyonu SÜSTÜR; sayının kendisi içeriktir. Bu yüzden animasyon
+     hiç çalışamadığında ekranda "0" değil GERÇEK değer kalmalıdır: sekme arka
+     plandayken requestAnimationFrame durur, "hareketi azalt" ayarında da
+     animasyon istenmez. Her iki durumda doğrudan hedef değeri yazarız; ayrıca
+     animasyon yarıda kalırsa süre dolunca değeri tamamlayan bir emniyet vardır.
+     ("0 yıllık tecrübe" yazan bir kurumsal site, animasyonsuz sayıdan kötüdür.) */
+  const reduceMotion = window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const settle = (node, target) => {
+    node.textContent = target.toLocaleString("tr-TR");
+  };
   const cio = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
       cio.unobserve(e.target);
       const node = e.target, target = parseFloat(node.dataset.count || "0");
-      const dur = 1400, t0 = performance.now();
+      if (reduceMotion || document.hidden) { settle(node, target); return; }
+      const t0 = performance.now();
       const step = (t) => {
-        const p = Math.min((t - t0) / dur, 1);
+        const p = Math.min((t - t0) / COUNT_DUR_MS, 1);
         const eased = 1 - Math.pow(1 - p, 3);
         node.textContent = Math.round(target * eased).toLocaleString("tr-TR");
         if (p < 1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
+      // rAF duraklarsa (sekme gizlenirse) sayı yarıda kalmasın
+      setTimeout(() => settle(node, target), COUNT_DUR_MS + 400);
     });
   }, { threshold: 0.4 });
+
+  /* "Yıllık tecrübe" sayaçlarının HTML'deki sabit değeri HK_YEARS ile ezilir.
+     Hedef ya açıkça data-count-years ile işaretlenmiştir ya da kutusundaki
+     etiket ".years" ile biten bir i18n anahtarı taşır. */
+  /* HTML'deki sayı, JS çalışmazsa görünecek YEDEK değerdir (ör. 54) — bu yüzden
+     hem data-count hem de ekrandaki metin güncellenir. Sayaç animasyonu zaten
+     her karede metni yeniden yazar; buradaki yazım yalnızca animasyon hiç
+     başlamazsa (gözlemci tetiklenmezse) doğru sayının kalmasını sağlar. */
+  function syncYearCounters() {
+    const v = String(HK_YEARS);
+    const setYears = (node) => { node.dataset.count = v; node.textContent = v; };
+    $$("[data-count-years]").forEach(setYears);
+    $$("[data-i18n$='.years']").forEach(label => {
+      const node = label.parentElement && label.parentElement.querySelector("[data-count]");
+      if (node) setYears(node);
+    });
+    /* Sayaç olmayan düz metin yerler (ör. anasayfadaki hero SVG'sinin
+       "… YIL / YRS" etiketi) — animasyonsuz, doğrudan yazılır. */
+    $$("[data-hk-years]").forEach(n => { n.textContent = v; });
+  }
+  syncYearCounters();
+
+  /* Ürün sayısı da tek yerden türetilir. Sayfaya elle yazılan "42" her yeni
+     üründe sessizce yanlışa döner; [data-hk-products] taşıyan her düğüme
+     birleşik katalogun uzunluğu yazılır. Düğümde data-count varsa sayaç
+     animasyonu da bu değeri okusun diye o da güncellenir (yıl sayaçlarındaki
+     kalıbın aynısı). HTML'deki sabit sayı, JS çalışmazsa görünecek yedektir. */
+  function syncProductCounters() {
+    const v = String(allProducts().length);
+    $$("[data-hk-products]").forEach(n => {
+      if (n.hasAttribute("data-count")) n.dataset.count = v;
+      n.textContent = v;
+    });
+  }
+  syncProductCounters();
+
   $$("[data-count]").forEach(node => cio.observe(node));
 
   /* ============ 5) Toast ============ */
+  const TOAST_MS = 2600;   // bildirim şeridinin ekranda kalma süresi
   let toastTimer;
   function toast(msg) {
     let t = $(".toast");
@@ -111,12 +241,39 @@
     t.textContent = msg;
     t.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+    toastTimer = setTimeout(() => t.classList.remove("show"), TOAST_MS);
   }
   window.hkToast = toast;
 
   /* ============ 6) Sepet: teklif + doğrudan sipariş ============ */
+
+  /* ---- 6a) Depo (localStorage) ve durum ---- */
   const BASKET_KEY = "hk_basket_v3"; // [{id, qty}] — eski v2 (yalnız id listesi) otomatik taşınır
+  /* Kimyasallar KİLOGRAM ile satılır; bir kısmı ise VARİL ile. Bu yüzden üst
+     sınır iki kademelidir: kg tarafında 2.400 kg gibi değerler normaldir,
+     varil tarafında 999 varil zaten fazlasıyla yüksektir. */
+  const QTY_MAX_KG = 999999;         // kg cinsinden tek kalem üst sınırı
+  const QTY_MAX_VARIL = 999;         // varil cinsinden tek kalem üst sınırı
+  /* Ürünün satış birimi: data.js / portal kaydındaki unit alanı "varil" ise
+     varil, DİĞER HER DURUMDA kg. Varsayılanın kg olması bilinçlidir — mevcut
+     42 ürünün hiçbirinde unit alanı yok ve hepsi kilo ile satılıyor. */
+  const isVaril = (p) => !!p && p.unit === "varil";
+  const unitLabel = (p) => T(isVaril(p) ? "unit.varil" : "unit.kg");
+  const qtyMaxFor = (p) => (isVaril(p) ? QTY_MAX_VARIL : QTY_MAX_KG);
+  /* Varilde bir varilin kaç kilo olduğu (portalda girilir, data.js'te kgPerUnit). */
+  const kgPerUnit = (p) => (isVaril(p) && +p.kgPerUnit > 0) ? +p.kgPerUnit : 0;
+  /* Varille satılan üründe müşteri KAÇ KİLO aldığını da görmelidir: varil sayısı
+     tek başına miktar duygusu vermiyor. kgPerUnit bilinmiyorsa (eski kayıt)
+     yalnız varil sayısı yazılır — uydurma kilo göstermeyiz. */
+  const totalKg = (e) => kgPerUnit(e.p) ? e.qty * kgPerUnit(e.p) : 0;
+  /* Sipariş/teklif metinlerinde geçen tek biçim:
+       kilo ürün  -> "2.400 kg"
+       varil ürün -> "3 varil (600 kg)" */
+  const qtyLabel = (e) => {
+    const base = e.qty.toLocaleString("tr-TR") + " " + unitLabel(e.p);
+    const kg = totalKg(e);
+    return kg ? base + " (" + kg.toLocaleString("tr-TR") + " " + T("unit.kg") + ")" : base;
+  };
   const getBasket = () => {
     try {
       const v3 = JSON.parse(localStorage.getItem(BASKET_KEY));
@@ -133,20 +290,50 @@
     } catch (_) {}
     return [];
   };
-  const setBasket = (b) => { localStorage.setItem(BASKET_KEY, JSON.stringify(b)); renderBasket(); };
+  /* SEPET SAHİBİ. Oturum artık sekmeyle birlikte ölüyor (sessionStorage), ama
+     sepet localStorage'ta kalıcı — ortak bir bilgisayarda bir sonraki kişi
+     öncekinin sepetini görürdü. Kimyasal tedarikte bu ticari bilgidir: hangi
+     firmanın neyi araştırdığını gösterir.
+     Bu yüzden sepet, giriş yapılmışken SAHİBİYLE etiketlenir. Sayfa açılışında
+     etiket varsa ve o kullanıcı artık yoksa (ya da başkası girmişse) sepet
+     temizlenir. MİSAFİR sepeti etiketlenmez ve KORUNUR: ziyaretçinin teklif
+     sepetini doldurup sonra giriş yapması meşru bir akıştır. */
+  /* Kullanıcı kimliği: e-posta > firma > rol. Hem sepet sahipliği hem de
+     oturum değişiminde sepet temizliği bunu kullanır — tek tanım. */
+  const userKey = () => {
+    const u = window.hkAuth && window.hkAuth.user();
+    return u ? (u.email || u.company || u.role) : null;
+  };
+  const BASKET_OWNER_KEY = "hk_basket_owner";
+  const setBasket = (b) => {
+    localStorage.setItem(BASKET_KEY, JSON.stringify(b));
+    const owner = userKey();
+    if (owner) localStorage.setItem(BASKET_OWNER_KEY, owner);
+    else localStorage.removeItem(BASKET_OWNER_KEY);
+    renderBasket();
+  };
+  /* Açılışta bir kez: sahibi gitmiş sepeti düşür. */
+  function dropOrphanBasket() {
+    const owner = localStorage.getItem(BASKET_OWNER_KEY);
+    if (!owner) return;                       // misafir sepeti — dokunma
+    if (owner === userKey()) return;          // aynı kullanıcı — dokunma
+    localStorage.setItem(BASKET_KEY, "[]");
+    localStorage.removeItem(BASKET_OWNER_KEY);
+  }
   const isCust = () => !!(window.hkAuth && window.hkAuth.isCustomer());
 
-  let bdView = "cart"; // cart | confirm | success
+  let bdView = "cart"; // cart | confirm | quoteform | success
   let lastOrderId = "";
 
   function addToBasket(id) {
-    const p = HK_PRODUCTS.find(x => x.id === id);
+    // Portalda eklenen ürünler de sepete girebilmeli: birleşik listede aranır.
+    const p = allProducts().find(x => x.id === id);
     if (!p) return;
     const b = getBasket();
     const line = b.find(x => x.id === id);
     bdView = "cart";
     if (line) {
-      line.qty = Math.min(999, (line.qty || 1) + 1);
+      line.qty = Math.min(QTY_MAX, (line.qty || 1) + 1);
       setBasket(b);
       toast("“" + PNAME(p) + "” — " + T("basket.inc") + ": " + line.qty);
       openBasket();
@@ -158,6 +345,35 @@
   }
   window.hkAdd = addToBasket;
 
+  /* ---- 6b) Sepete özel küçük yardımcılar ---- */
+
+  /* Sepet satırlarını ürün kaydıyla eşler; silinmiş id'ler elenir.
+     Teklif metni, sipariş kalemleri ve e-posta yedekleri hep bunu kullanır.
+     Eşleme birleşik listeden yapılır; yoksa portalda eklenip sepete konan bir
+     ürün diğer sayfada sessizce düşerdi. */
+  const basketEntries = () => {
+    const all = allProducts();
+    return getBasket()
+      .map(line => { const p = all.find(x => x.id === line.id); return p ? { p: p, qty: line.qty || 1 } : null; })
+      .filter(Boolean);
+  };
+
+  /* Çekmece altındaki gri açıklama satırı */
+  function smallNote(text) {
+    const n = el("p", null, text);
+    n.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
+    return n;
+  }
+
+  /* Onay ve misafir teklifi adımlarındaki "Sepete Dön" bağlantısı */
+  function backToCartButton() {
+    const back = el("button", null, "← " + T("order.cancel"));
+    back.type = "button";
+    back.style.cssText = "font-family:var(--font-mono);font-size:12px;color:var(--crimson);font-weight:600;margin-bottom:12px";
+    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
+    return back;
+  }
+
   /* Çekmece başlığı ve alt butonlar duruma göre */
   function basketChrome() {
     const cust = isCust();
@@ -168,36 +384,79 @@
     if (foot) foot.style.display = bdView === "cart" ? "" : "none";
   }
 
-  function qtyControl(b, line) {
+  /* Miktar denetimi: −/+ düğmeleri VE serbest giriş kutusu. Kilo ile satılan
+     ürünlerde 2.400 gibi değerleri düğmeye basarak girmek mümkün değildir, bu
+     yüzden kutuya doğrudan yazılabilir. Kutu blur/Enter'da doğrulanır; geçersiz
+     ya da boş giriş eski değere döner (sessizce 1'e düşürmek, müşterinin yazdığı
+     miktarı kaybetmek demektir). Birim etiketi kutunun yanında görünür. */
+  function qtyControl(b, line, p) {
+    const max = qtyMaxFor(p);
     const q = el("div", "bd-qty");
     const minus = el("button", null, "−");
     minus.type = "button";
     minus.disabled = (line.qty || 1) <= 1;
     minus.addEventListener("click", () => { line.qty = Math.max(1, (line.qty || 1) - 1); setBasket(b); });
+
+    const inp = el("input", "bd-qty-input");
+    inp.type = "text";
+    inp.inputMode = "numeric";
+    inp.value = String(line.qty || 1);
+    inp.size = String(max).length;
+    inp.setAttribute("aria-label", T("basket.qtyLabel") + " — " + unitLabel(p));
+    inp.title = T(isVaril(p) ? "basket.qtyHintVaril" : "basket.qtyHintKg");
+    const commit = () => {
+      const n = parseInt(String(inp.value).replace(/[^\d]/g, ""), 10);
+      if (!n || n < 1) { inp.value = String(line.qty || 1); return; }   // geçersiz → eski değer
+      line.qty = Math.min(max, n);
+      inp.value = String(line.qty);
+      setBasket(b);
+    };
+    inp.addEventListener("blur", commit);
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); commit(); }
+    });
+
     const plus = el("button", null, "+");
     plus.type = "button";
-    plus.addEventListener("click", () => { line.qty = Math.min(999, (line.qty || 1) + 1); setBasket(b); });
+    plus.addEventListener("click", () => { line.qty = Math.min(max, (line.qty || 1) + 1); setBasket(b); });
+
     q.appendChild(minus);
-    q.appendChild(el("i", null, String(line.qty || 1)));
+    q.appendChild(inp);
     q.appendChild(plus);
-    return q;
+    /* Birim etiketi çerçevenin DIŞINDA: .bd-qty overflow:hidden ile kutuyu
+       çiziyor, etiket içine alınırsa sayının parçası gibi okunuyor. */
+    const wrap = el("div", "bd-qty-wrap");
+    wrap.appendChild(q);
+    wrap.appendChild(el("span", "bd-qty-unit", unitLabel(p)));
+    /* Varilde toplam kilo hemen altta: müşteri kaç kilo aldığını görsün.
+       Miktar değiştikçe setBasket -> renderBasket zaten yeniden çiziyor. */
+    const kgEach = kgPerUnit(p);
+    if (kgEach) {
+      const tot = (line.qty || 1) * kgEach;
+      wrap.appendChild(el("span", "bd-qty-kg",
+        "= " + tot.toLocaleString("tr-TR") + " " + T("unit.kg")));
+    }
+    return wrap;
   }
 
+
+  /* ---- 6c) Görünümler: sepet / onay / misafir teklifi / başarı ---- */
   function renderCart(body, b) {
     const cust = isCust();
     if (cust) {
       const u = window.hkAuth.user();
       body.appendChild(el("span", "bd-mode", "● " + T("basket.modePill") + " — " + u.company));
     }
+    const all = allProducts();
     b.forEach(line => {
-      const p = HK_PRODUCTS.find(x => x.id === line.id);
+      const p = all.find(x => x.id === line.id);
       if (!p) return;
       const item = el("div", "bd-item");
       const info = el("div");
       info.appendChild(el("b", null, PNAME(p)));
       info.appendChild(el("span", "mono", p.brand));
       const right = el("div", "bd-right");
-      right.appendChild(qtyControl(b, line));
+      right.appendChild(qtyControl(b, line, p));
       const rm = el("button", "bd-remove", "×");
       rm.setAttribute("aria-label", "×");
       rm.addEventListener("click", () => setBasket(getBasket().filter(x => x.id !== line.id)));
@@ -223,29 +482,24 @@
       ap.style.cssText = "width:100%;justify-content:center;margin-top:10px";
       body.appendChild(ap);
     }
-    const note = el("p", null, cust ? T("order.info") : T("basket.memberNote"));
-    note.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
-    body.appendChild(note);
+    body.appendChild(smallNote(cust ? T("order.info") : T("basket.memberNote")));
   }
 
   function renderConfirm(body, b) {
     const u = window.hkAuth.user();
     if (!u) { bdView = "cart"; renderBasket(); return; }
-    const back = el("button", null, "← " + T("order.cancel"));
-    back.type = "button";
-    back.style.cssText = "font-family:var(--font-mono);font-size:12px;color:var(--crimson);font-weight:600;margin-bottom:12px";
-    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
-    body.appendChild(back);
+    body.appendChild(backToCartButton());
     const h = el("h4", null, T("order.confirmTitle"));
     h.style.cssText = "font-family:var(--font-display);font-weight:800;font-size:17px;margin-bottom:6px";
     body.appendChild(h);
+    const all = allProducts();
     b.forEach(line => {
-      const p = HK_PRODUCTS.find(x => x.id === line.id);
+      const p = all.find(x => x.id === line.id);
       if (!p) return;
       const row = el("div", "bd-item");
       const info = el("div");
       info.appendChild(el("b", null, PNAME(p)));
-      info.appendChild(el("span", "mono", line.qty + " " + T("order.unit")));
+      info.appendChild(el("span", "mono", qtyLabel({ p: p, qty: line.qty })));
       row.appendChild(info);
       body.appendChild(row);
     });
@@ -265,25 +519,22 @@
     lb.style.cssText = "font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;color:var(--ink-2);display:block;margin-bottom:6px";
     body.appendChild(lb);
     const ta = el("textarea");
-    ta.id = "bd-note"; ta.maxLength = 200; ta.placeholder = T("order.notePh");
+    ta.id = "bd-note"; ta.maxLength = ORDER_NOTE_MAX; ta.placeholder = T("order.notePh");
     ta.style.cssText = "width:100%;min-height:70px;padding:10px 12px;border:1.5px solid var(--line);border-radius:3px;background:var(--white);resize:vertical";
     body.appendChild(ta);
     const send = el("button", "btn btn--primary", "✓ " + T("order.confirm"));
     send.style.cssText = "width:100%;justify-content:center;margin-top:14px";
-    send.addEventListener("click", () => placeOrder(ta.value));
+    send.addEventListener("click", () => {
+      send.disabled = true;
+      placeOrder(ta.value, () => { send.disabled = false; });
+    });
     body.appendChild(send);
-    const info2 = el("p", null, T("order.info"));
-    info2.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
-    body.appendChild(info2);
+    body.appendChild(smallNote(T("order.info")));
   }
 
   /* Misafir teklif adımı: ad + telefon/e-posta (üyelik gerekmez) */
   function renderQuoteForm(body) {
-    const back = el("button", null, "← " + T("order.cancel"));
-    back.type = "button";
-    back.style.cssText = "font-family:var(--font-mono);font-size:12px;color:var(--crimson);font-weight:600;margin-bottom:12px";
-    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
-    body.appendChild(back);
+    body.appendChild(backToCartButton());
     const h = el("h4", null, T("quote.formTitle"));
     h.style.cssText = "font-family:var(--font-display);font-weight:700;font-size:17px;margin-bottom:4px";
     body.appendChild(h);
@@ -315,36 +566,7 @@
       sendQuote(name, firm, cont, () => { send.disabled = false; });
     });
     body.appendChild(send);
-    const n = el("p", null, T("basket.note"));
-    n.style.cssText = "font-size:12px;color:var(--ink-3);margin-top:8px";
-    body.appendChild(n);
-  }
-
-  function placeOrder(noteRaw) {
-    const u = window.hkAuth && window.hkAuth.user();
-    const b = getBasket();
-    if (!u || u.role !== "musteri") {
-      bdView = "cart"; renderBasket();
-      if (window.hkAuth) window.hkAuth.openLogin(() => { openBasket(); bdView = "confirm"; renderBasket(); });
-      return;
-    }
-    if (!b.length || typeof hgpAddOrder !== "function") return;
-    const items = b.map(line => {
-      const p = HK_PRODUCTS.find(x => x.id === line.id);
-      return p ? { n: p.n.tr, q: line.qty + " adet" } : null;
-    }).filter(Boolean);
-    const note = (noteRaw || "").trim().slice(0, 200);
-    lastOrderId = hgpAddOrder(u.company, items, u.name, note);
-    // Yetkiliye anında bildirim (anahtar girildiyse; sipariş bildirime bağımlı değildir)
-    hgNotify("Yeni Sipariş " + lastOrderId + " — " + u.company,
-      ["Sipariş No: " + lastOrderId, "Müşteri: " + u.company, "Veren: " + u.name, ""]
-        .concat(items.map(i => "• " + i.n + " — " + i.q))
-        .concat(note ? ["", "Not: " + note] : []),
-      u.name);
-    bdView = "success";
-    localStorage.setItem(BASKET_KEY, "[]");
-    renderBasket();
-    toast(T("order.toast") + " " + lastOrderId);
+    body.appendChild(smallNote(T("basket.note")));
   }
 
   function renderSuccess(body) {
@@ -366,6 +588,51 @@
     body.appendChild(box);
   }
 
+  /* ---- 6d) Sipariş gönderimi ve e-posta yedeği ---- */
+  const ORDER_NOTE_MAX = 200;   // sipariş notunda saklanan en fazla karakter
+
+
+
+  /* Sipariş ancak GERÇEKTEN iletildikten sonra "alındı" sayılır: portal kaydı da,
+     başarı ekranı da, sepetin boşaltılması da hgNotify true dönerse yapılır.
+  /* SİPARİŞ BURADA, SİTENİN İÇİNDE tamamlanır. Kayıt hgpAddOrder ile açılır ve
+     müşteri siparisleri siparislerim.html'den izler — e-postaya YÖNLENDİRME YOK.
+     E-posta ile gönderme ayrı bir düğmedir (#basket-mail, teklif akışı).
+     ÖNCEKİ HATA: sipariş yalnızca hgNotify true dönerse kaydediliyordu; web3forms
+     anahtarı boş olduğu için bu hiç gerçekleşmiyor, her sipariş mailto'ya düşüyor
+     ve siparislerim'de hiç görünmüyordu.
+     hgNotify artık YAN KANALDIR: anahtar girildiyse satışa haber verir, girilmediyse
+     sessizce false döner. Siparişin kaydı ona BAĞLI DEĞİLDİR. */
+  function placeOrder(noteRaw, done) {
+    const u = window.hkAuth && window.hkAuth.user();
+    const b = getBasket();
+    if (!u || u.role !== "musteri") {
+      bdView = "cart"; renderBasket();
+      if (window.hkAuth) window.hkAuth.openLogin(() => { openBasket(); bdView = "confirm"; renderBasket(); });
+      if (done) done();
+      return;
+    }
+    if (!b.length || typeof hgpAddOrder !== "function") { if (done) done(); return; }
+    const items = basketEntries().map(e => ({ n: e.p.n.tr, q: qtyLabel(e) }));
+    const note = (noteRaw || "").trim().slice(0, ORDER_NOTE_MAX);
+
+    lastOrderId = hgpAddOrder(u.company, items, u.name, note);
+    bdView = "success";
+    setBasket([]);
+    renderBasket();
+    toast(T("order.toast") + " " + lastOrderId);
+    if (done) done();
+
+    // Yan kanal: anahtar varsa satış ekibine anlık bildirim. Hata yutulur —
+    // sipariş zaten kaydedildi, bildirimin başarısı akışı etkilemez.
+    hgNotify("Yeni Sipariş " + lastOrderId + " — " + u.company,
+      ["Sipariş No: " + lastOrderId, "Müşteri: " + u.company, "Veren: " + u.name, ""]
+        .concat(items.map(i => "• " + i.n + " — " + i.q))
+        .concat(note ? ["", T("order.noteLabel") + ": " + note] : []),
+      u.name);
+  }
+
+  /* ---- 6e) Çizim ve çekmece aç/kapa ---- */
   function renderBasket() {
     const b = getBasket();
     $$(".basket-count").forEach(node => {
@@ -403,22 +670,20 @@
 
   const drawer = $(".basket-drawer");
   const overlay = $(".drawer-overlay");
-  function openBasket() { if (drawer) { drawer.classList.add("open"); overlay.classList.add("open"); } }
-  function closeBasket() { if (drawer) { drawer.classList.remove("open"); overlay.classList.remove("open"); } }
-  $$("[data-open-basket]").forEach(node => node.addEventListener("click", (e) => { e.preventDefault(); openBasket(); }));
+  const basketTriggers = $$("[data-open-basket]");
+  function openBasket() { if (drawer) { drawer.classList.add("open"); overlay.classList.add("open"); setExpanded(basketTriggers, drawer, true); } }
+  function closeBasket() { if (drawer) { drawer.classList.remove("open"); overlay.classList.remove("open"); setExpanded(basketTriggers, drawer, false); } }
+  if (drawer) setExpanded(basketTriggers, drawer, false);
+  basketTriggers.forEach(node => node.addEventListener("click", (e) => { e.preventDefault(); openBasket(); }));
   if (overlay) overlay.addEventListener("click", closeBasket);
   const bdClose = $(".bd-close");
   if (bdClose) bdClose.addEventListener("click", closeBasket);
 
+  /* ---- 6f) Teklif gönderimi (WhatsApp / e-posta) ---- */
   function basketMessage() {
-    const b = getBasket();
-    const lines = b.map(line => {
-      const p = HK_PRODUCTS.find(x => x.id === line.id);
-      return p ? "• " + PNAME(p) + " (" + line.qty + " " + T("order.unit") + ")" : "";
-    }).filter(Boolean);
-    const intro = { tr: "Merhaba, aşağıdaki ürünler için fiyat teklifi rica ederim:", en: "Hello, I would like a quote for the following products:", ru: "Здравствуйте, прошу цену на следующие продукты:" }[L()];
-    const foot = { tr: "\n\nFirma: \nİlgili kişi: \nTahmini miktar: ", en: "\n\nCompany: \nContact: \nEstimated quantity: ", ru: "\n\nКомпания: \nКонтакт: \nОриент. объём: " }[L()];
-    return encodeURIComponent(intro + "\n\n" + lines.join("\n") + foot);
+    const lines = basketEntries().map(e => "• " + PNAME(e.p) + " — " + qtyLabel(e));
+    const foot = "\n\n" + T("mail.firm") + ": \n" + T("mail.contact") + ": \n" + T("mail.qty") + ": ";
+    return encodeURIComponent(T("quote.mailIntro") + "\n\n" + lines.join("\n") + foot);
   }
   /* Teklif istemek üyelik gerektirmez; sipariş vermek onaylı hesap ister. */
   const waBtn = $("#basket-wa");
@@ -427,15 +692,11 @@
     window.open("https://wa.me/" + HK.whatsapp + "?text=" + basketMessage(), "_blank", "noopener");
   });
   function quoteMailFallback() {
-    const subj = { tr: "Fiyat Teklifi Talebi — Herkim Kimya", en: "Quote Request — Herkim Kimya", ru: "Запрос цены — Herkim Kimya" }[L()];
-    location.href = "mailto:" + HK.mailQuote + "?subject=" + encodeURIComponent(subj) + "&body=" + basketMessage();
+    location.href = "mailto:" + HK.mailQuote + "?subject=" + encodeURIComponent(T("quote.mailSubject")) + "&body=" + basketMessage();
   }
   function sendQuote(name, firm, contact, done) {
     const lines = ["Ad: " + name, "Firma: " + (firm || "—"), "İletişim: " + (contact || "—"), ""]
-      .concat(getBasket().map(line => {
-        const p = HK_PRODUCTS.find(x => x.id === line.id);
-        return p ? "• " + p.n.tr + " (" + line.qty + " adet)" : "";
-      }).filter(Boolean));
+      .concat(basketEntries().map(e => "• " + e.p.n.tr + " — " + qtyLabel(e)));
     hgNotify("Teklif Talebi — " + (firm || name), lines, name, contact).then(ok => {
       if (done) done();
       if (ok) { bdView = "cart"; renderBasket(); toast(T("quote.sentOk")); }
@@ -447,7 +708,7 @@
     if (!getBasket().length) { toast(T("basket.addFirst")); return; }
     if (!HK.web3forms) { quoteMailFallback(); return; }
     const u = window.hkAuth && window.hkAuth.user();
-    if (u && u.role === "musteri") { sendQuote(u.name, u.company, u.email || "satinalma@derimderi.com.tr"); return; }
+    if (u && u.role === "musteri") { sendQuote(u.name, u.company, u.email || ""); return; }
     bdView = "quoteform"; // misafir: iletişim bilgisi adımı
     renderBasket();
   });
@@ -462,8 +723,8 @@
 
     const top = el("div", "ec-top");
     top.appendChild(el("span", "ec-cas", p.brand));
-    if (p.tag === "yeni") top.appendChild(el("span", "ec-tag ec-tag--new", { tr: "Yeni", en: "New", ru: "Новинка" }[L()]));
-    else if (p.tag === "one") top.appendChild(el("span", "ec-tag", { tr: "Öne Çıkan", en: "Featured", ru: "Хит" }[L()]));
+    if (p.tag === "yeni") top.appendChild(el("span", "ec-tag ec-tag--new", T("tag.new")));
+    else if (p.tag === "one") top.appendChild(el("span", "ec-tag", T("tag.featured")));
     card.appendChild(top);
 
     card.appendChild(el("div", "ec-formula", SUB_CODE(p.sub)));
@@ -482,21 +743,40 @@
   }
 
   /* ============ 8) Dinamik içerik (dil değişince yeniden çizilir) ============ */
+  const FEATURED_LIMIT = 8;      // anasayfada gösterilen öne çıkan ürün sayısı
+  const DOC_HOME_LIMIT = 3;      // anasayfadaki doküman kartı sayısı
   const catState = { cat: "all", sub: "all", q: "" };
   const tableState = { q: "", cat: "all" };
   let tableSortKey = "id", tableSortDir = 1;
 
+  /* ÜRÜN SIRALAMASI — önce "yeni", sonra "öne çıkan", sonra geri kalanlar.
+     Etiketler data.js'te p.tag alanındadır ("yeni" | "one" | null). Rozetleri
+     productCard() basar; burada yalnızca SIRA belirlenir, yani rozet ile sıra
+     tek kaynaktan (p.tag) türer ve ikisi asla ayrışmaz.
+     Aynı öncelikteki ürünler data.js'teki sırayı (id) korur: Array#sort ES2019'dan
+     beri kararlıdır, yine de niyet açık olsun diye id karşılaştırması yazıldı.
+     Portalda eklenen ürünler de aynı p.tag alanını taşır ve bu sıralamaya
+     yayınlı ürünlerle BİRLİKTE girer: "yeni" etiketli bir portal ürünü listenin
+     sonuna değil BAŞINA gelir. Portal id'leri 9000'in üstündedir; id yalnızca
+     eşitlik bozucudur, bu yüzden büyük id sırayı değil sadece aynı etiket
+     grubundaki yeri belirler (portal ekleri kendi grubunun sonunda).
+     YENİ ETİKET EKLERSENİZ: sadece HK_TAG_ORDER'a bir satır ekleyin. */
+  const HK_TAG_ORDER = { yeni: 0, one: 1 };
+  const tagRank = (p) => (p && p.tag in HK_TAG_ORDER) ? HK_TAG_ORDER[p.tag] : 2;
+  const byHighlight = (a, b) => tagRank(a) - tagRank(b) || a.id - b.id;
+
   function renderFeatured() {
     const wrap = $("#featured-products");
     if (!wrap) return;
-    const featured = HK_PRODUCTS.filter(p => p.tag).concat(HK_PRODUCTS.filter(p => !p.tag)).slice(0, 8);
+    const featured = allProducts().slice().sort(byHighlight).slice(0, FEATURED_LIMIT);
     wrap.replaceChildren(...featured.map(productCard));
   }
 
   function renderGrid() {
     const wrap = $("#product-grid");
     if (!wrap) return;
-    const list = HK_PRODUCTS.filter(p => {
+    const all = allProducts();
+    const list = all.filter(p => {
       if (catState.cat !== "all" && CAT_OF(p.sub) !== catState.cat) return false;
       if (catState.sub !== "all" && p.sub !== catState.sub) return false;
       if (catState.q) {
@@ -505,6 +785,8 @@
       }
       return true;
     });
+    /* Filtre/arama sonucunda da yeni ve öne çıkan ürünler en üstte kalır. */
+    list.sort(byHighlight);
     if (list.length) wrap.replaceChildren(...list.map(productCard));
     else {
       const msg = el("p", "muted");
@@ -515,13 +797,14 @@
       wrap.replaceChildren(msg);
     }
     const rc = $("#grid-count");
-    if (rc) rc.textContent = list.length + " / " + HK_PRODUCTS.length;
+    // Payda da birleşik listeden gelir; yoksa "43 / 42" gibi bir sayı çıkardı.
+    if (rc) rc.textContent = list.length + " / " + all.length;
   }
 
   function renderTable() {
     const tbody = $("#ptable-body");
     if (!tbody) return;
-    let list = HK_PRODUCTS.slice();
+    let list = allProducts().slice();
     if (tableState.cat !== "all") list = list.filter(p => CAT_OF(p.sub) === tableState.cat);
     if (tableState.q) {
       const q = trLower(tableState.q);
@@ -561,32 +844,15 @@
       return tr;
     }));
     const rc = $("#table-count");
-    if (rc) rc.textContent = list.length + " ürün / product / продукт";
-  }
-
-  function renderNews() {
-    const wrap = $("#news-grid");
-    if (!wrap) return;
-    const limit = +wrap.dataset.limit || HK_NEWS.length;
-    const loc = { tr: "tr-TR", en: "en-GB", ru: "ru-RU" }[L()];
-    const fmt = (d) => new Date(d + "T00:00:00").toLocaleDateString(loc, { day: "2-digit", month: "long", year: "numeric" });
-    wrap.replaceChildren(...HK_NEWS.slice(0, limit).map(n => {
-      const a = el("a", "news-card reveal in"); a.href = n.href;
-      a.appendChild(el("span", "nc-tag", pick(n.tag)));
-      const t = el("time", null, fmt(n.date)); t.setAttribute("datetime", n.date);
-      a.appendChild(t);
-      a.appendChild(el("h3", null, pick(n.title)));
-      a.appendChild(el("p", null, pick(n.body)));
-      return a;
-    }));
+    if (rc) rc.textContent = list.length + " " + T("table.unit");
   }
 
   const docState = { cat: "all" };
   function renderDocs() {
     const wrap = $("#doc-grid");
     if (!wrap) return;
-    let list = HK_DOCS.filter(d => docState.cat === "all" || d.cat === docState.cat);
-    if (wrap.dataset.home) list = list.slice(0, 3);
+    let list = allDocs().filter(d => docState.cat === "all" || d.cat === docState.cat);
+    if (wrap.dataset.home) list = list.slice(0, DOC_HOME_LIMIT);
     wrap.replaceChildren(...list.map(d => {
       const card = el("article", "doc-card");
       card.appendChild(el("span", "dc-ext", d.ext));
@@ -594,18 +860,23 @@
       card.appendChild(el("p", null, pick(d.desc)));
       const meta = el("div", "dc-meta");
       meta.appendChild(el("span", null, pick(d.meta)));
-      const link = el("a", "dc-link", d.file
-        ? { tr: "İndir (PDF) ↓", en: "Download (PDF) ↓", ru: "Скачать (PDF) ↓" }[L()]
-        : { tr: "Talep et →", en: "Request →", ru: "Запросить →" }[L()]);
-      link.href = d.file || "iletisim.html";
-      if (d.file) link.setAttribute("download", "");
+      /* Yolu ÇİZİM ANINDA bir kez daha denetleriz. hgpAddDoc zaten denetliyor,
+         ama o zaman deponun tek kapı olması gerekirdi: hg_store_v1 aynı kaynaktaki
+         herhangi bir betikle ya da konsoldan elle yazılabilir ve buradaki değer
+         her ziyaretçinin tıkladığı <a href> olur. Denetim başarısızsa bağlantı
+         indirme değil "talep et" hâline döner — bozuk kayıt kartı gizlemez. */
+      const safeFile = (typeof window.hgpSafeDocPath === "function")
+        ? window.hgpSafeDocPath(d.file) : d.file;
+      const link = el("a", "dc-link", safeFile ? T("doc.download") : T("doc.request"));
+      link.href = safeFile || "iletisim.html";
+      if (safeFile) link.setAttribute("download", "");
       meta.appendChild(link); card.appendChild(meta);
       return card;
     }));
   }
 
   window.hkRenderDynamic = function () {
-    renderFeatured(); renderGrid(); renderTable(); renderNews(); renderDocs();
+    renderFeatured(); renderGrid(); renderTable(); renderDocs();
   };
 
   /* Filtre olayları */
@@ -649,17 +920,34 @@
 
   /* İlk çizim + dil/oturum değişiminde tazele */
   window.hkRenderDynamic();
+  dropOrphanBasket();   // sahibi gitmiş sepeti ilk çizimden ÖNCE düşür
   renderBasket();
   document.addEventListener("hk:langchange", () => { observeReveal(document); renderBasket(); });
-  document.addEventListener("hk:authchange", () => { bdView = "cart"; renderBasket(); renderTable(); });
+  /* SEPET OTURUMA BAĞLIDIR. Çıkış yapıldığında ya da BAŞKA bir müşteri hesabına
+     geçildiğinde sepet boşaltılır: ortak bir bilgisayarda bir sonraki kullanıcı
+     öncekinin sepetini görmemeli, sipariş yanlış firmaya bağlanmamalıdır.
+     Misafirden girişe geçiş (kimlik yok → kullanıcı) sepeti KORUR; ziyaretçi
+     sepetini doldurup sonra giriş yapmış olabilir, bu meşru bir akıştır. */
+  let lastUserKey = userKey();
+  document.addEventListener("hk:authchange", () => {
+    const now = userKey();
+    if (lastUserKey && now !== lastUserKey) setBasket([]);   // setBasket etiketi de günceller
+    lastUserKey = now;
+    bdView = "cart"; renderBasket(); renderTable();
+  });
 
   /* ============ 9) Site içi arama ============ */
+  const SEARCH_FOCUS_MS = 60;      // katman açılış animasyonu bitmeden odak vermeyelim
+  const SEARCH_PROD_LIMIT = 7;     // sonuç listesindeki en fazla ürün sayısı
   const so = $(".search-overlay");
   if (so) {
     const input = $("#site-search");
     const results = $("#search-results");
+    const searchTriggers = $$("[data-open-search]");
+    /* Hedefler gerçek dosya + gerçek çapa olmalı: "hakkimizda.html" diye bir sayfa
+       yok, kurumsal.html içindeki #biz-kimiz bölümü var. */
     const PAGES = () => [
-      { t: T("nav.about"), h: "hakkimizda.html" },
+      { t: T("nav.about"), h: "kurumsal.html#biz-kimiz" },
       { t: T("nav.principles"), h: "kurumsal.html#prensipler" },
       { t: T("nav.catalog"), h: "urunler.html" },
       { t: T("nav.productList"), h: "urun-listesi.html" },
@@ -673,20 +961,21 @@
       a.appendChild(el("span", "mono", meta));
       return a;
     };
-    function openSearch() { so.classList.add("open"); setTimeout(() => input.focus(), 60); }
-    function closeSearch() { so.classList.remove("open"); input.value = ""; renderResults(""); }
-    $$("[data-open-search]").forEach(b => b.addEventListener("click", openSearch));
+    function openSearch() { so.classList.add("open"); setExpanded(searchTriggers, so, true); setTimeout(() => input.focus(), SEARCH_FOCUS_MS); }
+    function closeSearch() { so.classList.remove("open"); setExpanded(searchTriggers, so, false); input.value = ""; renderResults(""); }
+    setExpanded(searchTriggers, so, false);
+    searchTriggers.forEach(b => b.addEventListener("click", openSearch));
     so.addEventListener("click", (e) => { if (e.target === so) closeSearch(); });
     document.addEventListener("keydown", (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); openSearch(); }
-      if (e.key === "Escape") { closeSearch(); closeBasket(); if (mnav) mnav.classList.remove("open"); }
+      if (e.key === "Escape") { closeSearch(); closeBasket(); closeMenu(); }
     });
     function renderResults(q) {
       const qq = trLower(q.trim());
       if (!qq) { results.replaceChildren(...PAGES().map(p => row(p.t, T("nav.corporate"), p.h))); return; }
-      const prods = HK_PRODUCTS
+      const prods = allProducts()
         .filter(p => trLower([p.n.tr, p.n.en, p.n.ru, p.brand].join(" ")).includes(qq))
-        .slice(0, 7)
+        .slice(0, SEARCH_PROD_LIMIT)
         .map(p => row(PNAME(p), p.brand, "urun-listesi.html"));
       const pages = PAGES().filter(p => trLower(p.t).includes(qq)).map(p => row(p.t, T("nav.corporate"), p.h));
       const merged = prods.concat(pages);
@@ -698,9 +987,10 @@
   }
 
   /* ============ 10) Çerez bildirimi ============ */
+  const COOKIE_DELAY_MS = 1600;   // sayfa oturduktan sonra göster, açılışta rahatsız etmesin
   const cb = $(".cookie-bar");
   if (cb && !localStorage.getItem("hk_cookie_ok")) {
-    setTimeout(() => cb.classList.add("show"), 1600);
+    setTimeout(() => cb.classList.add("show"), COOKIE_DELAY_MS);
     const ok = $("#cookie-ok");
     if (ok) ok.addEventListener("click", () => { localStorage.setItem("hk_cookie_ok", "1"); cb.classList.remove("show"); });
   }
@@ -718,12 +1008,12 @@
     const topic = (data.get("topic") || "").toString().trim();
     // Landing → CRM: talep portaldaki satış kutusuna da düşer (demo)
     try {
-      const q = JSON.parse(localStorage.getItem("hg_landing_queue") || "[]");
+      const q = JSON.parse(localStorage.getItem(HGP_QUEUE) || "[]");
       const d = new Date();
       const pad = (x) => (x < 10 ? "0" : "") + x;
       q.push({ name, firm, topic, msg,
                date: pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() });
-      localStorage.setItem("hg_landing_queue", JSON.stringify(q));
+      localStorage.setItem(HGP_QUEUE, JSON.stringify(q));
     } catch (err) {}
     // Önce gerçek gönderim (Web3Forms); anahtar yoksa/başarısızsa e-posta yedeği
     const mailFallback = () => {
@@ -772,6 +1062,27 @@
       $("#ac-kvkk").checked = true;
       checkVkn();
     });
+
+    /* Bildirim gitmediyse başvuruyu ziyaretçinin e-posta istemcisine devret;
+       "başvurunuz alındı" ekranı yalnızca gerçekten iletilince açılır. */
+    function acctMailFallback(a) {
+      const body = [T("acct.mailIntro"), "",
+        T("mail.firm") + ": " + a.firm,
+        T("mail.taxNo") + ": " + a.taxOffice + " / " + a.vkn,
+        T("mail.contact") + ": " + a.contact,
+        T("mail.email") + ": " + a.email,
+        T("mail.mobile") + ": " + a.mobile,
+        T("mail.phone") + ": " + a.phone,
+        T("mail.address") + ": " + (a.address || "—"),
+        T("mail.web") + ": " + (a.web || "—")]
+        .concat(a.msg ? ["", T("mail.message") + ": " + a.msg] : [])
+        .join("\n");
+      location.href = "mailto:" + HK.email +
+        "?subject=" + encodeURIComponent(T("acct.mailSubject") + " — " + a.firm) +
+        "&body=" + encodeURIComponent(body);
+      toast(T("toast.mailOpening"));
+    }
+
     aform.addEventListener("submit", (e) => {
       e.preventDefault();
       const val = (s) => { const n = $(s); return n ? n.value.trim() : ""; };
@@ -783,20 +1094,29 @@
       if (!hgpValidTaxId(vkn)) { toast(T("acct.errVkn")); vknInput.focus(); return; }
       if (!email || email.indexOf("@") < 1) { toast(T("acct.errMail")); $("#ac-email").focus(); return; }
       if (!$("#ac-kvkk").checked) { toast(T("acct.errKvkk")); return; }
-      const id = hgpAddApplication({ firm, taxOffice: tax, vkn, phone, web, address: addr, contact, email, mobile, msg });
-      hgNotify("Hesap Başvurusu " + id + " — " + firm,
-        ["Başvuru No: " + id, "Firma: " + firm, "Vergi D./No: " + tax + " / " + vkn,
+      const app = { firm: firm, taxOffice: tax, vkn: vkn, phone: phone, web: web,
+                    address: addr, contact: contact, email: email, mobile: mobile, msg: msg };
+      const sbtn = aform.querySelector("[type=submit]");
+      if (sbtn) sbtn.disabled = true;
+      hgNotify("Hesap Başvurusu — " + firm,
+        ["Firma: " + firm, "Vergi D./No: " + tax + " / " + vkn,
          "Yetkili: " + contact, "E-posta: " + email, "Cep: " + mobile,
          "Tel: " + phone, "Adres: " + (addr || "—"), "Web: " + (web || "—")]
           .concat(msg ? ["", "Mesaj: " + msg] : []),
-        contact, email);
-      const okBox = $("#acct-ok");
-      aform.style.display = "none";
-      if (okBox) {
-        const no = $("#acct-ok-no"); if (no) no.textContent = id;
-        okBox.style.display = "";
-      }
-      window.scrollTo({ top: 0, behavior: "smooth" });
+        contact, email)
+        .then(ok => {
+          if (sbtn) sbtn.disabled = false;
+          if (!ok) { acctMailFallback(app); return; }
+          // Başvuru kaydı ve başvuru numarası ancak bildirim iletildikten sonra üretilir.
+          const id = hgpAddApplication(app);
+          const okBox = $("#acct-ok");
+          aform.style.display = "none";
+          if (okBox) {
+            const no = $("#acct-ok-no"); if (no) no.textContent = id;
+            okBox.style.display = "";
+          }
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
     });
   }
 
@@ -866,7 +1186,8 @@
       if (o.track && o.track !== "—") metaBits.push(T("myord.track") + ": " + o.track);
       if (o.carrier && o.carrier !== "—") metaBits.push(o.carrier);
       if (metaBits.length) card.appendChild(el("p", "mo-meta mono", metaBits.join("  ·  ")));
-      if (o.note) card.appendChild(el("p", "mo-note", T("order.note").replace(" (opsiyonel)", "").replace(" (optional)", "").replace(" (необязательно)", "") + ": " + o.note));
+      // order.noteLabel = "(opsiyonel)" eki olmayan ayrı anahtar; çeviri metnini kesip biçmiyoruz.
+      if (o.note) card.appendChild(el("p", "mo-note", T("order.noteLabel") + ": " + o.note));
       moWrap.appendChild(card);
     });
   }
@@ -878,14 +1199,27 @@
   document.addEventListener("hk:authchange", renderMyOrders);
   document.addEventListener("hk:langchange", renderMyOrders);
 
+  /* E-bülten kaydı: kaydın gideceği bir uç yoksa "kaydınız alındı" denmez;
+     ziyaretçi kendi e-posta istemcisine yönlendirilir. */
   $$("[id^='newsletter-form']").forEach(nf => nf.addEventListener("submit", (e) => {
     e.preventDefault();
     const inp = $("input", nf);
     const em = (inp.value || "").trim();
     if (!em || !em.includes("@")) { toast(T("toast.mailErr")); return; }
-    localStorage.setItem("hk_newsletter", em);
-    inp.value = "";
-    toast(T("toast.newsOk"));
+    const sbtn = nf.querySelector("[type=submit]");
+    if (sbtn) sbtn.disabled = true;
+    hgNotify("E-bülten Kaydı — " + em, ["E-posta: " + em], em, em).then(ok => {
+      if (sbtn) sbtn.disabled = false;
+      if (!ok) {
+        location.href = "mailto:" + HK.email +
+          "?subject=" + encodeURIComponent(T("news.mailSubject")) +
+          "&body=" + encodeURIComponent(T("news.mailIntro") + "\n\n" + T("mail.email") + ": " + em);
+        toast(T("toast.mailOpening"));
+        return;
+      }
+      inp.value = "";
+      toast(T("toast.newsOk"));
+    });
   }));
 
   /* ============ 13) Tanıtım videosu (tıklayınca yükle) ============ */

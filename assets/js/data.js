@@ -1,33 +1,87 @@
 /* ============================================================
-   HERKİM KİMYA — Veri Katmanı (gerçek şirket bilgileri)
+   HERKİM KİMYA — Veri Katmanı
    Kaynak: herkim.com.tr — 1975 kuruluşlu deri & tekstil kimyasalları
    Deri & tekstil kimyasalları · binder üretimi
    Ürün adları / kategoriler üç dillidir (tr/en/ru).
-   NOT: Bireysel ürünler temsilîdir; gerçek SKU listesi talep/giriş
-   ile paylaşılır (tıpkı herkim.com.tr'deki gibi). Kendi portföyünüze
-   göre HK_PRODUCTS dizisini düzenlemeniz yeterlidir.
+
+   İÇİNDEKİLER — bu dosyanın dışa verdikleri
+     HK_COMPANY        Şirket künyesi. Yalnız bir bölümü koddan okunur;
+                       hangisinin nerede okunduğu alan alan yazılıdır.
+     HK_CATS           6 ana kategori (üç dilli etiket)
+     HK_SUBS           6 alt kategori — ana kategoriyle bire bir + katalog kodu
+     HK_PRODUCTS       42 ürün: resmî Herkim Group listesi (Temmuz 2026 flyer),
+                       üç dilli. assets/docs/herkim-urun-katalogu-2026.pdf ile
+                       aynı listedir; ikisi birlikte güncellenmelidir.
+     HK_DOCS           Doküman merkezi kartları (üç dilli)
+     HK_RATES_FALLBACK Kur servisi cevap vermezse kullanılan yedek USD/EUR
+
+   Hepsi `const` — window'a YAZILMAZ. Diğer dosyalar bu adlara çıplak isimle
+   başvurduğu için data.js her sayfada en başta yüklenmek zorundadır.
+
+   YAYINLANMIŞ KAYNAK BURASIDIR
+     HK_PRODUCTS ve HK_DOCS, siteyi ziyaret eden HERKESİN gördüğü listelerdir.
+     Portal (portal.html) bu listelere kayıt ekleyebilir; ancak o kayıtlar
+     yalnızca EKLEYEN KİŞİNİN KENDİ TARAYICISINDA (localStorage) durur — başka
+     bir bilgisayardan giren ziyaretçi onları GÖRMEZ. Portal eki bir önizlemedir.
+     Gerçekten yayınlamak için: portaldaki dışa aktarma çıktısı aşağıdaki
+     dizilere yapıştırılır ve commit edilir. Site ancak o zaman değişir.
+     Ana site listeleri main.js'teki allProducts()/allDocs() ile okur: bu iki
+     dizi + varsa portal ekleri.
    ============================================================ */
 
-/* Şirket bilgileri — tek kaynaktan düzenleyin */
+/* Şirket künyesi.
+   DİKKAT: burası "tek kaynak" DEĞİL. Yalnız ilk bloktaki alanlar koddan
+   okunur. İkinci bloktaki değerler sitede elle yazılıdır; burayı değiştirmek
+   sitede hiçbir şeyi değiştirmez — gerçek düzenleme yeri her alanın yanında
+   yazılıdır. Satır numaraları yaklaşıktır; yanlarındaki metni/anahtarı aratın. */
 const HK_COMPANY = {
-  name: "Herkim Kimya",
-  legal: "Herkim Group Kimyevi Maddeler A.Ş.",
+  /* --- KOD TARAFINDAN OKUNAN ALANLAR --- */
   founded: 1975,
-  experience: 54,
+  // Tecrübe süresi (yıl) BİLEREK burada tutulmuyor: main.js render sırasında
+  // içinde bulunulan yıldan founded'ı çıkararak hesaplar. Sabit sayı yazmayın —
+  // yıl dönünce sessizce yanlışa döner (eski "experience: 54" alanı böyle
+  // yanlıştı ve zaten hiçbir yerden okunmuyordu).
+  email: "info@herkimgroup.com",      // main.js — iletişim formu mailto yedeği
+  mailQuote: "sales@herkimgroup.com", // main.js — sepetten teklif mailto yedeği
+  whatsapp: "902163941125",   // main.js — wa.me bağlantıları ve sepet teklif butonu.
+                              // WhatsApp Business hattınızın numarası; ülke kodu
+                              // bitişik yazılır, başında + ve arada boşluk YOKTUR.
+  web3forms: "",              // portal-store.js hgNotify + main.js. Anahtar girilince
+                              // iletişim/teklif/sipariş/başvuru bildirimleri şirket
+                              // e-postasına ANINDA düşer; boşken mailto yedeğine düşülür.
+                              // Anahtar almak: web3forms.com → e-postayı gir →
+                              // gelen anahtarı buraya yapıştır.
+
+  /* --- ŞU AN KOD TARAFINDAN OKUNMUYOR — sitede elle yazılmış ---
+     Aşağıdakiler gerçek şirket verisidir ve ileride koda bağlanabilir; bu yüzden
+     silinmedi. Ama bugün siteyi değiştirmek için yanlarında yazan yeri düzenleyin. */
+  name: "Herkim Kimya",
+  // → tüm sayfaların <title>/meta'sı (örn. index.html ≈6) ve i18n.js "foot.rights"
+  legal: "Herkim Group Kimyevi Maddeler A.Ş.",
+  // → yalnız iletisim.html ≈7 meta description içinde geçiyor
   salesPoints: 12,
+  // → i18n.js "home.about.li2", "tl.exp.d", "srv.pazarlama.d", "faq.a5" (üç dilde
+  //   ayrı ayrı) ve index.html ≈373 / kurumsal.html ≈120
   address: "Deri OSB Mah. Pres Sok. No: 3, Tuzla — İstanbul / Türkiye",
+  // → index.html ≈47 (JSON-LD streetAddress), index.html ≈435, iletisim.html ≈134
   phone: "444 56 58",
+  // → her sayfanın üst şeridi (tel:4445658, örn. index.html ≈73) ve
+  //   index.html ≈439 / iletisim.html ≈138
   phone2: "+90 216 394 11 33 (Dahili 224)",
+  // → index.html ≈439, iletisim.html ≈138 (telefon satırının ikinci yarısı)
   phoneTel: "+902163941133",
+  // → hiçbir yerde karşılığı yok: sitedeki tel: bağlantıları 444'lü numarayı
+  //   (tel:4445658) kullanıyor. Bu alan tamamen boşta duruyor.
   fax: "+90 216 394 10 04",
-  email: "info@herkimgroup.com",
-  mailQuote: "sales@herkimgroup.com",
-  whatsapp: "902163941125",   // wa.me — WhatsApp Business hattınızla değiştirin
-  web3forms: "",              // Web3Forms erişim anahtarı — girilince form/teklif/sipariş/talep
-                              // bildirimleri şirket e-postasına ANINDA düşer. Anahtar almak:
-                              // web3forms.com → e-postayı gir → gelen anahtarı buraya yapıştır.
+  // → index.html ≈447, iletisim.html ≈142
   group: "https://www.herkimgroup.com",
+  // → her sayfanın üst şeridindeki "tb-group" bağlantısı (örn. index.html ≈75),
+  //   index.html ≈53 (JSON-LD sameAs) ve footer "foot.ent2" bağlantısı
   brands: ["Herkim", "Herkim", "Herkim"]
+  // → hiçbir yerden okunmuyor ve üç eleman da aynı: büyük olasılıkla doldurulmamış
+  //   bir taslak. hizmetler.html ≈143'teki "Distribütör marka · 3" sayacı elle
+  //   yazılmıştır, bu diziden gelmiyor. Doğru içeriği satış ekibine sormadan
+  //   doldurmayın; uydurulmuş marka adı siteye giremez.
 };
 
 /* Ana kategoriler (üç dilli) — kaynak: resmî Herkim Group ürün listesi */
@@ -51,7 +105,12 @@ const HK_SUBS = {
 };
 
 /* Ürünler — resmî Herkim Group ürün listesi (Temmuz 2026 flyer).
-   n: ad (tr/en/ru), brand: marka/menşei, tag: "yeni"|"one"|null */
+   n: ad (tr/en/ru), brand: marka/menşei, tag: "yeni"|"one"|null
+   unit: SATIŞ BİRİMİ. Alan YOKSA ürün KİLO ile satılır — varsayılan ve olağan
+   durum, aşağıdaki 42 ürünün tamamı böyledir. Yalnızca varille satılan üründe
+   unit: "varil" yazılır. Portalda ürün eklerken "Varille satılır" kutusu bu
+   alanı üretir; sepetteki miktar kutusu ve sipariş/teklif metinleri birimi
+   buradan okur (assets/js/main.js → isVaril / unitLabel / qtyLabel). */
 const HK_PRODUCTS = [
   // ---- Asitler ----
   { id: 1,  sub: "asit",    n: { tr: "Asetik Asit",                          en: "Acetic Acid",                                        ru: "Уксусная кислота" },                          brand: "Herkim", tag: null },
@@ -106,94 +165,6 @@ const HK_PRODUCTS = [
   { id: 40, sub: "solvent", n: { tr: "Potasyum Klorür",                      en: "Potassium Chloride",                                 ru: "Хлорид калия" },                              brand: "Herkim",       tag: null },
   { id: 41, sub: "solvent", n: { tr: "Soya Lesitini",                        en: "Soya Lecithin",                                      ru: "Соевый лецитин" },                            brand: "Herkim",tag: "yeni" },
   { id: 42, sub: "solvent", n: { tr: "Triizobutil Fosfat",                   en: "Triisobutyl Phosphate",                              ru: "Триизобутилфосфат" },                         brand: "Herkim",      tag: null }
-];
-
-/* Duyurular (üç dilli) */
-const HK_NEWS = [
-  {
-    date: "2026-06-20", tag: { tr: "Fuar", en: "Expo", ru: "Выставка" },
-    title: {
-      tr: "APLF / Deri Fuarı'nda standımıza bekleriz",
-      en: "Visit our stand at the APLF Leather Fair",
-      ru: "Ждём вас на нашем стенде на выставке кожи APLF"
-    },
-    body: {
-      tr: "Uluslararası deri fuarında yeni finisaj ve altkat serilerimizi tanıtıyoruz. Randevu için satış ekibimizle iletişime geçin.",
-      en: "We are presenting our new finishing and base-coat series at the international leather fair. Contact our sales team for an appointment.",
-      ru: "Представляем новые серии финиша и грунта на международной выставке кожи. Свяжитесь с отделом продаж для встречи."
-    },
-    href: "iletisim.html"
-  },
-  {
-    date: "2026-05-15", tag: { tr: "Ürün", en: "Product", ru: "Продукт" },
-    title: {
-      tr: "Su bazlı finisaj ürün grubumuz genişledi",
-      en: "Our water-based finishing range has expanded",
-      ru: "Расширена линейка водного финиша"
-    },
-    body: {
-      tr: "Çevre dostu, düşük VOC'lu su bazlı top coat ve tutuş ajanları stoklarımıza eklendi. Numune talep edebilirsiniz.",
-      en: "Eco-friendly, low-VOC water-based top coats and handle agents are now in stock. Samples available on request.",
-      ru: "Экологичные водные топ-коты и агенты грифа с низким VOC уже на складе. Доступны образцы."
-    },
-    href: "urunler.html"
-  },
-  {
-    date: "2026-04-02", tag: { tr: "Duyuru", en: "Notice", ru: "Объявление" },
-    title: {
-      tr: "2026 fiyat listesi güncellendi",
-      en: "2026 price list updated",
-      ru: "Обновлён прайс-лист 2026"
-    },
-    body: {
-      tr: "Kur ve navlun koşullarına göre güncellenen fiyat listemizi satış temsilcinizden talep edebilirsiniz.",
-      en: "You can request our updated price list — revised for exchange rates and freight — from your sales representative.",
-      ru: "Обновлённый прайс-лист (с учётом курса и фрахта) можно запросить у вашего менеджера."
-    },
-    href: "iletisim.html"
-  },
-  {
-    date: "2026-02-10", tag: { tr: "Kurumsal", en: "Corporate", ru: "Компания" },
-    title: {
-      tr: "12. satış noktamız hizmete girdi",
-      en: "Our 12th sales point is now open",
-      ru: "Открыта 12-я точка продаж"
-    },
-    body: {
-      tr: "Büyüyen talebe paralel olarak yeni bölge satış noktamızı açtık; sevkiyat sürelerimiz daha da kısaldı.",
-      en: "In line with growing demand, we opened a new regional sales point; our delivery times are now even shorter.",
-      ru: "В ответ на рост спроса мы открыли новую региональную точку; сроки доставки стали ещё короче."
-    },
-    href: "kurumsal.html#biz-kimiz"
-  },
-  {
-    date: "2025-11-18", tag: { tr: "Ürün", en: "Product", ru: "Продукт" },
-    title: {
-      tr: "İnşaat boya binderleri üretim kapasitemiz arttı",
-      en: "Increased capacity for construction paint binders",
-      ru: "Увеличены мощности по строительным биндерам"
-    },
-    body: {
-      tr: "Kendi üretimimiz olan akrilik ve stiren-akrilik binder kapasitemizi artırdık; büyük hacimli talepleri IBC ile karşılıyoruz.",
-      en: "We increased our in-house acrylic and styrene-acrylic binder capacity; we serve high-volume demand in IBCs.",
-      ru: "Мы увеличили собственные мощности по акриловым и стирол-акриловым биндерам; крупные объёмы — в IBC."
-    },
-    href: "urunler.html"
-  },
-  {
-    date: "2025-09-05", tag: { tr: "Duyuru", en: "Notice", ru: "Объявление" },
-    title: {
-      tr: "Teknik servis ekibimiz sahada",
-      en: "Our technical service team is in the field",
-      ru: "Наша техническая служба — на местах"
-    },
-    body: {
-      tr: "AR-GE ve teknik servis ekibimiz, tabakhanelerde reçete optimizasyonu ve uygulama desteği için ücretsiz ziyaret sunuyor.",
-      en: "Our R&D and technical service team offers free visits for recipe optimization and application support at tanneries.",
-      ru: "Наша команда НИОКР и техподдержки предлагает бесплатные визиты для оптимизации рецептур на заводах."
-    },
-    href: "hizmetler.html"
-  }
 ];
 
 /* Dokümanlar (üç dilli) */

@@ -3,6 +3,25 @@
    Portal ile AYNI oturum anahtarını paylaşır (hg_portal_session):
    burada giriş yapan müşteri portalda da açıktır (ve tersi).
    Kilitlenme ve boşta kalma kuralları portalla birebir aynıdır.
+
+   UYARI — BU BİR DEMO GİRİŞİDİR, GÜVENLİK DEĞERİ YOKTUR:
+   - Parola (HGP_DEMO_PASS) tarayıcıya inen paketin içindedir ve giriş
+     penceresinde ipucu olarak zaten ekrana yazılır. Gizli bir şey değildir.
+   - Oturum, localStorage'da düz bir nesnedir. Konsoldan tek satırla rol
+     yazan herkes istediği hesap gibi görünür. Doğrulama yapılmaz.
+   - Kilitlenme (HGP_LOCK_MS) ve boşta kalma (HGP_IDLE_MS) sayaçları da
+     aynı localStorage'da tutulur; saldırganın silebildiği bir şey kontrol
+     değildir. Bunlar sadece kullanıcı deneyimi kolaylığıdır.
+   Gerçek kimlik doğrulama SUNUCU tarafında yapılmalıdır (parola sunucuda
+   doğrulanır, oturum imzalı çerezle taşınır, kilit sunucuda sayılır).
+   Bu dosyaya istemci tarafı hash/şifreleme eklemeyin: güvenliği artırmaz,
+   sadece güvenliymiş gibi görünmesini sağlar ve ekibi yanıltır.
+
+   İÇİNDEKİLER
+     1) Oturum                    — okuma, tazeleme, giriş/çıkış
+     2) Başlıktaki hesap düğmesi  — avatar + hesap menüsü
+     3) Giriş penceresi           — modal, kilit sayacı, form gönderimi
+     4) Kurulum                   — düğmeyi başlığa tak, olayları bağla
    ============================================================ */
 (function () {
   "use strict";
@@ -10,8 +29,27 @@
   const $ = (s, c) => (c || document).querySelector(s);
   const T = (k) => (typeof window.hkT === "function" ? window.hkT(k) : k);
 
-  const SES = "hg_portal_session", LOCK = "hg_login_lock", LAST = "hg_last_login_";
-  const PASS = "demo1234", IDLE = 15 * 60 * 1000;
+  /* Anahtarlar, demo parola ve süreler portal-store.js'te tek kaynakta
+     tanımlıdır; burada yalnızca kısa okunur takma adları veriliyor.
+     Değerleri BURAYA yeniden yazmayın, iki dosya sessizce ayrışır. */
+  const SES = HGP_SESSION_KEY, LOCK = HGP_LOCK_KEY, LAST = HGP_LAST_LOGIN;
+  const PASS = HGP_DEMO_PASS, IDLE = HGP_IDLE_MS;
+
+  /* Oturumu her etkinlikte değil, en fazla bu sıklıkta diske yazarız
+     (scroll/touch sırasında sürekli localStorage yazmamak için). */
+  const TOUCH_THROTTLE_MS = 30000;
+  /* Diğer sekmedeki giriş/çıkışı yakalamak için başlık tazeleme aralığı. */
+  const ROLE_POLL_MS = 30000;
+  /* Modal açılış animasyonu otururken odak vermek için kısa bekleme. */
+  const FOCUS_DELAY_MS = 140;
+  /* Girişten sonra bekleyen işi (sepete ekle vb.) modal kapanma
+     animasyonunun ardına atmak için kısa bekleme. */
+  const CALLBACK_DELAY_MS = 60;
+
+  /* Satış temsilcisi adı tek kaynaktan (HGP_USERS.satis) okunur; kadro
+     değişirse portal-store.js'te tek satır güncellemek yeter. */
+  const salesRepName = () =>
+    (typeof HGP_USERS !== "undefined" && HGP_USERS.satis && HGP_USERS.satis.name) || null;
 
   function el(tag, cls, text) {
     const n = document.createElement(tag);
@@ -21,12 +59,24 @@
   }
   const emit = () => document.dispatchEvent(new CustomEvent("hk:authchange"));
 
-  /* ---------- Oturum ---------- */
-  const rawSes = () => { try { return JSON.parse(localStorage.getItem(SES)); } catch (_) { return null; } };
+  /* ---------- 1) Oturum ---------- */
+  /* Bozuk kayıtta null döneriz (kullanıcı çıkmış sayılır) ama sessiz
+     kalmayız: aksi halde "durduk yere çıkış yaptı" şikâyeti izlenemez. */
+  /* Oturum sessionStorage'ta tutulur (portal-store.js -> hgpSesRead/Write/Clear).
+     Gerekçe: localStorage sekme kapansa da yaşıyor, ortak bilgisayarda çıkış
+     yapmayı unutan kullanıcının hesabı sonraki kişiye açık kalıyordu. Sekme
+     içi gezinme oturumu korur; sekme kapanınca tarayıcı siler. */
+  const rawSes = () => {
+    const s = hgpSesRead();
+    if (s === null && sessionStorage.getItem(SES)) {
+      console.warn("[site-auth] Oturum kaydı okunamadı (bozuk JSON), çıkış yapılmış sayılıyor:", SES);
+    }
+    return s;
+  };
   function ses() {
     const s = rawSes();
     if (!s || !s.role) return null;
-    if (Date.now() - (s.touched || s.at || 0) > IDLE) { localStorage.removeItem(SES); return null; }
+    if (Date.now() - (s.touched || s.at || 0) > IDLE) { hgpSesClear(); return null; }
     return s;
   }
   function user() {
@@ -41,9 +91,9 @@
   function touch() {
     const s = rawSes();
     if (!s) return;
-    if (Date.now() - (s.touched || s.at || 0) > 30000) {
+    if (Date.now() - (s.touched || s.at || 0) > TOUCH_THROTTLE_MS) {
       s.touched = Date.now();
-      localStorage.setItem(SES, JSON.stringify(s));
+      hgpSesWrite(s);
     }
   }
   ["click", "keydown", "scroll", "touchstart"].forEach(ev =>
@@ -54,15 +104,18 @@
   setInterval(() => {
     const cur = (ses() || {}).role || null;
     if (cur !== knownRole) { knownRole = cur; renderAccount(); emit(); }
-  }, 30000);
+  }, ROLE_POLL_MS);
 
   let pendingCb = null;
 
-  function login(role, acct) {
+  /* remember: true -> oturum tarayıcı kapansa da durur (localStorage)
+                false -> sekme kapanınca biter (sessionStorage, VARSAYILAN)
+     Tercih giriş anında BİR KEZ yazılır; sonraki tazelemeler (touch) onu korur. */
+  function login(role, acct, remember) {
     const payload = { role: role, at: Date.now() };
     if (acct) payload.acct = acct;
-    localStorage.setItem(SES, JSON.stringify(payload));
-    localStorage.removeItem(LOCK);
+    hgpSesWrite(payload, !!remember);
+    localStorage.removeItem(LOCK);   // kilit sayacı kalıcı kalır: kaba kuvvet sekme kapatarak sıfırlanmasın
     try { if (typeof hgpNow === "function") localStorage.setItem(LAST + role, hgpNow()); } catch (_) {}
     const cb = pendingCb; pendingCb = null;
     hideModal();
@@ -71,18 +124,18 @@
     emit();
     const u = user();
     if (window.hkToast && u) window.hkToast(T("auth.welcome") + ", " + u.name + ".");
-    if (cb) setTimeout(cb, 60);
+    if (cb) setTimeout(cb, CALLBACK_DELAY_MS);
   }
 
   function logout() {
-    localStorage.removeItem(SES);
+    hgpSesClear();
     knownRole = null;
     renderAccount();
     emit();
     if (window.hkToast) window.hkToast(T("auth.loggedOut"));
   }
 
-  /* ---------- Başlıktaki hesap düğmesi ---------- */
+  /* ---------- 2) Başlıktaki hesap düğmesi ---------- */
   let wrap = null;
 
   function svgUser() {
@@ -150,12 +203,14 @@
     if (pop && pop.classList.contains("open") && !wrap.contains(e.target)) pop.classList.remove("open");
   });
 
-  /* ---------- Giriş penceresi ---------- */
+  /* ---------- 3) Giriş penceresi ---------- */
   let overlay = null, lockTimer = null;
 
+  /* Bozuk kilit kaydında sıfırdan başlarız; yine de uyarı basıyoruz ki
+     "kilit hiç devreye girmiyor" durumu izlenebilsin. */
   const getLock = () => {
     try { return JSON.parse(localStorage.getItem(LOCK)) || { n: 0, until: 0 }; }
-    catch (_) { return { n: 0, until: 0 }; }
+    catch (_) { console.warn("[site-auth] Kilit kaydı okunamadı (bozuk JSON), sayaç sıfırlandı:", LOCK); return { n: 0, until: 0 }; }
   };
 
   function hideModal() {
@@ -195,7 +250,21 @@
     i2.type = "password"; i2.id = "au-pass"; i2.autocomplete = "current-password";
     i2.maxLength = 64; i2.placeholder = "••••••••";
     f2.appendChild(l2); f2.appendChild(i2);
-    form.appendChild(f1); form.appendChild(f2);
+    /* BENİ HATIRLA — güvenlik/kolaylık tercihini kullanıcıya bırakır.
+       Varsayılan İŞARETSİZ: ortak bilgisayarda güvenli olan davranış budur.
+       İşaretlenirse oturum ve sepet tarayıcı kapansa da korunur. */
+    const f3 = el("div", "auth-remember");
+    const rem = el("input");
+    rem.type = "checkbox"; rem.id = "au-remember";
+    const rl = el("label", "auth-remember-lab");
+    rl.htmlFor = "au-remember";
+    rl.appendChild(rem);
+    const rt = el("span", "auth-remember-txt");
+    rt.appendChild(el("b", null, T("auth.remember")));
+    rt.appendChild(el("span", null, T("auth.rememberHint")));
+    rl.appendChild(rt);
+    f3.appendChild(rl);
+    form.appendChild(f1); form.appendChild(f2); form.appendChild(f3);
     const submit = el("button", "btn btn--primary", T("auth.submit"));
     submit.type = "submit";
     submit.style.cssText = "width:100%;justify-content:center;margin-top:16px";
@@ -211,7 +280,7 @@
     const db = el("button", "btn btn--ghost btn--sm", T("auth.demoBtn"));
     db.type = "button";
     db.style.cssText = "width:100%;justify-content:center";
-    db.addEventListener("click", () => login("musteri"));
+    db.addEventListener("click", () => login("musteri", null, rem.checked));
     demo.appendChild(db);
     const apply = el("p");
     apply.style.cssText = "margin-top:12px;font-size:12.5px;color:var(--ink-3)";
@@ -250,7 +319,7 @@
       if (l.until > Date.now()) { lockUI(); return; }
       const fail = (msg) => {
         l.n = (l.n || 0) + 1;
-        if (l.n >= 3) { l.until = Date.now() + 60000; l.n = 0; }
+        if (l.n >= HGP_MAX_FAILS) { l.until = Date.now() + HGP_LOCK_MS; l.n = 0; }
         localStorage.setItem(LOCK, JSON.stringify(l));
         if (l.until > Date.now()) lockUI();
         else showErr(msg.replace("{n}", l.n));
@@ -258,14 +327,14 @@
       if (i2.value !== PASS) { fail(T("auth.err")); return; }
       // E-posta → hesap eşleme: varsayılan demo müşteri ya da onaylı web hesabı
       const em = i1.value.trim().toLowerCase();
-      if (!em || em === "satinalma@derimderi.com.tr") { login("musteri"); return; }
+      if (!em || em === "satinalma@derimderi.com.tr") { login("musteri", null, rem.checked); return; }
       let acc = null;
       try {
         (hgpGet().accounts || []).forEach(a => { if (a.email === em) acc = a; });
       } catch (_) {}
       if (!acc) { fail(T("auth.noAccount")); return; }
       login("musteri", { role: "musteri", name: acc.name, company: acc.company,
-                         initials: acc.initials, rep: "Ayşe Yılmaz", email: acc.email });
+                         initials: acc.initials, rep: salesRepName(), email: acc.email }, rem.checked);
     });
 
     return i2;
@@ -275,14 +344,14 @@
     pendingCb = cb || null;
     const passInput = buildModal(); // her açılışta güncel dille kurulur
     requestAnimationFrame(() => overlay.classList.add("open"));
-    setTimeout(() => passInput.focus(), 140);
+    setTimeout(() => passInput.focus(), FOCUS_DELAY_MS);
   }
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && overlay && overlay.classList.contains("open")) cancelModal();
   });
 
-  /* ---------- Kurulum ---------- */
+  /* ---------- 4) Kurulum ---------- */
   const actions = $(".header-actions");
   if (actions) {
     wrap = el("div", "user-wrap");
