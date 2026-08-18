@@ -249,7 +249,31 @@
 
   /* ---- 6a) Depo (localStorage) ve durum ---- */
   const BASKET_KEY = "hk_basket_v3"; // [{id, qty}] — eski v2 (yalnız id listesi) otomatik taşınır
-  const QTY_MAX = 999;               // tek kalemde izin verilen en yüksek adet
+  /* Kimyasallar KİLOGRAM ile satılır; bir kısmı ise VARİL ile. Bu yüzden üst
+     sınır iki kademelidir: kg tarafında 2.400 kg gibi değerler normaldir,
+     varil tarafında 999 varil zaten fazlasıyla yüksektir. */
+  const QTY_MAX_KG = 999999;         // kg cinsinden tek kalem üst sınırı
+  const QTY_MAX_VARIL = 999;         // varil cinsinden tek kalem üst sınırı
+  /* Ürünün satış birimi: data.js / portal kaydındaki unit alanı "varil" ise
+     varil, DİĞER HER DURUMDA kg. Varsayılanın kg olması bilinçlidir — mevcut
+     42 ürünün hiçbirinde unit alanı yok ve hepsi kilo ile satılıyor. */
+  const isVaril = (p) => !!p && p.unit === "varil";
+  const unitLabel = (p) => T(isVaril(p) ? "unit.varil" : "unit.kg");
+  const qtyMaxFor = (p) => (isVaril(p) ? QTY_MAX_VARIL : QTY_MAX_KG);
+  /* Varilde bir varilin kaç kilo olduğu (portalda girilir, data.js'te kgPerUnit). */
+  const kgPerUnit = (p) => (isVaril(p) && +p.kgPerUnit > 0) ? +p.kgPerUnit : 0;
+  /* Varille satılan üründe müşteri KAÇ KİLO aldığını da görmelidir: varil sayısı
+     tek başına miktar duygusu vermiyor. kgPerUnit bilinmiyorsa (eski kayıt)
+     yalnız varil sayısı yazılır — uydurma kilo göstermeyiz. */
+  const totalKg = (e) => kgPerUnit(e.p) ? e.qty * kgPerUnit(e.p) : 0;
+  /* Sipariş/teklif metinlerinde geçen tek biçim:
+       kilo ürün  -> "2.400 kg"
+       varil ürün -> "3 varil (600 kg)" */
+  const qtyLabel = (e) => {
+    const base = e.qty.toLocaleString("tr-TR") + " " + unitLabel(e.p);
+    const kg = totalKg(e);
+    return kg ? base + " (" + kg.toLocaleString("tr-TR") + " " + T("unit.kg") + ")" : base;
+  };
   const getBasket = () => {
     try {
       const v3 = JSON.parse(localStorage.getItem(BASKET_KEY));
@@ -266,7 +290,36 @@
     } catch (_) {}
     return [];
   };
-  const setBasket = (b) => { localStorage.setItem(BASKET_KEY, JSON.stringify(b)); renderBasket(); };
+  /* SEPET SAHİBİ. Oturum artık sekmeyle birlikte ölüyor (sessionStorage), ama
+     sepet localStorage'ta kalıcı — ortak bir bilgisayarda bir sonraki kişi
+     öncekinin sepetini görürdü. Kimyasal tedarikte bu ticari bilgidir: hangi
+     firmanın neyi araştırdığını gösterir.
+     Bu yüzden sepet, giriş yapılmışken SAHİBİYLE etiketlenir. Sayfa açılışında
+     etiket varsa ve o kullanıcı artık yoksa (ya da başkası girmişse) sepet
+     temizlenir. MİSAFİR sepeti etiketlenmez ve KORUNUR: ziyaretçinin teklif
+     sepetini doldurup sonra giriş yapması meşru bir akıştır. */
+  /* Kullanıcı kimliği: e-posta > firma > rol. Hem sepet sahipliği hem de
+     oturum değişiminde sepet temizliği bunu kullanır — tek tanım. */
+  const userKey = () => {
+    const u = window.hkAuth && window.hkAuth.user();
+    return u ? (u.email || u.company || u.role) : null;
+  };
+  const BASKET_OWNER_KEY = "hk_basket_owner";
+  const setBasket = (b) => {
+    localStorage.setItem(BASKET_KEY, JSON.stringify(b));
+    const owner = userKey();
+    if (owner) localStorage.setItem(BASKET_OWNER_KEY, owner);
+    else localStorage.removeItem(BASKET_OWNER_KEY);
+    renderBasket();
+  };
+  /* Açılışta bir kez: sahibi gitmiş sepeti düşür. */
+  function dropOrphanBasket() {
+    const owner = localStorage.getItem(BASKET_OWNER_KEY);
+    if (!owner) return;                       // misafir sepeti — dokunma
+    if (owner === userKey()) return;          // aynı kullanıcı — dokunma
+    localStorage.setItem(BASKET_KEY, "[]");
+    localStorage.removeItem(BASKET_OWNER_KEY);
+  }
   const isCust = () => !!(window.hkAuth && window.hkAuth.isCustomer());
 
   let bdView = "cart"; // cart | confirm | quoteform | success
@@ -331,20 +384,61 @@
     if (foot) foot.style.display = bdView === "cart" ? "" : "none";
   }
 
-  function qtyControl(b, line) {
+  /* Miktar denetimi: −/+ düğmeleri VE serbest giriş kutusu. Kilo ile satılan
+     ürünlerde 2.400 gibi değerleri düğmeye basarak girmek mümkün değildir, bu
+     yüzden kutuya doğrudan yazılabilir. Kutu blur/Enter'da doğrulanır; geçersiz
+     ya da boş giriş eski değere döner (sessizce 1'e düşürmek, müşterinin yazdığı
+     miktarı kaybetmek demektir). Birim etiketi kutunun yanında görünür. */
+  function qtyControl(b, line, p) {
+    const max = qtyMaxFor(p);
     const q = el("div", "bd-qty");
     const minus = el("button", null, "−");
     minus.type = "button";
     minus.disabled = (line.qty || 1) <= 1;
     minus.addEventListener("click", () => { line.qty = Math.max(1, (line.qty || 1) - 1); setBasket(b); });
+
+    const inp = el("input", "bd-qty-input");
+    inp.type = "text";
+    inp.inputMode = "numeric";
+    inp.value = String(line.qty || 1);
+    inp.size = String(max).length;
+    inp.setAttribute("aria-label", T("basket.qtyLabel") + " — " + unitLabel(p));
+    inp.title = T(isVaril(p) ? "basket.qtyHintVaril" : "basket.qtyHintKg");
+    const commit = () => {
+      const n = parseInt(String(inp.value).replace(/[^\d]/g, ""), 10);
+      if (!n || n < 1) { inp.value = String(line.qty || 1); return; }   // geçersiz → eski değer
+      line.qty = Math.min(max, n);
+      inp.value = String(line.qty);
+      setBasket(b);
+    };
+    inp.addEventListener("blur", commit);
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); commit(); }
+    });
+
     const plus = el("button", null, "+");
     plus.type = "button";
-    plus.addEventListener("click", () => { line.qty = Math.min(QTY_MAX, (line.qty || 1) + 1); setBasket(b); });
+    plus.addEventListener("click", () => { line.qty = Math.min(max, (line.qty || 1) + 1); setBasket(b); });
+
     q.appendChild(minus);
-    q.appendChild(el("i", null, String(line.qty || 1)));
+    q.appendChild(inp);
     q.appendChild(plus);
-    return q;
+    /* Birim etiketi çerçevenin DIŞINDA: .bd-qty overflow:hidden ile kutuyu
+       çiziyor, etiket içine alınırsa sayının parçası gibi okunuyor. */
+    const wrap = el("div", "bd-qty-wrap");
+    wrap.appendChild(q);
+    wrap.appendChild(el("span", "bd-qty-unit", unitLabel(p)));
+    /* Varilde toplam kilo hemen altta: müşteri kaç kilo aldığını görsün.
+       Miktar değiştikçe setBasket -> renderBasket zaten yeniden çiziyor. */
+    const kgEach = kgPerUnit(p);
+    if (kgEach) {
+      const tot = (line.qty || 1) * kgEach;
+      wrap.appendChild(el("span", "bd-qty-kg",
+        "= " + tot.toLocaleString("tr-TR") + " " + T("unit.kg")));
+    }
+    return wrap;
   }
+
 
   /* ---- 6c) Görünümler: sepet / onay / misafir teklifi / başarı ---- */
   function renderCart(body, b) {
@@ -362,7 +456,7 @@
       info.appendChild(el("b", null, PNAME(p)));
       info.appendChild(el("span", "mono", p.brand));
       const right = el("div", "bd-right");
-      right.appendChild(qtyControl(b, line));
+      right.appendChild(qtyControl(b, line, p));
       const rm = el("button", "bd-remove", "×");
       rm.setAttribute("aria-label", "×");
       rm.addEventListener("click", () => setBasket(getBasket().filter(x => x.id !== line.id)));
@@ -405,7 +499,7 @@
       const row = el("div", "bd-item");
       const info = el("div");
       info.appendChild(el("b", null, PNAME(p)));
-      info.appendChild(el("span", "mono", line.qty + " " + T("order.unit")));
+      info.appendChild(el("span", "mono", qtyLabel({ p: p, qty: line.qty })));
       row.appendChild(info);
       body.appendChild(row);
     });
@@ -497,55 +591,18 @@
   /* ---- 6d) Sipariş gönderimi ve e-posta yedeği ---- */
   const ORDER_NOTE_MAX = 200;   // sipariş notunda saklanan en fazla karakter
 
-  /* Web3Forms anahtarı yoksa ya da gönderim başarısızsa siparişi ziyaretçinin
-     kendi e-posta istemcisine devrederiz — iletişim formundaki yedekle aynı desen. */
-  function orderMailFallback(u, note) {
-    const body = [T("order.mailIntro"), "",
-      T("mail.firm") + ": " + u.company,
-      T("mail.contact") + ": " + u.name, ""]
-      .concat(basketEntries().map(e => "• " + PNAME(e.p) + " (" + e.qty + " " + T("order.unit") + ")"))
-      .concat(note ? ["", T("order.noteLabel") + ": " + note] : [])
-      .join("\n");
-    location.href = "mailto:" + HK.email +
-      "?subject=" + encodeURIComponent(T("order.mailSubject") + " — " + u.company) +
-      "&body=" + encodeURIComponent(body);
-    toast(T("toast.mailOpening"));
-    /* Sepeti BURADA kendiliğinden boşaltmayız: taslağın gerçekten gönderildiğini
-       tarayıcıdan bilemeyiz, kullanıcı e-posta penceresini kapatmış olabilir.
-       Bunun yerine boşaltma kararını kullanıcıya bırakan bir adım gösteririz —
-       aksi hâlde sepet hiç temizlenmiyor ve kalıcı olarak dolu kalıyordu. */
-    bdView = "handoff";
-    renderBasket();
-  }
 
-  /* Mailto devri sonrası: "gönderdim" onayı sepeti boşaltır. */
-  function renderHandoff(body) {
-    const box = el("div", "bd-success");
-    box.appendChild(el("h4", null, T("order.handoffTitle")));
-    const p = el("p", null, T("order.handoffBody"));
-    p.style.marginTop = "8px";
-    box.appendChild(p);
-    const sent = el("button", "btn btn--primary", T("order.handoffSent"));
-    sent.type = "button";
-    sent.style.cssText = "width:100%;justify-content:center;margin-top:18px";
-    sent.addEventListener("click", () => {
-      setBasket([]);            // setBasket zaten yeniden çizer
-      bdView = "cart";
-      renderBasket();
-      closeBasket();
-    });
-    box.appendChild(sent);
-    const back = el("button", "btn btn--ghost btn--sm", T("order.handoffBack"));
-    back.type = "button";
-    back.style.cssText = "width:100%;justify-content:center;margin-top:10px";
-    back.addEventListener("click", () => { bdView = "cart"; renderBasket(); });
-    box.appendChild(back);
-    body.appendChild(box);
-  }
 
   /* Sipariş ancak GERÇEKTEN iletildikten sonra "alındı" sayılır: portal kaydı da,
      başarı ekranı da, sepetin boşaltılması da hgNotify true dönerse yapılır.
-     Aksi hâlde sepet olduğu gibi durur ve kullanıcı e-posta yedeğine yönlenir. */
+  /* SİPARİŞ BURADA, SİTENİN İÇİNDE tamamlanır. Kayıt hgpAddOrder ile açılır ve
+     müşteri siparisleri siparislerim.html'den izler — e-postaya YÖNLENDİRME YOK.
+     E-posta ile gönderme ayrı bir düğmedir (#basket-mail, teklif akışı).
+     ÖNCEKİ HATA: sipariş yalnızca hgNotify true dönerse kaydediliyordu; web3forms
+     anahtarı boş olduğu için bu hiç gerçekleşmiyor, her sipariş mailto'ya düşüyor
+     ve siparislerim'de hiç görünmüyordu.
+     hgNotify artık YAN KANALDIR: anahtar girildiyse satışa haber verir, girilmediyse
+     sessizce false döner. Siparişin kaydı ona BAĞLI DEĞİLDİR. */
   function placeOrder(noteRaw, done) {
     const u = window.hkAuth && window.hkAuth.user();
     const b = getBasket();
@@ -556,22 +613,23 @@
       return;
     }
     if (!b.length || typeof hgpAddOrder !== "function") { if (done) done(); return; }
-    const items = basketEntries().map(e => ({ n: e.p.n.tr, q: e.qty + " adet" }));
+    const items = basketEntries().map(e => ({ n: e.p.n.tr, q: qtyLabel(e) }));
     const note = (noteRaw || "").trim().slice(0, ORDER_NOTE_MAX);
-    hgNotify("Yeni Sipariş — " + u.company,
-      ["Müşteri: " + u.company, "Veren: " + u.name, ""]
+
+    lastOrderId = hgpAddOrder(u.company, items, u.name, note);
+    bdView = "success";
+    setBasket([]);
+    renderBasket();
+    toast(T("order.toast") + " " + lastOrderId);
+    if (done) done();
+
+    // Yan kanal: anahtar varsa satış ekibine anlık bildirim. Hata yutulur —
+    // sipariş zaten kaydedildi, bildirimin başarısı akışı etkilemez.
+    hgNotify("Yeni Sipariş " + lastOrderId + " — " + u.company,
+      ["Sipariş No: " + lastOrderId, "Müşteri: " + u.company, "Veren: " + u.name, ""]
         .concat(items.map(i => "• " + i.n + " — " + i.q))
-        .concat(note ? ["", "Not: " + note] : []),
-      u.name)
-      .then(ok => {
-        if (done) done();
-        if (!ok) { orderMailFallback(u, note); return; }
-        lastOrderId = hgpAddOrder(u.company, items, u.name, note);
-        bdView = "success";
-        localStorage.setItem(BASKET_KEY, "[]");
-        renderBasket();
-        toast(T("order.toast") + " " + lastOrderId);
-      });
+        .concat(note ? ["", T("order.noteLabel") + ": " + note] : []),
+      u.name);
   }
 
   /* ---- 6e) Çizim ve çekmece aç/kapa ---- */
@@ -605,7 +663,6 @@
       empty.appendChild(p1); body.appendChild(empty);
       return;
     }
-    if (bdView === "handoff") { renderHandoff(body); return; }
     if (bdView === "confirm") { renderConfirm(body, b); return; }
     if (bdView === "quoteform") { renderQuoteForm(body); return; }
     renderCart(body, b);
@@ -624,7 +681,7 @@
 
   /* ---- 6f) Teklif gönderimi (WhatsApp / e-posta) ---- */
   function basketMessage() {
-    const lines = basketEntries().map(e => "• " + PNAME(e.p) + " (" + e.qty + " " + T("order.unit") + ")");
+    const lines = basketEntries().map(e => "• " + PNAME(e.p) + " — " + qtyLabel(e));
     const foot = "\n\n" + T("mail.firm") + ": \n" + T("mail.contact") + ": \n" + T("mail.qty") + ": ";
     return encodeURIComponent(T("quote.mailIntro") + "\n\n" + lines.join("\n") + foot);
   }
@@ -639,7 +696,7 @@
   }
   function sendQuote(name, firm, contact, done) {
     const lines = ["Ad: " + name, "Firma: " + (firm || "—"), "İletişim: " + (contact || "—"), ""]
-      .concat(basketEntries().map(e => "• " + e.p.n.tr + " (" + e.qty + " adet)"));
+      .concat(basketEntries().map(e => "• " + e.p.n.tr + " — " + qtyLabel(e)));
     hgNotify("Teklif Talebi — " + (firm || name), lines, name, contact).then(ok => {
       if (done) done();
       if (ok) { bdView = "cart"; renderBasket(); toast(T("quote.sentOk")); }
@@ -863,6 +920,7 @@
 
   /* İlk çizim + dil/oturum değişiminde tazele */
   window.hkRenderDynamic();
+  dropOrphanBasket();   // sahibi gitmiş sepeti ilk çizimden ÖNCE düşür
   renderBasket();
   document.addEventListener("hk:langchange", () => { observeReveal(document); renderBasket(); });
   /* SEPET OTURUMA BAĞLIDIR. Çıkış yapıldığında ya da BAŞKA bir müşteri hesabına
@@ -870,14 +928,10 @@
      öncekinin sepetini görmemeli, sipariş yanlış firmaya bağlanmamalıdır.
      Misafirden girişe geçiş (kimlik yok → kullanıcı) sepeti KORUR; ziyaretçi
      sepetini doldurup sonra giriş yapmış olabilir, bu meşru bir akıştır. */
-  const userKey = () => {
-    const u = window.hkAuth && window.hkAuth.user();
-    return u ? (u.email || u.company || u.role) : null;
-  };
   let lastUserKey = userKey();
   document.addEventListener("hk:authchange", () => {
     const now = userKey();
-    if (lastUserKey && now !== lastUserKey) setBasket([]);
+    if (lastUserKey && now !== lastUserKey) setBasket([]);   // setBasket etiketi de günceller
     lastUserKey = now;
     bdView = "cart"; renderBasket(); renderTable();
   });

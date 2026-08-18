@@ -1245,6 +1245,20 @@ h3.display { font-size: var(--fs-h3); }
 .bd-qty button { width: 27px; height: 27px; font-weight: 700; color: var(--crimson); background: var(--paper-2); line-height: 1; }
 .bd-qty button:hover { background: var(--crimson-soft); }
 .bd-qty i { font-style: normal; min-width: 30px; text-align: center; font-family: var(--font-mono); font-size: var(--fs-label); }
+/* Serbest miktar girişi. Kimyasallar kilo ile satıldığı için 2.400 gibi değerler
+   düğmeye basarak girilemez; kutuya doğrudan yazılır. Kutu çerçevesizdir:
+   çerçeveyi saran .bd-qty çizer, böylece −/+ ile tek bir denetim gibi görünür. */
+.bd-qty-input {
+  width: 62px; text-align: center;
+  font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink);
+  background: var(--white); border: 0; border-inline: 1.5px solid var(--line);
+  padding: 5px 4px; -moz-appearance: textfield;
+}
+.bd-qty-input:focus { outline: none; background: var(--crimson-soft); }
+/* Birim etiketi denetimin DIŞINDA durur: çerçevenin içine alınırsa sayıyla
+   karışıp miktarın bir parçası gibi okunuyor. */
+.bd-qty-wrap { display: inline-flex; align-items: center; }
+.bd-qty-unit { margin-left: var(--space-xs); font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-3); }
 .bd-mode { display: inline-flex; align-items: center; gap: 7px; margin: 2px 0 10px; font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.1em; color: #15803D; background: #E3F4E9; border: 1px solid #BFE3CC; border-radius: 999px; padding: 4px 11px; }
 .bd-success { text-align: center; padding: 34px 16px; }
 /* 26px ölçek dışı: 62px'lik halkaya ortalanmış onay işareti glifi. */
@@ -1451,3 +1465,20 @@ h2.display { font-size: var(--fs-h2); }
 .btn:active { transform: none; box-shadow: none; }
 body::before { opacity: 0.028; }
 .hero-ctas .btn--primary { padding-inline: 30px; }
+
+/* Varil ürünlerinde sepetteki toplam kilo. Miktarın ALTINDA, ikincil tonda:
+   asıl giriş varil sayısıdır, kilo onun türevidir ve okunurluğu bozmamalı. */
+.bd-qty-wrap { flex-wrap: wrap; }
+.bd-qty-kg {
+  flex: 1 0 100%; margin-top: var(--space-2xs);
+  font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--ink-3);
+  text-align: right;
+}
+
+/* "Beni hatırla" — giriş penceresinde güvenlik/kolaylık tercihi. */
+.auth-remember { margin-top: var(--space-sm); }
+.auth-remember-lab { display: flex; align-items: flex-start; gap: var(--space-xs); cursor: pointer; }
+.auth-remember-lab input { width: 17px; height: 17px; margin: 1px 0 0; flex: 0 0 auto; accent-color: var(--crimson); cursor: pointer; }
+.auth-remember-txt { display: flex; flex-direction: column; gap: 2px; }
+.auth-remember-txt b { font-size: var(--fs-small); color: var(--ink); font-weight: 600; }
+.auth-remember-txt span { font-size: var(--fs-micro); color: var(--ink-3); line-height: 1.4; }

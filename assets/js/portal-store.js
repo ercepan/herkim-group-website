@@ -191,6 +191,60 @@
      hesap başvurusu yazıyordu (ölçüldü: 3688 bayt). Ziyaretçinin deposuna
      uydurma iş kaydı yazmak KVKK açısından da savunulamaz.
      hgpPeek() hiçbir şey yazmaz; depo yoksa null döner. */
+  /* ============ OTURUM DEPOSU — sessionStorage, localStorage DEĞİL ============
+     HATA: oturum localStorage'ta tutuluyordu ve localStorage sekme/tarayıcı
+     kapansa da yaşar. Ortak bir bilgisayarda çıkış yapmayı UNUTAN kullanıcının
+     hesabı, siteyi sonra açan kişiye açık kalıyordu.
+     sessionStorage sekme kapandığında tarayıcı tarafından silinir. Aynı sekmede
+     sayfalar arası gezinme (index -> urunler -> siparislerim) oturumu KORUR;
+     yeni sekme ya da yeniden açılan tarayıcı temiz başlar.
+     15 dakikalık boşta kalma denetimi KALDIRILMADI: sekmeyi açık unutan
+     kullanıcı için ikinci katman olarak gerekli.
+     Üç dosya da (site-auth.js, portal-app.js, buradaki depo) YALNIZCA bu üç
+     yardımcıyı kullanır; doğrudan storage'a dokunmayın, iki taraf sessizce
+     ayrışır (bu kod tabanında sabitler bir kez tam olarak böyle ayrışmıştı). */
+  /* "BENİ HATIRLA" — kullanıcı GÜVENLİK ile KOLAYLIK arasında kendisi seçer.
+       işaretsiz (VARSAYILAN) -> sessionStorage: sekme kapanınca oturum biter.
+                                 Ortak/ofis bilgisayarı için doğru olan budur.
+       işaretli               -> localStorage: tarayıcı kapansa da oturum ve
+                                 sepet durur; kullanıcı geri geldiğinde sepetini
+                                 yeniden kurmak zorunda kalmaz.
+     Tercih hg_session_persist ile SAKLANIR; okuma her iki depoya da bakar,
+     böylece hangi modda giriş yapıldığından bağımsız olarak oturum bulunur.
+     Silme HER İKİ depoyu birden temizler: yarım kalan bir kayıt, kullanıcının
+     "çıkış yaptım" sanmasına yol açar. */
+  var HGP_PERSIST_KEY = "hg_session_persist";
+  function hgpSesPersistent() {
+    try { return localStorage.getItem(HGP_PERSIST_KEY) === "1"; } catch (e) { return false; }
+  }
+  function hgpSesRead() {
+    try {
+      var v = sessionStorage.getItem(HGP_SESSION_KEY);
+      if (v === null) v = localStorage.getItem(HGP_SESSION_KEY);
+      return JSON.parse(v);
+    } catch (e) { return null; }
+  }
+  /* persist argümanı verilmezse mevcut tercih korunur — oturum tazelenirken
+     (touch) kullanıcının seçimi sessizce değişmesin. */
+  function hgpSesWrite(o, persist) {
+    var keep = (persist === undefined) ? hgpSesPersistent() : !!persist;
+    try {
+      if (persist !== undefined) localStorage.setItem(HGP_PERSIST_KEY, keep ? "1" : "0");
+      if (keep) {
+        localStorage.setItem(HGP_SESSION_KEY, JSON.stringify(o));
+        sessionStorage.removeItem(HGP_SESSION_KEY);
+      } else {
+        sessionStorage.setItem(HGP_SESSION_KEY, JSON.stringify(o));
+        localStorage.removeItem(HGP_SESSION_KEY);
+      }
+      return true;
+    } catch (e) { return false; }   // gizli sekme / dolu kota
+  }
+  function hgpSesClear() {
+    try { sessionStorage.removeItem(HGP_SESSION_KEY); } catch (e) {}
+    try { localStorage.removeItem(HGP_SESSION_KEY); localStorage.removeItem(HGP_PERSIST_KEY); } catch (e) {}
+  }
+
   function hgpPeek() {
     try { return JSON.parse(localStorage.getItem(HGP_KEY)) || null; }
     catch (e) { return null; }
@@ -590,6 +644,24 @@
 
   /* Ürün ekle. p = { sub, n:{tr,en,ru}, brand, tag }
      Geçersiz girdide depoya HİÇBİR ŞEY yazılmaz ve null döner. */
+  /* Satış birimi. Kimyasallar KİLO ile satılır; bir kısmı VARİL ile. Depoda
+     yalnızca istisna saklanır: unit === "varil". Kilo varsayılan olduğu için
+     alan hiç yazılmaz — böylece data.js'teki mevcut 42 ürün (unit alanı yok)
+     kendiliğinden kilo olur ve dışa aktarımda gereksiz alan taşınmaz. */
+  function hgpUnit(x) {
+    return String(x == null ? "" : x).trim().toLowerCase() === "varil" ? "varil" : null;
+  }
+  /* Bir varilin KAÇ KİLO olduğu. Yalnızca varille satılan üründe anlamlıdır ve
+     orada ZORUNLUDUR: müşteri sepette "3 varil (600 kg)" görebilsin diye tek
+     kaynak budur. Pozitif tam sayı değilse null döner ve kayıt reddedilir —
+     kilosu bilinmeyen bir varil, sepette yanlış kilo göstermekten iyidir. */
+  var HGP_KG_PER_UNIT_MAX = 100000;
+  function hgpKgPerUnit(x) {
+    var n = parseInt(String(x == null ? "" : x).replace(/[^\d]/g, ""), 10);
+    if (!n || n < 1 || n > HGP_KG_PER_UNIT_MAX) return null;
+    return n;
+  }
+
   function hgpAddProduct(p, who) {
     var d = p || {};
     var sub = hgpStr(d.sub);
@@ -598,12 +670,21 @@
     if (!n) return null;
     var s = hgpGet();
     var id = hgpNextCustomId(s, "customProducts");
-    s.customProducts.unshift({
+    var rec = {
       id: id, sub: sub, n: n,
       brand: hgpStr(d.brand),
       tag: hgpTag(d.tag),
       createdAt: hgpNow()
-    });
+    };
+    var unit = hgpUnit(d.unit);
+    if (unit) {
+      /* Varil seçildiyse kilo karşılığı ŞART: yoksa hiçbir şey yazmayız. */
+      var kg = hgpKgPerUnit(d.kgPerUnit);
+      if (!kg) return null;
+      rec.unit = unit;
+      rec.kgPerUnit = kg;
+    }
+    s.customProducts.unshift(rec);
     hgpAct(s, who || "Portal", "Kataloğa ürün eklendi: " + n.tr + " (#" + id + ")", "genel");
     hgpSave(s);
     return id;
@@ -623,7 +704,13 @@
     if (d.n !== undefined) { n = hgpTriple(d.n); if (!n) return false; }
     if (d.brand !== undefined) brand = hgpStr(d.brand);
     if (d.tag !== undefined) tag = hgpTag(d.tag);
+    var unit = it.unit || null, kgPer = it.kgPerUnit || null;
+    if (d.unit !== undefined) unit = hgpUnit(d.unit);
+    if (d.kgPerUnit !== undefined) kgPer = hgpKgPerUnit(d.kgPerUnit);
+    if (unit && !kgPer) return null;   // varil ama kilosu yok → yama tümden reddedilir
     it.sub = sub; it.n = n; it.brand = brand; it.tag = tag;
+    if (unit) { it.unit = unit; it.kgPerUnit = kgPer; }
+    else { delete it.unit; delete it.kgPerUnit; }            // kilo = alan yok
     hgpAct(s, who || "Portal", "Katalog ürünü güncellendi: " + n.tr + " (#" + it.id + ")", "genel");
     hgpSave(s);
     return true;
@@ -771,7 +858,10 @@
              hgpPad("sub: " + hgpQ(p.sub) + ",", 16) +
              "n: { tr: " + hgpQ(p.n && p.n.tr) + ", en: " + hgpQ(p.n && p.n.en) + ", ru: " + hgpQ(p.n && p.n.ru) + " }, " +
              "brand: " + hgpQ(p.brand) + ", " +
-             "tag: " + (p.tag ? hgpQ(p.tag) : "null") + " }";
+             "tag: " + (p.tag ? hgpQ(p.tag) : "null") +
+             /* Kilo varsayılan olduğu için unit YALNIZCA varil ürünlerde yazılır;
+                data.js'teki mevcut satırlarla aynı biçimi korur. */
+             (p.unit === "varil" ? ", unit: " + hgpQ("varil") + ", kgPerUnit: " + p.kgPerUnit : "") + " }";
       out.push(line + (i < list.length - 1 ? "," : ""));
     }
     return out.join("\n") + "\n";
@@ -866,6 +956,10 @@
 
   /* Oturum sabitleri — yukarıdaki uyarıyı okuyun: bunlar DEMO içindir. */
   window.HGP_SESSION_KEY = HGP_SESSION_KEY;
+  window.hgpSesRead = hgpSesRead;
+  window.hgpSesWrite = hgpSesWrite;
+  window.hgpSesClear = hgpSesClear;
+  window.hgpSesPersistent = hgpSesPersistent;
   window.HGP_LOCK_KEY = HGP_LOCK_KEY;
   window.HGP_LAST_LOGIN = HGP_LAST_LOGIN;
   window.HGP_DEMO_PASS = HGP_DEMO_PASS;

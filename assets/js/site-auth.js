@@ -62,14 +62,21 @@
   /* ---------- 1) Oturum ---------- */
   /* Bozuk kayıtta null döneriz (kullanıcı çıkmış sayılır) ama sessiz
      kalmayız: aksi halde "durduk yere çıkış yaptı" şikâyeti izlenemez. */
+  /* Oturum sessionStorage'ta tutulur (portal-store.js -> hgpSesRead/Write/Clear).
+     Gerekçe: localStorage sekme kapansa da yaşıyor, ortak bilgisayarda çıkış
+     yapmayı unutan kullanıcının hesabı sonraki kişiye açık kalıyordu. Sekme
+     içi gezinme oturumu korur; sekme kapanınca tarayıcı siler. */
   const rawSes = () => {
-    try { return JSON.parse(localStorage.getItem(SES)); }
-    catch (_) { console.warn("[site-auth] Oturum kaydı okunamadı (bozuk JSON), çıkış yapılmış sayılıyor:", SES); return null; }
+    const s = hgpSesRead();
+    if (s === null && sessionStorage.getItem(SES)) {
+      console.warn("[site-auth] Oturum kaydı okunamadı (bozuk JSON), çıkış yapılmış sayılıyor:", SES);
+    }
+    return s;
   };
   function ses() {
     const s = rawSes();
     if (!s || !s.role) return null;
-    if (Date.now() - (s.touched || s.at || 0) > IDLE) { localStorage.removeItem(SES); return null; }
+    if (Date.now() - (s.touched || s.at || 0) > IDLE) { hgpSesClear(); return null; }
     return s;
   }
   function user() {
@@ -86,7 +93,7 @@
     if (!s) return;
     if (Date.now() - (s.touched || s.at || 0) > TOUCH_THROTTLE_MS) {
       s.touched = Date.now();
-      localStorage.setItem(SES, JSON.stringify(s));
+      hgpSesWrite(s);
     }
   }
   ["click", "keydown", "scroll", "touchstart"].forEach(ev =>
@@ -101,11 +108,14 @@
 
   let pendingCb = null;
 
-  function login(role, acct) {
+  /* remember: true -> oturum tarayıcı kapansa da durur (localStorage)
+                false -> sekme kapanınca biter (sessionStorage, VARSAYILAN)
+     Tercih giriş anında BİR KEZ yazılır; sonraki tazelemeler (touch) onu korur. */
+  function login(role, acct, remember) {
     const payload = { role: role, at: Date.now() };
     if (acct) payload.acct = acct;
-    localStorage.setItem(SES, JSON.stringify(payload));
-    localStorage.removeItem(LOCK);
+    hgpSesWrite(payload, !!remember);
+    localStorage.removeItem(LOCK);   // kilit sayacı kalıcı kalır: kaba kuvvet sekme kapatarak sıfırlanmasın
     try { if (typeof hgpNow === "function") localStorage.setItem(LAST + role, hgpNow()); } catch (_) {}
     const cb = pendingCb; pendingCb = null;
     hideModal();
@@ -118,7 +128,7 @@
   }
 
   function logout() {
-    localStorage.removeItem(SES);
+    hgpSesClear();
     knownRole = null;
     renderAccount();
     emit();
@@ -240,7 +250,21 @@
     i2.type = "password"; i2.id = "au-pass"; i2.autocomplete = "current-password";
     i2.maxLength = 64; i2.placeholder = "••••••••";
     f2.appendChild(l2); f2.appendChild(i2);
-    form.appendChild(f1); form.appendChild(f2);
+    /* BENİ HATIRLA — güvenlik/kolaylık tercihini kullanıcıya bırakır.
+       Varsayılan İŞARETSİZ: ortak bilgisayarda güvenli olan davranış budur.
+       İşaretlenirse oturum ve sepet tarayıcı kapansa da korunur. */
+    const f3 = el("div", "auth-remember");
+    const rem = el("input");
+    rem.type = "checkbox"; rem.id = "au-remember";
+    const rl = el("label", "auth-remember-lab");
+    rl.htmlFor = "au-remember";
+    rl.appendChild(rem);
+    const rt = el("span", "auth-remember-txt");
+    rt.appendChild(el("b", null, T("auth.remember")));
+    rt.appendChild(el("span", null, T("auth.rememberHint")));
+    rl.appendChild(rt);
+    f3.appendChild(rl);
+    form.appendChild(f1); form.appendChild(f2); form.appendChild(f3);
     const submit = el("button", "btn btn--primary", T("auth.submit"));
     submit.type = "submit";
     submit.style.cssText = "width:100%;justify-content:center;margin-top:16px";
@@ -256,7 +280,7 @@
     const db = el("button", "btn btn--ghost btn--sm", T("auth.demoBtn"));
     db.type = "button";
     db.style.cssText = "width:100%;justify-content:center";
-    db.addEventListener("click", () => login("musteri"));
+    db.addEventListener("click", () => login("musteri", null, rem.checked));
     demo.appendChild(db);
     const apply = el("p");
     apply.style.cssText = "margin-top:12px;font-size:12.5px;color:var(--ink-3)";
@@ -303,14 +327,14 @@
       if (i2.value !== PASS) { fail(T("auth.err")); return; }
       // E-posta → hesap eşleme: varsayılan demo müşteri ya da onaylı web hesabı
       const em = i1.value.trim().toLowerCase();
-      if (!em || em === "satinalma@derimderi.com.tr") { login("musteri"); return; }
+      if (!em || em === "satinalma@derimderi.com.tr") { login("musteri", null, rem.checked); return; }
       let acc = null;
       try {
         (hgpGet().accounts || []).forEach(a => { if (a.email === em) acc = a; });
       } catch (_) {}
       if (!acc) { fail(T("auth.noAccount")); return; }
       login("musteri", { role: "musteri", name: acc.name, company: acc.company,
-                         initials: acc.initials, rep: salesRepName(), email: acc.email });
+                         initials: acc.initials, rep: salesRepName(), email: acc.email }, rem.checked);
     });
 
     return i2;

@@ -105,7 +105,12 @@ const HK_SUBS = {
 };
 
 /* Ürünler — resmî Herkim Group ürün listesi (Temmuz 2026 flyer).
-   n: ad (tr/en/ru), brand: marka/menşei, tag: "yeni"|"one"|null */
+   n: ad (tr/en/ru), brand: marka/menşei, tag: "yeni"|"one"|null
+   unit: SATIŞ BİRİMİ. Alan YOKSA ürün KİLO ile satılır — varsayılan ve olağan
+   durum, aşağıdaki 42 ürünün tamamı böyledir. Yalnızca varille satılan üründe
+   unit: "varil" yazılır. Portalda ürün eklerken "Varille satılır" kutusu bu
+   alanı üretir; sepetteki miktar kutusu ve sipariş/teklif metinleri birimi
+   buradan okur (assets/js/main.js → isVaril / unitLabel / qtyLabel). */
 const HK_PRODUCTS = [
   // ---- Asitler ----
   { id: 1,  sub: "asit",    n: { tr: "Asetik Asit",                          en: "Acetic Acid",                                        ru: "Уксусная кислота" },                          brand: "Herkim", tag: null },

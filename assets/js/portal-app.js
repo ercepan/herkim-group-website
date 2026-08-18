@@ -95,8 +95,9 @@
   /* ---------- 4. Giriş + güvenlik ---------- */
   function nowMs() { return Date.now(); }
   function getSes() {
-    try { return JSON.parse(localStorage.getItem(HGP_SESSION_KEY)); }
-    catch (e) { console.warn("Herkim portal: oturum kaydı okunamadı — bozuk JSON.", e); return null; }
+    /* Oturum sessionStorage'tadır (bkz. portal-store.js): sekme kapanınca
+       tarayıcı siler, unutulan hesap bir sonraki kişiye açık kalmaz. */
+    return hgpSesRead();
   }
   /* localStorage yazımı gizli sekmede ve kota dolduğunda İSTİSNA fırlatır. Sarmalanmazsa
      istisna burada patlar, boot() hiç çağrılmaz ve giriş düğmesi kullanıcıya hiçbir şey
@@ -105,7 +106,7 @@
     var payload = { role: role, at: nowMs() };
     if (acct) payload.acct = acct;
     try {
-      localStorage.setItem(HGP_SESSION_KEY, JSON.stringify(payload));
+      if (!hgpSesWrite(payload)) throw new Error("sessionStorage yazılamadı");
       localStorage.removeItem(HGP_LOCK_KEY);
       localStorage.setItem(HGP_LAST_LOGIN + role, hgpNow());
     } catch (e) {
@@ -146,7 +147,7 @@
     errBox.classList.add("show");
   }
 
-  function logout() { localStorage.removeItem(HGP_SESSION_KEY); location.reload(); }
+  function logout() { hgpSesClear(); location.reload(); }
   var btnLogout = need("#btn-logout");
   if (btnLogout) btnLogout.addEventListener("click", logout);
   var btnSwitch = need("#btn-switch");
@@ -163,7 +164,7 @@
     if (!s) return;
     if (nowMs() - (s.touched || s.at) > TOUCH_THROTTLE_MS) {
       s.touched = nowMs();
-      localStorage.setItem(HGP_SESSION_KEY, JSON.stringify(s));
+      hgpSesWrite(s);
     }
   }
   ["click", "keydown", "scroll", "touchstart"].forEach(function (ev) {
@@ -969,7 +970,7 @@
   }
 
   /* ---------- 15. Ürün yönetimi (satış / yönetim) ---------- */
-  var PROD_COLS = 6;                 // ürün tablosundaki sütun sayısı (boş satır colSpan'i)
+  var PROD_COLS = 7;                 // ürün tablosundaki sütun sayısı (boş satır colSpan'i)
   var prodBuilt = false;             // ekran bir kez kurulur (bkz. 14. bölüm)
   var prodF = null;                  // form alanlarının düğümleri
   var prodBodyEl = null, prodCountEl = null;
@@ -995,7 +996,18 @@
       tr: txt(CAT_NAME_MAX, T("portal.prod.phTr", "örn. Sodyum Format")),
       en: txt(CAT_NAME_MAX, T("portal.prod.phEn", "örn. Sodium Formate")),
       ru: txt(CAT_NAME_MAX, T("portal.prod.phRu", "örn. Формиат натрия")),
-      tag: pick(tagPairs())
+      tag: pick(tagPairs()),
+      /* Satış birimi kutusu. İŞARETSİZ = kilo (varsayılan, ürünlerin çoğu).
+         İşaretliyse kayda unit:"varil" yazılır ve sepetteki miktar kutusu ile
+         sipariş metinleri birimi ona göre gösterir. */
+      varil: (function () { var c = document.createElement("input"); c.type = "checkbox"; c.id = "pf-varil"; return c; })(),
+      /* Varil başına kilo. Yalnız varil işaretliyken etkin; kapalıyken devre
+         dışı bırakılır ki kilo ile satılan üründe yanlışlıkla doldurulmasın. */
+      kgPer: (function () {
+        var i = document.createElement("input");
+        i.type = "text"; i.inputMode = "numeric"; i.id = "pf-kgper"; i.maxLength = 6;
+        return i;
+      })()
     };
     // Kategori listesi yoksa hgpAddProduct zaten reddeder; formu da kilitleriz
     if (!subs.length) {
@@ -1010,6 +1022,49 @@
     form.appendChild(fld("pf-en", T("portal.prod.lblEn", "AD (İNGİLİZCE)"), prodF.en));
     form.appendChild(fld("pf-ru", T("portal.prod.lblRu", "AD (RUSÇA)"), prodF.ru));
     form.appendChild(fld("pf-tag", T("portal.prod.lblTag", "ETİKET"), prodF.tag));
+
+    /* Onay kutusu tek satır: <label> içinde kutu + metin. fld() etiketi alanın
+       ÜSTÜNE koyduğu için burada kullanılmaz — onay kutusunda etiket yanda olur. */
+    /* SATIŞ BİRİMİ alanı. Diğer alanlarla aynı iskelet: üstte mono etiket,
+       altında denetim. Onay kutusunun kendi metni etiketin İÇİNDE değil, kutunun
+       yanındadır — <label for> ile bağlıdır, yani metne tıklamak da kutuyu değiştirir.
+       Biçim portal.css'teki .unit-check kuralındadır; satır içi stil YOK. */
+    var unitRow = el("div", "field field--full");
+    var unitCap = el("label", null, T("portal.prod.lblUnitField", "SATIŞ BİRİMİ"));
+    unitCap.htmlFor = "pf-varil";
+    var unitBox = el("label", "unit-check");
+    unitBox.htmlFor = "pf-varil";
+    unitBox.appendChild(prodF.varil);
+    var unitTxt = el("span", "unit-check-txt");
+    unitTxt.appendChild(el("b", null, T("portal.prod.lblVaril", "Varille satılır")));
+    unitTxt.appendChild(el("span", null, T("portal.prod.lblVarilHint",
+      "İşaretlenmezse ürün kilogram ile satılır. Sepetteki miktar kutusu ve sipariş metinleri bu birimi kullanır.")));
+    unitBox.appendChild(unitTxt);
+    /* Seçili vurgusunu sınıfla sürüyoruz (bkz. portal.css .unit-check.is-on).
+       Başlangıç durumu da yazılır: form yeniden çizilirse kutu ile görünüm ayrışmasın. */
+    /* Varil başına kilo satırı — kutunun İÇİNDE durur: kavramsal olarak
+       "varille satılır" kararının bir parçasıdır, ayrı bir alan değil. */
+    var kgRow = el("div", "unit-kg");
+    var kgLab = el("label", null, T("portal.prod.lblKgPer", "Bir varil kaç kg?"));
+    kgLab.htmlFor = "pf-kgper";
+    prodF.kgPer.placeholder = T("portal.prod.phKgPer", "örn. 200");
+    kgRow.appendChild(kgLab);
+    kgRow.appendChild(prodF.kgPer);
+    kgRow.appendChild(el("span", "unit-kg-suffix", T("unit.kg", "kg")));
+    unitBox.appendChild(kgRow);
+
+    var syncUnitBox = function () {
+      var on = prodF.varil.checked;
+      unitBox.classList.toggle("is-on", on);
+      kgRow.classList.toggle("is-on", on);
+      prodF.kgPer.disabled = !on;
+      if (!on) prodF.kgPer.value = "";
+    };
+    prodF.varil.addEventListener("change", syncUnitBox);
+    syncUnitBox();
+    unitRow.appendChild(unitCap);
+    unitRow.appendChild(unitBox);
+    form.appendChild(unitRow);
 
     var act = el("div", "field--full");
     act.style.cssText = "display:flex;gap:var(--space-sm);align-items:center;flex-wrap:wrap";
@@ -1028,12 +1083,22 @@
         toast(T("portal.prod.needNames", "Ürün adı üç dilde de zorunludur: Türkçe, İngilizce ve Rusça."));
         return;
       }
-      var id = hgpAddProduct({ sub: prodF.sub.value, n: n, brand: prodF.brand.value, tag: prodF.tag.value }, USER.name);
+      if (prodF.varil.checked && !parseInt(prodF.kgPer.value.replace(/[^\d]/g, ""), 10)) {
+        toast(T("portal.prod.needKgPer", "Varille satılan üründe bir varilin kaç kg olduğunu yazın."));
+        return;
+      }
+      var id = hgpAddProduct({
+        sub: prodF.sub.value, n: n, brand: prodF.brand.value, tag: prodF.tag.value,
+        unit: prodF.varil.checked ? "varil" : "",     // boş = kilo (varsayılan)
+        kgPerUnit: prodF.kgPer.value
+      }, USER.name);
       if (!id) {
         toast(T("portal.prod.addFail", "Ürün eklenemedi — kategoriyi ve üç dildeki adı kontrol edin."));
         return;
       }
       prodF.tr.value = ""; prodF.en.value = ""; prodF.ru.value = ""; prodF.brand.value = "";
+      prodF.varil.checked = false;
+      prodF.varil.dispatchEvent(new Event("change"));   // vurguyu ve kg alanını sıfırla
       toast(T("portal.prod.added", "Ürün bu tarayıcıya eklendi — yayına çıkması için dışa aktarın.") + " #" + id);
       renderAll();
     });
@@ -1052,6 +1117,7 @@
       T("portal.prod.colCat", "KATEGORİ"),
       T("portal.prod.colBrand", "MARKA"),
       T("portal.prod.colTag", "ETİKET"),
+      T("portal.prod.colUnit", "BİRİM"),
       T("portal.cat.colAction", "İŞLEM")
     ].forEach(function (c) { htr.appendChild(el("th", null, c)); });
     thead.appendChild(htr);
@@ -1084,6 +1150,12 @@
     tr.appendChild(el("td", null, subLabel(p.sub)));
     tr.appendChild(el("td", null, p.brand || "—"));
     tr.appendChild(el("td", null, tagLabel(p.tag)));
+    /* Birim: kayıtta unit alanı yoksa kilo (varsayılan). */
+    /* portal.html i18n.js YÜKLEMEZ: T() ikinci argümandaki Türkçe yedeğe düşer.
+       Yedek verilmezse hücre BOŞ çıkar — bu sütun ilk yazımda öyle çıkmıştı. */
+    tr.appendChild(el("td", "mono", p.unit === "varil"
+      ? T("unit.varil", "varil") + " · " + p.kgPerUnit + " " + T("unit.kg", "kg")
+      : T("unit.kg", "kg")));
     var tda = el("td");
     var del = el("button", "advance-btn", T("portal.cat.del", "Sil"));
     del.type = "button";
@@ -1481,7 +1553,7 @@
   function boot() {
     var s = getSes();
     // Boşta kalma süresi dolmuşsa oturumu düşürürüz (site-auth.js ile aynı kural, aynı anahtar)
-    if (s && nowMs() - (s.touched || s.at) > HGP_IDLE_MS) { localStorage.removeItem(HGP_SESSION_KEY); s = null; }
+    if (s && nowMs() - (s.touched || s.at) > HGP_IDLE_MS) { hgpSesClear(); s = null; }
     var loginView = need("#login-view"), appView = need("#app-view");
     /* MÜŞTERİ OTURUMU — portal açılmaz.
        Ana sitede giriş yapan müşteri (site-auth.js) AYNI oturum anahtarını
