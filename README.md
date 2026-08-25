@@ -65,6 +65,25 @@ python3 -m http.server 4173   # → http://localhost:4173
 3. Push etmeden önce siteyi yerelde açıp değiştirdiğin akışı elle dene; tarayıcı konsolunda hata olmadığını kontrol et.
 4. `git push origin main` → 1 dk sonra canlıda. Aynı dosyada çakışmamak için kim neyi alacaksa kısaca haberleşin; büyük işlerde dal açın: `git checkout -b ozellik-adi` → push → GitHub'da Pull Request.
 
+## Önbellek kuralı (ÖNEMLİ — ikiniz de okuyun)
+
+CSS/JS bağlantılarının sonundaki `?v=2026-08-25` bir **sürüm damgasıdır**.
+Tarayıcılar (ve GitHub Pages) bu dosyaları günlerce önbellekte tutar; damga
+olmadan yeni kodu yayınlasanız bile ziyaretçi **eski CSS/JS ile yeni HTML'i**
+karıştırır ve site bozuk görünür (yazı tipleri gitmiş, ham `a11y.skip` gibi
+çeviri anahtarları ekranda görünmüş gibi).
+
+**Kural:** `assets/css/` veya `assets/js/` içinde bir dosyayı değiştirdiğinizde
+11 HTML dosyasındaki damgayı da güncelleyin:
+
+```bash
+# Bugünün tarihiyle damgayı yenile
+sed -i '' "s/?v=[0-9-]\{10\}/?v=$(date +%Y-%m-%d)/g" *.html
+```
+
+**Kendi tarayıcınızda eski hali görüyorsanız** (damga güncellenmeden önce):
+macOS Chrome/Edge'de `Cmd+Shift+R`, Safari'de `Cmd+Option+E` sonra `Cmd+R`.
+
 ## Araçlar
 
 - `tools/katalog-uret.py` — Ürün Kataloğu PDF'ini (assets/docs/) flyer tasarımıyla yeniden üretir. Ürün listesi değişince script içindeki listeleri güncelleyip çalıştırın: `pip install cairosvg && python3 tools/katalog-uret.py`
