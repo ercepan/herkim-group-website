@@ -1,0 +1,13 @@
+{
+  "name": "herkim-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Herkim Group B2B — veritabanı şeması, güvenlik politikaları ve bildirim katmanı",
+  "scripts": {
+    "test": "node test/rls-sizinti-testi.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.7"
+  }
+}
