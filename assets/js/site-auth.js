@@ -352,7 +352,11 @@
   });
 
   /* ---------- 4) Kurulum ---------- */
-  const actions = $(".header-actions");
+  /* Yayın aşaması: hesap başvurusu kapalıyken başlıktaki hesap düğmesi
+     hiç kurulmaz; giriş penceresi de erişilemez olur. Kod duruyor,
+     data.js -> HK_FEATURES.hesapBasvurusu true olunca kendiliğinden açılır. */
+  const OZELLIK_ACIK = (typeof HK_FEATURES === "undefined") || HK_FEATURES.hesapBasvurusu !== false;
+  const actions = OZELLIK_ACIK ? $(".header-actions") : null;
   if (actions) {
     wrap = el("div", "user-wrap");
     actions.insertBefore(wrap, $("[data-open-basket]", actions));
@@ -360,5 +364,11 @@
   }
   document.addEventListener("hk:langchange", renderAccount);
 
-  window.hkAuth = { user: user, isCustomer: isCustomer, openLogin: openModal, logout: logout };
+  window.hkAuth = {
+    user: function () { return OZELLIK_ACIK ? user() : null; },
+    isCustomer: function () { return OZELLIK_ACIK && isCustomer(); },
+    openLogin: function (cb) { if (OZELLIK_ACIK) openModal(cb); },
+    logout: logout,
+    acik: OZELLIK_ACIK
+  };
 })();

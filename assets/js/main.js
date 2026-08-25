@@ -320,7 +320,11 @@
     localStorage.setItem(BASKET_KEY, "[]");
     localStorage.removeItem(BASKET_OWNER_KEY);
   }
-  const isCust = () => !!(window.hkAuth && window.hkAuth.isCustomer());
+  /* Yayın aşaması: sipariş kapalıyken sepet DAİMA teklif modunda kalır.
+     Bu tek satır, sipariş akışının bütün giriş kapılarını kapatır
+     (sepet başlığı, adet kutusu etiketi, onay ekranı, ürün kartı düğmesi). */
+  const SIPARIS_ACIK = (typeof HK_FEATURES === "undefined") || HK_FEATURES.siparis !== false;
+  const isCust = () => SIPARIS_ACIK && !!(window.hkAuth && window.hkAuth.isCustomer());
 
   let bdView = "cart"; // cart | confirm | quoteform | success
   let lastOrderId = "";
@@ -333,7 +337,7 @@
     const line = b.find(x => x.id === id);
     bdView = "cart";
     if (line) {
-      line.qty = Math.min(QTY_MAX, (line.qty || 1) + 1);
+      line.qty = Math.min(qtyMaxFor(p), (line.qty || 1) + 1);
       setBasket(b);
       toast("“" + PNAME(p) + "” — " + T("basket.inc") + ": " + line.qty);
       openBasket();
@@ -470,7 +474,7 @@
       cta.textContent = "✓ " + T("order.place");
       cta.addEventListener("click", () => { bdView = "confirm"; renderBasket(); });
       body.appendChild(cta);
-    } else {
+    } else if (SIPARIS_ACIK) {
       cta.textContent = T("basket.loginToOrder");
       cta.addEventListener("click", () => {
         if (!window.hkAuth) return;
@@ -482,7 +486,10 @@
       ap.style.cssText = "width:100%;justify-content:center;margin-top:10px";
       body.appendChild(ap);
     }
-    body.appendChild(smallNote(cust ? T("order.info") : T("basket.memberNote")));
+    /* Sipariş kapalıyken sepetin tek çıkışı alttaki teklif düğmeleridir
+       (WhatsApp / e-posta) — üstte ayrıca bir çağrı düğmesi gösterilmez. */
+    body.appendChild(smallNote(cust ? T("order.info")
+                              : (SIPARIS_ACIK ? T("basket.memberNote") : T("basket.quoteOnlyNote"))));
   }
 
   function renderConfirm(body, b) {
@@ -1119,6 +1126,60 @@
         });
     });
   }
+
+  /* ============ 11.5) Kapalı bölüm perdesi ============
+     Yayın aşamasında hesap başvurusu ve sipariş takibi kapalı. Sayfalar
+     SİLİNMEDİ (sonraki faz için duruyor) ama ziyaretçiye boş/yarım ekran
+     göstermek yerine ne olduğunu söyleyip teklif akışına yönlendiriyoruz.
+     Bayrak açılınca bu perde kendiliğinden kalkar. */
+  (function kapaliBolumPerdesi() {
+    const dosya = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+    const kapali =
+      (dosya === "hesap.html" && (typeof HK_FEATURES !== "undefined") && HK_FEATURES.hesapBasvurusu === false) ||
+      (dosya === "siparislerim.html" && (typeof HK_FEATURES !== "undefined") && HK_FEATURES.siparis === false);
+    if (!kapali) return;
+
+    const ana = $("main");
+    if (!ana) return;
+    ana.replaceChildren();
+
+    const bolum = el("section", "section");
+    const sarmal = el("div", "wrap");
+    sarmal.style.maxWidth = "720px";
+
+    const kutu = el("div");
+    kutu.style.cssText = "border:1px solid var(--line);border-radius:var(--radius);" +
+      "background:var(--white);box-shadow:var(--shadow-offset-sm);padding:52px 34px;text-align:center";
+
+    const h = el("h1", "display");
+    h.style.fontSize = "26px";
+    h.setAttribute("data-i18n", "soon.title");
+    h.textContent = T("soon.title");
+    kutu.appendChild(h);
+
+    const p1 = el("p");
+    p1.style.cssText = "color:var(--ink-2);max-width:460px;margin:14px auto 0;font-size:var(--fs-body)";
+    p1.setAttribute("data-i18n", "soon.body");
+    p1.textContent = T("soon.body");
+    kutu.appendChild(p1);
+
+    const dugmeler = el("div");
+    dugmeler.style.cssText = "display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px";
+    const b1 = el("a", "btn btn--primary");
+    b1.href = "urunler.html";
+    b1.setAttribute("data-i18n", "soon.catalog");
+    b1.textContent = T("soon.catalog");
+    const b2 = el("a", "btn");
+    b2.href = "iletisim.html";
+    b2.setAttribute("data-i18n", "soon.contact");
+    b2.textContent = T("soon.contact");
+    dugmeler.appendChild(b1); dugmeler.appendChild(b2);
+    kutu.appendChild(dugmeler);
+
+    sarmal.appendChild(kutu);
+    bolum.appendChild(sarmal);
+    ana.appendChild(bolum);
+  })();
 
   /* ============ 12) Siparişlerim (siparislerim.html) ============ */
   const moWrap = $("#my-orders");
