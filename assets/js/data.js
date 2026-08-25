@@ -29,6 +29,23 @@
      dizi + varsa portal ekleri.
    ============================================================ */
 
+/* ============================================================
+   YAYIN AŞAMASI — ÖZELLİK ANAHTARLARI
+   Faz 1 (canlı): yalnız TEKLİF sistemi. Ziyaretçi katalogu görür,
+   sepete ürün ekler, WhatsApp/e-posta ile fiyat teklifi ister.
+   Müşteri girişi, hesap başvurusu ve doğrudan sipariş KAPALI —
+   kod silinmedi, sonraki faz için hazır bekliyor.
+
+   AÇMAK İÇİN: ilgili satırı true yapın. Başka hiçbir yere
+   dokunmanız gerekmez; arayüz kendini buna göre kurar.
+   Önerilen açılış sırası: hesapBasvurusu -> siparis -> portal.
+   ============================================================ */
+const HK_FEATURES = {
+  hesapBasvurusu: false,  // hesap.html, giris penceresi, basliktaki hesap dugmesi
+  siparis: false,         // sepetten dogrudan siparis + siparislerim.html
+  portal: false           // ic personel portali (portal.html - zaten linksiz)
+};
+
 /* Şirket künyesi.
    DİKKAT: burası "tek kaynak" DEĞİL. Yalnız ilk bloktaki alanlar koddan
    okunur. İkinci bloktaki değerler sitede elle yazılıdır; burayı değiştirmek
