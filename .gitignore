@@ -22,3 +22,4 @@ dist/
 .env
 .env.*
 .playwright-mcp/
+herkim-backend/node_modules/
