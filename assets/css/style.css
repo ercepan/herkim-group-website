@@ -811,7 +811,10 @@ h3.display { font-size: var(--fs-h3); }
 .field { display: flex; flex-direction: column; gap: 7px; }
 .field--full { grid-column: 1 / -1; }
 .field label { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); }
-.field input, .field select, .field textarea {
+/* Onay kutusu ve radyo düğmesi bu kuraldan MUAFTIR: aşağıdaki
+   width:100% + padding + çerçeve onlara uygulanınca kutu forma
+   yayılıyor (199x13 px) ve onay metni bozuk görünüyordu. */
+.field input:not([type="checkbox"]):not([type="radio"]), .field select, .field textarea {
   padding: 13px 15px;
   background: var(--white);
   border: 1.5px solid var(--line);
@@ -823,7 +826,28 @@ h3.display { font-size: var(--fs-h3); }
   line-height: 1.4;
   width: 100%;
 }
-.field input:focus, .field select:focus, .field textarea:focus {
+/* ---------- Onay kutuları (KVKK / ticari ileti) ---------- */
+.field input[type="checkbox"], .field input[type="radio"] {
+  width: 17px; height: 17px; flex: 0 0 17px;
+  margin: 2px 0 0 0; padding: 0;
+  accent-color: var(--crimson);
+  cursor: pointer;
+}
+/* Onay satırı: kutu solda sabit, metin yanında akar. Etiket mono/uppercase
+   DEĞİLDİR — bunlar okunacak sözleşme metinleri, alan başlığı değil. */
+.consent-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-family: var(--font-body);
+  font-size: var(--fs-body); line-height: 1.55;
+  letter-spacing: normal; text-transform: none;
+  color: var(--ink-2); cursor: pointer;
+}
+.consent-row + .consent-row { margin-top: 10px; }
+.consent-row span { flex: 1 1 auto; }
+.consent-row a { color: var(--crimson); font-weight: 600; }
+.consent-row a:hover { text-decoration: underline; }
+
+.field input:not([type="checkbox"]):not([type="radio"]):focus, .field select:focus, .field textarea:focus {
   outline: none; border-color: var(--crimson);
   box-shadow: 3px 3px 0 rgba(163, 28, 60, 0.25);
 }
