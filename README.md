@@ -19,7 +19,7 @@
 | `hesap.html` | Müşteri hesap başvurusu (NGB modeli): VKN/TCKN sağlama basamağı denetimi |
 | `siparislerim.html` | Girişli müşterinin sipariş takibi (durum, zaman çizelgesi, takip no) |
 | `kvkk.html` | KVKK + çerez politikası (şablon — hukukçuya danışılacak) |
-| `portal.html` | **İç operasyon portalı — menülerde LİNKİ YOK, bilinçli gizli.** 4 rol: müşteri / satış (CRM + başvuru onayı) / depo / yönetim |
+| `portal.html` | **İç PERSONEL portalı — menülerde LİNKİ YOK, bilinçli gizli.** 3 rol: satış (CRM + başvuru onayı) / depo / yönetim. Müşteri rolü portaldan çıkarıldı; müşteri kendi siparişini ana sitedeki `siparislerim.html` sayfasından izler. |
 
 `pan/` klasörü: Pan Holding örnek sitesi (ayrı iş, Herkim'den bağımsız).
 
@@ -34,10 +34,18 @@
 | `main.js` | Site etkileşimi: sepet (teklif + doğrudan sipariş), filtreler, arama, formlar, Siparişlerim, hesap başvurusu |
 | `portal-app.js` | Portal uygulaması (yalnız `portal.html`) |
 
+## Backend (herkim-backend/)
+
+Gerçek veritabanı katmanı — Supabase hesabı açıldığı an devreye girer.
+Şema, satır seviyesi güvenlik politikaları, sipariş fonksiyonu, e-posta
+şablonları ve 29 sızıntı testi orada. Kurulum: `herkim-backend/README.md`.
+Site şu an hâlâ yerel demo modunda (`assets/js/hg-config.js` → `demo: true`).
+
 ## Demo akışı
 
-- **Demo şifresi:** `demo1234` (tüm roller). Varsayılan müşteri: `satinalma@derimderi.com.tr`.
-- Uçtan uca: `hesap.html`'den başvur → portalda **Satış → Müşteri Kartları**'nda onayla → o e-postayla siteden gir → sepetten sipariş ver → sipariş satış onayına, depo panosuna, yönetim dashboard'una düşer → müşteri `siparislerim.html`'den izler.
+- **Portal girişi:** rol düğmeleriyle (şifresiz demo). **Müşteri girişi:** ana sitedeki hesap düğmesinden, demo şifresi `portal-store.js → HGP_DEMO_PASS`.
+- ⚠️ Demo şifresi kaynak kodda ve depo public — gerçek müşteri verisi girmeden önce Supabase Auth'a geçilmeli (bkz. `herkim-backend/README.md`).
+- Uçtan uca: `hesap.html`'den başvur → portalda **Satış → Müşteri Kartları**'nda onayla → o e-postayla ana siteden gir → sepetten sipariş ver → sipariş satış onayına, depo panosuna, yönetim dashboard'una düşer → müşteri `siparislerim.html`'den izler.
 - Veriler tarayıcıda (`localStorage`) yaşar; portalda "Demoyu sıfırla" ile başa döner. Gerçek kuruluma geçişte bu katman küçük bir API + Logo Tiger/ATLAS entegrasyonuyla değişecek; ekranlar aynı kalır.
 
 ## Altın kurallar (bozmayın)
