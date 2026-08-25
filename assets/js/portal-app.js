@@ -32,6 +32,38 @@
 (function () {
   "use strict";
 
+  /* ============================================================
+     YAYIN FAZI KAPISI — portal kapalıyken hiç çalışmaz.
+     Faz 1'de site yalnız teklif sistemiyle yayında; portal.html
+     adresini bulan birinin tek tıkla Satış/Depo/Yönetim ekranına
+     (ve içindeki temsilî müşteri kayıtlarına) girmesi engellenir.
+     data.js -> HK_FEATURES.portal true olunca kendiliğinden açılır.
+     ============================================================ */
+  if (typeof HK_FEATURES !== "undefined" && HK_FEATURES.portal === false) {
+    var kapat = function () {
+      document.title = "Kullanımda değil";
+      var g = document.getElementById("login-view"); if (g) g.remove();
+      var u = document.getElementById("app-view"); if (u) u.remove();
+      var k = document.createElement("div");
+      k.style.cssText = "min-height:100vh;display:grid;place-items:center;padding:40px;" +
+        "font-family:system-ui,sans-serif;background:#FAF6F1;color:#43333A;text-align:center";
+      var i = document.createElement("div");
+      var b = document.createElement("p");
+      b.style.cssText = "font-size:17px;font-weight:600;color:#1B1216;margin-bottom:8px";
+      b.textContent = "Bu bölüm şu an kullanımda değil.";
+      var a = document.createElement("a");
+      a.href = "index.html";
+      a.style.cssText = "color:#A31C3C;font-weight:600;text-decoration:none";
+      a.textContent = "Herkim Group ana sayfasına dön";
+      i.appendChild(b); i.appendChild(a); k.appendChild(i);
+      document.body.replaceChildren(k);
+    };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", kapat);
+    else kapat();
+    return;
+  }
+
+
   /* ---------- 1. Yardımcılar ---------- */
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };

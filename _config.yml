@@ -1,0 +1,23 @@
+# ============================================================
+# GitHub Pages yayın ayarı
+#
+# NEDEN VAR: Alan adı bağlandığında bu depodaki HER klasör
+# herkese açık yayınlanır. Aşağıdakiler siteye ait DEĞİLDİR ve
+# yayınlanmamalıdır:
+#   pan/            → başka bir şirketin (Pan Holding) örnek sitesi
+#   herkim-backend/ → veritabanı şeması, güvenlik politikaları,
+#                     temsilî müşteri adlı e-posta önizlemeleri
+#   tools/          → katalog üretici ve fiyat bekçisi betikleri
+#
+# DİKKAT: Depoya .nojekyll dosyası EKLEMEYİN — eklenirse bu
+# dosya devre dışı kalır ve yukarıdakilerin hepsi yayına çıkar.
+# ============================================================
+exclude:
+  - pan/
+  - herkim-backend/
+  - tools/
+  - README.md
+  - .gitignore
+
+# Site kökündeki HTML dosyaları olduğu gibi yayınlanır (Jekyll işlemez).
+plugins: []
