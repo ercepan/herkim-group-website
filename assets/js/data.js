@@ -43,9 +43,11 @@ const HK_COMPANY = {
   // yanlıştı ve zaten hiçbir yerden okunmuyordu).
   email: "info@herkimgroup.com",      // main.js — iletişim formu mailto yedeği
   mailQuote: "sales@herkimgroup.com", // main.js — sepetten teklif mailto yedeği
-  whatsapp: "902163941125",   // main.js — wa.me bağlantıları ve sepet teklif butonu.
-                              // WhatsApp Business hattınızın numarası; ülke kodu
-                              // bitişik yazılır, başında + ve arada boşluk YOKTUR.
+  whatsapp: "905301447373",   // main.js — wa.me bağlantıları ve sepet teklif butonu.
+                              // GEÇİCİ TEST NUMARASI (+90 530 144 73 73).
+                              // Canlıya çıkmadan önce şirketin WhatsApp Business
+                              // hattıyla değiştirilecek. Ülke kodu bitişik yazılır,
+                              // başında + ve arada boşluk YOKTUR.
   web3forms: "",              // portal-store.js hgNotify + main.js. Anahtar girilince
                               // iletişim/teklif/sipariş/başvuru bildirimleri şirket
                               // e-postasına ANINDA düşer; boşken mailto yedeğine düşülür.

@@ -75,7 +75,7 @@ python3 -m http.server 4173   # → http://localhost:4173
 
 ## Önbellek kuralı (ÖNEMLİ — ikiniz de okuyun)
 
-CSS/JS bağlantılarının sonundaki `?v=2026-08-25` bir **sürüm damgasıdır**.
+CSS/JS bağlantılarının sonundaki `?v=2026-08-25b` bir **sürüm damgasıdır**.
 Tarayıcılar (ve GitHub Pages) bu dosyaları günlerce önbellekte tutar; damga
 olmadan yeni kodu yayınlasanız bile ziyaretçi **eski CSS/JS ile yeni HTML'i**
 karıştırır ve site bozuk görünür (yazı tipleri gitmiş, ham `a11y.skip` gibi
@@ -85,8 +85,9 @@ karıştırır ve site bozuk görünür (yazı tipleri gitmiş, ham `a11y.skip` 
 11 HTML dosyasındaki damgayı da güncelleyin:
 
 ```bash
-# Bugünün tarihiyle damgayı yenile
-sed -i '' "s/?v=[0-9-]\{10\}/?v=$(date +%Y-%m-%d)/g" *.html
+# Bugünün tarihiyle damgayı yenile (aynı gün ikinci kez değiştirdiyseniz
+# sonuna bir harf ekleyin: ...-25b, ...-25c)
+sed -i '' "s/?v=[^\"]*/?v=$(date +%Y-%m-%d)/g" *.html
 ```
 
 **Kendi tarayıcınızda eski hali görüyorsanız** (damga güncellenmeden önce):
