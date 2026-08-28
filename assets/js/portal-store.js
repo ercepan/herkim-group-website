@@ -152,7 +152,8 @@
       customers: [],  // onaylı başvurulardan doğan CRM kartları
       customProducts: [], // portalda eklenen ürünler (bkz. KATALOG EKLERİ bölümü)
       customDocs: [],     // portalda eklenen dokümanlar
-      customSeq: {}       // katalog eklerinde dağıtılmış en yüksek kimlik (geri sayılmaz)
+      customSeq: {},      // katalog eklerinde dağıtılmış en yüksek kimlik (geri sayılmaz)
+      hiddenProducts: []  // listeden çıkarılan data.js ürünlerinin kimlikleri
     };
   }
 
@@ -261,10 +262,11 @@
        eksiksiz tamamlansın, mevcut kayıtlar ezilmesin. customSeq boş bir nesne
        olarak başlar; ilk ekleme sırasında listedeki en büyük kimlikten devam
        eder, yani taşınan depoda kimlik çakışmaz. */
-    if (!s.customProducts || !s.customDocs || !s.customSeq) {
+    if (!s.customProducts || !s.customDocs || !s.customSeq || !s.hiddenProducts) {
       if (!s.customProducts) s.customProducts = [];
       if (!s.customDocs) s.customDocs = [];
       if (!s.customSeq) s.customSeq = {};
+      if (!s.hiddenProducts) s.hiddenProducts = [];
       hgpSave(s);
     }
     // Ana sitedeki iletişim formundan düşen talepleri içeri al (Landing → CRM)
@@ -737,13 +739,91 @@
     catch (e) { return []; }
   }
 
+  /* ---------------- data.js ürünlerini listeden çıkarma ----------------
+     Portal data.js dosyasını DEĞİŞTİREMEZ (arka uç yok). Bu yüzden "çıkarma"
+     şöyle çalışır: kimlik bir gizleme listesine yazılır, hgpAllProducts o
+     kimlikleri eler, böylece ürün katalogda görünmez. Kalıcı olması için
+     dışa aktarım panelindeki satırın data.js'ten silinmesi ve commit'lenmesi
+     gerekir — tıpkı ekleme gibi.
+
+     Yalnız data.js ürünleri için: portalda eklenen kayıt zaten hgpDeleteProduct
+     ile gerçekten silinir, gizlenmesine gerek yok. */
+  function hgpHiddenIds() {
+    try {
+      var h = (hgpPeek() || {}).hiddenProducts;
+      return Object.prototype.toString.call(h) === "[object Array]" ? h.slice() : [];
+    } catch (e) { return []; }
+  }
+
+  function hgpHideProduct(id, who) {
+    var s = hgpGet(), key = Number(id);
+    if (!isFinite(key)) return false;
+    // Portal eklerinde gizleme anlamsız: onlar için gerçek silme vardır
+    var i;
+    for (i = 0; i < s.customProducts.length; i++) {
+      if (Number(s.customProducts[i].id) === key) return false;
+    }
+    var base = hgpBaseProducts(), varMi = false, ad = "";
+    for (i = 0; i < base.length; i++) {
+      if (Number(base[i].id) === key) { varMi = true; ad = (base[i].n && base[i].n.tr) || "—"; break; }
+    }
+    if (!varMi) return false;
+    if (!s.hiddenProducts) s.hiddenProducts = [];
+    if (s.hiddenProducts.indexOf(key) !== -1) return false;
+    s.hiddenProducts.push(key);
+    hgpAct(s, who || "Portal", "Ürün listeden çıkarıldı: " + ad + " (#" + key + ")", "genel");
+    hgpSave(s);
+    return true;
+  }
+
+  function hgpUnhideProduct(id, who) {
+    var s = hgpGet(), key = Number(id);
+    if (!s.hiddenProducts) return false;
+    var i = s.hiddenProducts.indexOf(key);
+    if (i === -1) return false;
+    s.hiddenProducts.splice(i, 1);
+    hgpAct(s, who || "Portal", "Ürün listeye geri alındı: #" + key, "genel");
+    hgpSave(s);
+    return true;
+  }
+
+  /* Çıkarılan data.js ürünlerini data.js'te kalıcı yapmak için yönerge üretir.
+     Kod üretmiyoruz — silinecek satırları göstermek daha güvenli: operatör
+     yanlış satırı silmesin diye her ürünün kimliği ve tam adı yazılır. */
+  function hgpExportHidden() {
+    var ids = hgpHiddenIds();
+    if (!ids.length) return "";
+    var base = hgpBaseProducts(), harita = {}, i;
+    for (i = 0; i < base.length; i++) harita[Number(base[i].id)] = base[i];
+    var out = [
+      "/* ============================================================",
+      "   LİSTEDEN ÇIKARILAN ÜRÜNLER — " + hgpToday(),
+      "   NEREYE: assets/js/data.js → HK_PRODUCTS dizisi.",
+      "   NASIL: aşağıda kimliği yazan satırları diziden SİLİN. Silmek yerine",
+      "   başına // koymayın: dizide bozuk satır kalır.",
+      "   SONRA: commit edip push edin. Bunu yapmadan ürün yalnızca bu",
+      "   tarayıcıda gizli kalır; başka cihazdan giren müşteri onu HÂLÂ GÖRÜR.",
+      "   ============================================================ */"
+    ];
+    for (i = 0; i < ids.length; i++) {
+      var u = harita[Number(ids[i])];
+      out.push("// SİL → id: " + ids[i] + "  →  " + (u ? ((u.n && u.n.tr) || "—") + "  ·  " + (u.brand || "—") : "(data.js'te artık yok)"));
+    }
+    return out.join("\n");
+  }
+
   /* data.js listesi + portal ekleri, BU sırayla.
      Ana site her render'da çağırır: asla istisna fırlatmaz, her zaman dizi
      döner, HK_PRODUCTS'ı değiştirmez (concat yeni dizi üretir). */
   function hgpAllProducts() {
-    var custom = [];
+    var custom = [], gizli = [];
     try { custom = (hgpPeek() || {}).customProducts || []; } catch (e) { custom = []; }
-    return hgpBaseProducts().concat(custom);
+    try { gizli = hgpHiddenIds(); } catch (e) { gizli = []; }
+    var taban = hgpBaseProducts();
+    if (gizli.length) {
+      taban = taban.filter(function (p) { return gizli.indexOf(Number(p.id)) === -1; });
+    }
+    return taban.concat(custom);
   }
 
   /* ---------------- Dokümanlar ---------------- */
@@ -1045,6 +1125,10 @@
   window.hgpUpdateProduct = hgpUpdateProduct;
   window.hgpDeleteProduct = hgpDeleteProduct;
   window.hgpListProducts = hgpListProducts;
+  window.hgpHiddenIds = hgpHiddenIds;
+  window.hgpHideProduct = hgpHideProduct;
+  window.hgpUnhideProduct = hgpUnhideProduct;
+  window.hgpExportHidden = hgpExportHidden;
   window.hgpAllProducts = hgpAllProducts;
   window.hgpAddDoc = hgpAddDoc;
   window.hgpDeleteDoc = hgpDeleteDoc;
