@@ -67,10 +67,11 @@ CRM, siparişler ve müşteri kartları kapalıdır.
 
 ## Demo akışı (Faz 2 — şu an KAPALI)
 
-- **Müşteri girişi:** ana sitedeki hesap düğmesinden, demo şifresi
-  `portal-store.js → HGP_DEMO_PASS`. `HK_FEATURES.hesapBasvurusu` ve
-  `siparis` bayrakları `false` olduğu için bu akış şu an kapalıdır.
-- ⚠️ Demo şifresi kaynak kodda ve depo public — gerçek müşteri verisi girmeden önce Supabase Auth'a geçilmeli (bkz. `herkim-backend/README.md`).
+- **Müşteri girişi kapalı** (`HK_FEATURES.hesapBasvurusu` ve `siparis` = `false`).
+  Demo girişi ve demo şifresi **kalıcı olarak silindi** — parolasız bir arka
+  kapıydı ve şifre kaynak kodda görünüyordu. Faz 2'de müşteri girişi gerçek
+  kimlik doğrulamayla (Supabase Auth) gelecek, demo kısayoluyla değil.
+- Alıcılar Faz 1'de teklif sepetini doldurup satış ekibiyle iletişime geçer.
 - Uçtan uca: `hesap.html`'den başvur → portalda **Satış → Müşteri Kartları**'nda onayla → o e-postayla ana siteden gir → sepetten sipariş ver → sipariş satış onayına, depo panosuna, yönetim dashboard'una düşer → müşteri `siparislerim.html`'den izler.
 - Veriler tarayıcıda (`localStorage`) yaşar; portalda "Demoyu sıfırla" ile başa döner. Gerçek kuruluma geçişte bu katman küçük bir API + Logo Tiger/ATLAS entegrasyonuyla değişecek; ekranlar aynı kalır.
 
