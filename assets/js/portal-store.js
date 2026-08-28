@@ -919,6 +919,46 @@
      çıkmadığı anlamına gelir. Çağıran taraf false gelirse kullanıcıya
      "iletildi" demek yerine telefon/e-posta gibi alternatif kanalı
      göstermelidir; aksi halde talep kimseye ulaşmadan kaybolur. */
+  /* ------------------------------------------------------------
+     Bildirim yardımcıları
+
+     hgpClean: kullanıcı metnini e-posta gövdesine koymadan önce
+     kontrol karakterlerinden arındırır. Satır sonu ile sahte başlık
+     eklemeyi (Bcc:, X-...) etkisiz kılar ve aşırı uzunluğu keser.
+
+     hgpRateOk: aynı tarayıcıdan kısa sürede tekrar gönderimi keser.
+     DÜRÜST SINIR — bu bir güvenlik kontrolü DEĞİLDİR: localStorage
+     temizlenerek ya da doğrudan api.web3forms.com'a POST atılarak
+     aşılır (anahtar zaten herkese açık). Amacı yalnızca kazara çift
+     gönderimi ve naif bot trafiğini engellemektir. Kotanın ASIL
+     koruması Web3Forms panelindeki captcha + "Allowed Domains"
+     kısıtlamasıdır; anahtar girilmeden önce ikisi de açılmalıdır.
+     ------------------------------------------------------------ */
+  function hgpClean(v, max) {
+    var out = String(v == null ? "" : v);
+    out = out.replace(/[\u0000-\u001F\u007F]+/g, " ");
+    out = out.replace(/\s{2,}/g, " ");
+    return out.trim().slice(0, max || 400);
+  }
+
+  var HGP_RL_KEY = "hg_rl_v1";
+  function hgpRateOk(kova, limit, pencereDk) {
+    try {
+      var now = Date.now(), span = (pencereDk || 10) * 60000, hepsi = {};
+      try { hepsi = JSON.parse(localStorage.getItem(HGP_RL_KEY) || "{}") || {}; } catch (e) { hepsi = {}; }
+      var vurus = (Array.isArray(hepsi[kova]) ? hepsi[kova] : [])
+        .filter(function (t) { return typeof t === "number" && now - t < span; });
+      hepsi[kova] = vurus;
+      if (vurus.length >= (limit || 3)) {
+        localStorage.setItem(HGP_RL_KEY, JSON.stringify(hepsi));
+        return false;
+      }
+      vurus.push(now);
+      localStorage.setItem(HGP_RL_KEY, JSON.stringify(hepsi));
+      return true;
+    } catch (e) { return true; }   // depo kapalıysa akışı engelleme
+  }
+
   function hgNotify(subject, lines, senderName, senderEmail) {
     try {
       var key = (typeof HK_COMPANY !== "undefined" && HK_COMPANY.web3forms) || "";
@@ -928,12 +968,13 @@
       }
       var body = {
         access_key: key,
-        subject: subject,
+        subject: hgpClean(subject, 120),
         from_name: "Herkim Web Sitesi",
-        name: senderName || "Web ziyaretçisi",
-        message: (lines || []).join("\n")
+        name: hgpClean(senderName || "Web ziyaretçisi", 80),
+        message: (lines || []).map(function (l) { return hgpClean(l, 400); }).join("\n")
       };
-      if (senderEmail && senderEmail.indexOf("@") > 0) body.email = senderEmail;
+      var gonderen = hgpClean(senderEmail, 80);
+      if (gonderen && gonderen.indexOf("@") > 0 && !/[\s,;<>]/.test(gonderen)) body.email = gonderen;
       /* İkinci kutuya kopya: talep hem ticari (sales@) hem genel (info@)
          kutuya düşsün. Adres data.js -> HK_COMPANY.notifyCc alanından gelir;
          boş bırakılırsa kopya gönderilmez. */
@@ -1014,5 +1055,7 @@
   window.hgpExportDocs = hgpExportDocs;
 
   window.hgpReset = hgpReset;
+  window.hgpClean = hgpClean;
+  window.hgpRateOk = hgpRateOk;
   window.hgNotify = hgNotify;
 })();

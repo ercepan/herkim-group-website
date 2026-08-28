@@ -1023,6 +1023,13 @@
     tuzak.setAttribute("aria-hidden", "true");
     tuzak.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;opacity:0";
     cform.appendChild(tuzak);
+    /* Doldurma süresi ölçümü. DİKKAT: sayfa açılışı değil, formun ilk
+       ELLE dokunulduğu an baz alınır — sayfa açık unutulduğunda kapı
+       kendiliğinden açılmasın diye. İlk etkileşim yoksa açılış anı kullanılır. */
+    let ilkTemas = 0;
+    ["input", "change", "focusin"].forEach(function (ev) {
+      cform.addEventListener(ev, function () { if (!ilkTemas) ilkTemas = Date.now(); }, { once: false, passive: true });
+    });
     const acilis = Date.now();
 
     const sbtn = cform.querySelector("[type=submit]");
@@ -1060,7 +1067,7 @@
     cform.addEventListener("submit", (e) => {
       e.preventDefault();
       if (tuzak.value) return;                                   // bot doldurdu
-      if (Date.now() - acilis < 2500) { toast(T("guard.tooFast")); return; }
+      if (Date.now() - (ilkTemas || acilis) < 2500) { toast(T("guard.tooFast")); return; }
 
       const data = new FormData(cform);
       const al = (k) => (data.get(k) || "").toString().trim();
