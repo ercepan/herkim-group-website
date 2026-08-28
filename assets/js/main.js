@@ -741,10 +741,14 @@
     meta.appendChild(el("span", null, SUB_LABEL(p.sub)));
     card.appendChild(meta);
 
-    /* Katalog kartında "+" düğmesi YOK (kullanıcı isteği): kart yalnızca
-       tanıtım amaçlıdır. Teklif sepetine ekleme, etiketi açıkça yazan
-       "+ Teklif" düğmesiyle Ürün Listesi sayfasında yapılır — çıplak bir
-       artı işareti ne yaptığını anlatmıyordu. */
+    /* "+" teklif sepetine ekler. Faz 1'de sepet yalnızca TEKLİF sepetidir:
+       sipariş verme kapalı (HK_FEATURES.siparis === false), sepetten
+       çıkan tek şey satış ekibine giden teklif talebidir. */
+    const add = el("button", "ec-add", "+");
+    add.setAttribute("aria-label", T("basket.addAria"));
+    add.setAttribute("title", T("basket.addAria"));
+    add.addEventListener("click", () => addToBasket(p.id));
+    card.appendChild(add);
     return card;
   }
 

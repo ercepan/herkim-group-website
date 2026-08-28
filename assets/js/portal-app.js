@@ -1754,7 +1754,94 @@
      bu tarayıcıda durur; yayına çıkması için "Dışa aktar" çıktısının data.js'e
      yapıştırılıp commit edilmesi gerekir.
      ============================================================ */
-  var admHata = 0, admKilitBitis = 0;
+  /* ---------- Kaba kuvvet kilidi ----------
+     Sayaç localStorage'da tutulur: sayfayı yenilemek ya da sekmeyi kapatıp
+     açmak kilidi SIFIRLAMAZ. (Önceki sürümde sayaç bellekteydi; yenileyen
+     herkes sıfırdan başlıyordu — deneme yanılmaya hiçbir engel değildi.)
+
+     Basamaklar data.js'teki HK_ADMIN.gecikme dizisindedir. Kilit bittiğinde
+     sayaç SIFIRLANMAZ: bir sonraki hata bir üst basamağa çıkar, yani ısrar
+     eden biri her turda daha uzun bekler.
+
+     Dürüst sınır: devtools bilen biri bu anahtarı silip sayacı sıfırlayabilir.
+     Bu kilit, klavye başında deneyen birini durdurur. Çevrimdışı denemeye
+     karşı koruyan şey kilit değil, parolanın uzunluğu ve PBKDF2 tur sayısıdır. */
+  var HK_ADM_KILIT = "hg_adm_lock_v1";
+
+  function admKilitOku() {
+    try {
+      var v = JSON.parse(localStorage.getItem(HK_ADM_KILIT) || "null");
+      if (!v || typeof v !== "object") return { hata: 0, bitis: 0 };
+      return {
+        hata: Math.max(0, parseInt(v.hata, 10) || 0),
+        bitis: Math.max(0, parseInt(v.bitis, 10) || 0)
+      };
+    } catch (e) { return { hata: 0, bitis: 0 }; }
+  }
+
+  function admKilitYaz(d) {
+    try { localStorage.setItem(HK_ADM_KILIT, JSON.stringify(d)); } catch (e) { /* dolu/kapalı depo: kilitsiz devam */ }
+  }
+
+  /* Kaçıncı hatada kaç saniye bekleneceği. Dizi yoksa makul bir yedek
+     kullanılır — data.js elden geçerken bu satır silinirse kilit tamamen
+     kalkmasın. */
+  function admGecikme(hataSayisi) {
+    var basamaklar = (typeof HK_ADMIN !== "undefined" && HK_ADMIN.gecikme) || [[10, 21600], [7, 3600], [5, 900], [4, 300], [3, 60]];
+    for (var i = 0; i < basamaklar.length; i++) {
+      if (hataSayisi >= basamaklar[i][0]) return basamaklar[i][1] * 1000;
+    }
+    return 0;
+  }
+
+  function admSureYazisi(ms) {
+    var sn = Math.ceil(ms / 1000);
+    if (sn < 60) return sn + " saniye";
+    if (sn < 3600) return Math.ceil(sn / 60) + " dakika";
+    return Math.ceil(sn / 3600) + " saat";
+  }
+
+  /* ---------- PBKDF2 doğrulama ----------
+     Aynı türetme data.js'teki özet üretilirken node tarafında yapıldı
+     (tools/yonetici-kimligi.mjs). Burada tarayıcının WebCrypto'su ile
+     tekrarlanır; parola hiçbir zaman saklanmaz, yalnız türetilir ve atılır. */
+  function admHexBayt(hex) {
+    var n = hex.length / 2, u = new Uint8Array(n), i;
+    for (i = 0; i < n; i++) u[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return u;
+  }
+
+  function admBaytHex(buf) {
+    var u = new Uint8Array(buf), out = "", i;
+    for (i = 0; i < u.length; i++) out += (u[i] < 16 ? "0" : "") + u[i].toString(16);
+    return out;
+  }
+
+  function admTuret(kullanici, parola) {
+    var A = (typeof HK_ADMIN !== "undefined") ? HK_ADMIN : null;
+    if (!A || !A.tuz || !A.ozet || !A.tur) {
+      return Promise.reject(new Error("yapilandirma"));
+    }
+    var kripto = window.crypto && window.crypto.subtle;
+    if (!kripto) return Promise.reject(new Error("guvenli-baglam"));
+
+    /* Kullanıcı adı ve parola BİRLİKTE türetilir; ayırıcı boşluktur ve
+       data.js'teki özet de böyle üretildi. İkisi tek parça olduğu için
+       giriş ekranı hangisinin yanlış olduğunu söyleyemez — söyleseydi
+       saldırgan işi yarıya indirirdi. */
+    var ham = new TextEncoder().encode(kullanici + " " + parola);
+    return kripto.importKey("raw", ham, "PBKDF2", false, ["deriveBits"])
+      .then(function (k) {
+        return kripto.deriveBits({
+          name: "PBKDF2",
+          salt: admHexBayt(A.tuz),
+          iterations: A.tur,
+          hash: "SHA-256"
+        }, k, 256);
+      })
+      .then(function (bits) { return admBaytHex(bits) === String(A.ozet).toLowerCase(); });
+  }
+
   if (YONETICI_MODU) {
     // 1) Menüyü kısıtla: yalnız ürün ve doküman yönetimi
     NAV.yonetim = [
@@ -1777,7 +1864,7 @@
       HGP_USERS.yonetim.title = "Ürün & Doküman Yönetimi";
     }
 
-    // 2) Giriş ekranını tek parolalı hale getir
+    // 2) Giriş ekranını kullanıcı adı + parola formuna çevir
     var girisKart = document.querySelector("#login-view .lg-card");
     if (girisKart) {
       var rolBar = girisKart.querySelector(".rolebar");
@@ -1786,26 +1873,36 @@
       if (altNot) altNot.remove();
 
       var baslik = girisKart.querySelector("h2");
-      if (baslik) { baslik.textContent = "Yönetici girişi"; }
+      if (baslik) baslik.textContent = "Yönetici girişi";
       var altBaslik = girisKart.querySelector(".sub");
       if (altBaslik) altBaslik.textContent = "Ürün ve doküman yönetimi. Yalnız yetkili personel.";
 
       var form = document.createElement("form");
       form.id = "adm-form";
 
-      var alan = document.createElement("div");
-      alan.className = "field";
-      alan.style.marginBottom = "16px";
-      var etiket = document.createElement("label");
-      etiket.setAttribute("for", "adm-pass");
-      etiket.textContent = "PAROLA";
-      var girdi = document.createElement("input");
-      girdi.type = "password";
-      girdi.id = "adm-pass";
-      girdi.autocomplete = "current-password";
-      girdi.maxLength = 64;
-      alan.appendChild(etiket); alan.appendChild(girdi);
-      form.appendChild(alan);
+      function admAlan(id, etiketMetni, tur, otomatik) {
+        var alan = document.createElement("div");
+        alan.className = "field";
+        alan.style.marginBottom = "14px";
+        var etiket = document.createElement("label");
+        etiket.setAttribute("for", id);
+        etiket.textContent = etiketMetni;
+        var girdi = document.createElement("input");
+        girdi.type = tur;
+        girdi.id = id;
+        girdi.autocomplete = otomatik;
+        girdi.maxLength = 128;
+        girdi.spellcheck = false;
+        girdi.setAttribute("autocapitalize", "off");
+        girdi.setAttribute("autocorrect", "off");
+        alan.appendChild(etiket);
+        alan.appendChild(girdi);
+        form.appendChild(alan);
+        return girdi;
+      }
+
+      var kulGirdi = admAlan("adm-user", "KULLANICI ADI", "text", "username");
+      var parGirdi = admAlan("adm-pass", "PAROLA", "password", "current-password");
 
       var dugme = document.createElement("button");
       dugme.className = "btn btn--primary";
@@ -1818,33 +1915,113 @@
       if (sec) girisKart.insertBefore(form, sec);
       else girisKart.appendChild(form);
 
+      function admHata(metin) {
+        if (!errBox) return;
+        errBox.textContent = metin;
+        errBox.classList.remove("show");
+        void errBox.offsetWidth;
+        errBox.classList.add("show");
+      }
+
+      /* Kilitliyken formu kapalı tutar ve kalan süreyi saniye saniye yazar.
+         Süre dolunca kendiliğinden açılır — kullanıcı sayfayı yenilemek
+         zorunda kalmasın. */
+      var geriSayim = 0;
+      function admKilidiUygula() {
+        var d = admKilitOku();
+        var kalan = d.bitis - nowMs();
+        if (kalan > 0) {
+          dugme.disabled = true;
+          kulGirdi.disabled = true;
+          parGirdi.disabled = true;
+          dugme.textContent = "Kilitli — " + admSureYazisi(kalan);
+          if (!geriSayim) {
+            geriSayim = setInterval(admKilidiUygula, 1000);
+          }
+          return true;
+        }
+        if (geriSayim) { clearInterval(geriSayim); geriSayim = 0; }
+        dugme.disabled = false;
+        kulGirdi.disabled = false;
+        parGirdi.disabled = false;
+        dugme.textContent = "Giriş yap";
+        return false;
+      }
+
+      if (admKilidiUygula()) {
+        admHata("Çok fazla hatalı deneme yapıldı. Süre dolunca form yeniden açılacak.");
+      }
+
+      var admMesgul = false;
       form.addEventListener("submit", function (e) {
         e.preventDefault();
-        var beklenen = (typeof HK_ADMIN !== "undefined" && HK_ADMIN.parola) || "";
-        /* Kaba kuvvet yavaşlatma: art arda hata sayılır, 3 hatada 60 sn bekletir.
-           Aynı tarayıcıda tutulur; gerçek bir sınır değil, sadece deneme
-           yanılmayı yavaşlatır (parola zaten kaynak kodda görünür). */
-        if (admKilitBitis > nowMs()) {
-          if (errBox) {
-            errBox.textContent = "Çok fazla hatalı deneme. " +
-              Math.ceil((admKilitBitis - nowMs()) / 1000) + " sn sonra tekrar deneyin.";
-            errBox.classList.remove("show"); void errBox.offsetWidth; errBox.classList.add("show");
-          }
+        if (admMesgul) return;
+        if (admKilidiUygula()) {
+          var k = admKilitOku();
+          admHata("Çok fazla hatalı deneme. " + admSureYazisi(k.bitis - nowMs()) + " sonra tekrar deneyin.");
           return;
         }
-        if (!beklenen || girdi.value !== beklenen) {
-          admHata++;
-          if (admHata >= 3) { admKilitBitis = nowMs() + 60000; admHata = 0; }
-          if (errBox) {
-            errBox.textContent = "Parola hatalı.";
-            errBox.classList.remove("show"); void errBox.offsetWidth; errBox.classList.add("show");
-          }
-          girdi.value = "";
-          girdi.focus();
+
+        var kullanici = kulGirdi.value.trim();
+        var parola = parGirdi.value;
+        if (!kullanici || !parola) {
+          admHata("Kullanıcı adı ve parola gerekli.");
           return;
         }
-        admHata = 0; admKilitBitis = 0;
-        enter("yonetim");
+
+        /* PBKDF2 600.000 tur bu makinede ~0,12 sn sürüyor; eski bir telefonda
+           saniyeleri bulabilir. Bekleme kaba kuvvete karşı bir maliyettir, ama
+           kullanıcı ekranın donmadığını görsün diye düğme durumu yazılır. */
+        admMesgul = true;
+        dugme.disabled = true;
+        dugme.textContent = "Denetleniyor…";
+
+        admTuret(kullanici, parola).then(function (dogruMu) {
+          admMesgul = false;
+          dugme.disabled = false;
+          dugme.textContent = "Giriş yap";
+
+          if (dogruMu) {
+            try { localStorage.removeItem(HK_ADM_KILIT); } catch (e) { /* önemsiz */ }
+            parGirdi.value = "";
+            enter("yonetim");
+            return;
+          }
+
+          var d = admKilitOku();
+          d.hata += 1;
+          var bekle = admGecikme(d.hata);
+          if (bekle > 0) d.bitis = nowMs() + bekle;
+          admKilitYaz(d);
+
+          parGirdi.value = "";
+          if (admKilidiUygula()) {
+            admHata("Kullanıcı adı veya parola hatalı. Çok fazla deneme yapıldı: " +
+              admSureYazisi(bekle) + " beklemeniz gerekiyor.");
+          } else {
+            /* Kalan hak yazılır: meşru yönetici yanlış tuşa bastığını
+               anlasın, kilide yakalanmadan düzeltsin. */
+            var kalanHak = 3 - d.hata;
+            admHata("Kullanıcı adı veya parola hatalı." +
+              (kalanHak > 0 ? " Kilitlenmeden önce " + kalanHak + " deneme hakkınız kaldı." : ""));
+            kulGirdi.focus();
+          }
+        }).catch(function (err) {
+          admMesgul = false;
+          dugme.disabled = false;
+          dugme.textContent = "Giriş yap";
+          /* Doğrulama YAPILAMADIYSA giriş verilmez. Sessizce düz metin
+             karşılaştırmaya düşmek, korumanın tamamını iptal ederdi. */
+          if (err && err.message === "guvenli-baglam") {
+            admHata("Bu sayfa güvenli bağlamda açılmadığı için parola doğrulanamıyor. " +
+              "Portalı https:// adresinden ya da localhost üzerinden açın.");
+          } else if (err && err.message === "yapilandirma") {
+            admHata("Yönetici kimliği tanımlı değil (data.js → HK_ADMIN). " +
+              "node tools/yonetici-kimligi.mjs ile üretip yapıştırın.");
+          } else {
+            admHata("Parola doğrulanamadı. Sayfayı yenileyip tekrar deneyin.");
+          }
+        });
       });
     }
   }

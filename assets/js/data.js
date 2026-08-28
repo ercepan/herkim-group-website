@@ -51,20 +51,50 @@ const HK_FEATURES = {
 
 /* ============================================================
    YONETICI HESABI (urun yonetimi)
-   Portal adresini bilen + asagidaki parolayi giren kisi urun ve dokuman
-   ekleyip cikarabilir.
+   Kullanici adi ve parolayi giren kisi urun ve dokuman ekleyip cikarabilir.
 
-   DURUST SINIR — bu parola GERCEK BIR GUVENLIK DEGILDIR:
-   site statik oldugu icin parola tarayiciya inen kodun icindedir ve
-   kaynak goruntulenerek okunabilir. ASIL koruma sudur: portalda yapilan
-   ekleme/cikarma YALNIZCA o kisinin kendi tarayicisinda durur. Degisiklik
-   siteye ancak "Disa aktar" ciktisi data.js'e yapistirilip commit edilince
-   yansir. Yani yetkisiz biri girse bile YAYINDAKI siteyi degistiremez.
+   PAROLA BURADA YAZMAZ. Asagidaki "ozet", kullanici adi ile parolanin
+   birlesiminden PBKDF2-HMAC-SHA256 ile 600.000 turda turetildi. Bu dosyayi
+   okuyan kimlikleri OGRENEMEZ. Portal girisinde ayni turetme tarayicida
+   (WebCrypto) yeniden yapilir ve sonuc bu ozetle karsilastirilir.
+
+   Yeni kimlik uretmek icin:  node tools/yonetici-kimligi.mjs
+   Arac parolayi hicbir dosyaya yazmaz, yalniz ekrana basar.
+
+   DURUST SINIR — bunun neyi koruyup neyi korumadigi:
+   KORUR:   kaynagi okuyan parolayi goremez; deneme yaniltma pahalidir
+            (her deneme yeniden PBKDF2 turetmesi gerektirir + artan
+            kilit sureleri).
+   KORUMAZ: ozet herkese aciktir, yani sabirli biri CEVRIMDISI deneme
+            yapabilir. Bunu anlamsiz kilan sey parolanin uzunlugudur —
+            arac 24 karakterlik (~139 bit) parola uretir; bu uzunlukta
+            cevrimdisi deneme pratikte imkansizdir. KENDI parolanizi
+            koyacaksaniz kisa ya da tahmin edilebilir olmasin.
+   KORUMAZ: tarayicidaki kilit sayaci localStorage'dadir; devtools bilen
+            biri onu silebilir. Kilit, klavye basinda deneyen birini
+            durdurur — kararli bir saldirgani degil.
+
+   ASIL koruma bunlarin hicbiri degil, sudur: portalda yapilan ekleme ve
+   cikarma YALNIZCA o kisinin kendi tarayicisinda durur. Degisiklik siteye
+   ancak "Disa aktar" ciktisi data.js'e yapistirilip commit edilince yansir.
+   Yani yetkisiz biri girse bile YAYINDAKI siteyi degistiremez.
 
    Gercek parola korumasi ancak sunucu tarafiyla gelir (bkz. herkim-backend).
    ============================================================ */
 const HK_ADMIN = {
-  parola: "herkim2026"   // DEGISTIRIN. Kaynak kodda gorunur; gizli bilgi koymayin.
+  tuz: "d4235bb9d8424cbbe9ff8544a2ff2ebf",
+  tur: 600000,
+  ozet: "2632df19fd61445b944be8c39dccc7b60ff3448331798dcedc0305ea450b6a89",
+
+  /* Kaba kuvvet basamaklari: [kacinci hatadan itibaren, kac saniye kilit].
+     Yukaridan asagiya okunur, ilk uyan basamak uygulanir. */
+  gecikme: [
+    [10, 21600],  // 10. hatadan sonra 6 saat
+    [7, 3600],    // 7. hatadan sonra 1 saat
+    [5, 900],     // 5. hatadan sonra 15 dakika
+    [4, 300],     // 4. hatadan sonra 5 dakika
+    [3, 60]       // 3. hatadan sonra 1 dakika
+  ]
 };
 
 /* Şirket künyesi.
