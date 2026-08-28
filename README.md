@@ -19,7 +19,7 @@
 | `hesap.html` | Müşteri hesap başvurusu (NGB modeli): VKN/TCKN sağlama basamağı denetimi |
 | `siparislerim.html` | Girişli müşterinin sipariş takibi (durum, zaman çizelgesi, takip no) |
 | `kvkk.html` | KVKK + çerez politikası (şablon — hukukçuya danışılacak) |
-| `portal.html` | **İç PERSONEL portalı — menülerde LİNKİ YOK, bilinçli gizli.** 3 rol: satış (CRM + başvuru onayı) / depo / yönetim. Müşteri rolü portaldan çıkarıldı; müşteri kendi siparişini ana sitedeki `siparislerim.html` sayfasından izler. |
+| `portal.html` | **İç PERSONEL portalı — menülerde LİNKİ YOK, bilinçli gizli.** Faz 1'de tek yönetici hesabı, yalnız ürün/doküman yönetimi (bkz. "Yayın modu"). Kapalı duran Faz 2'de 3 rol vardır: satış (CRM + başvuru onayı) / depo / yönetim. Müşteri rolü portaldan çıkarıldı; müşteri kendi siparişini ana sitedeki `siparislerim.html` sayfasından izler. |
 
 `pan/` klasörü: Pan Holding örnek sitesi (ayrı iş, Herkim'den bağımsız).
 
@@ -41,9 +41,35 @@ Gerçek veritabanı katmanı — Supabase hesabı açıldığı an devreye girer
 şablonları ve 29 sızıntı testi orada. Kurulum: `herkim-backend/README.md`.
 Site şu an hâlâ yerel demo modunda (`assets/js/hg-config.js` → `demo: true`).
 
-## Demo akışı
+## Yayın modu: yönetici girişi
 
-- **Portal girişi:** rol düğmeleriyle (şifresiz demo). **Müşteri girişi:** ana sitedeki hesap düğmesinden, demo şifresi `portal-store.js → HGP_DEMO_PASS`.
+Faz 1'de portal **tek bir yönetici hesabıyla** ve yalnız ürün/doküman
+yönetimi için açılır (`data.js → HK_FEATURES.urunYonetimi`). Rol düğmeleri,
+CRM, siparişler ve müşteri kartları kapalıdır.
+
+- **Kimlik `data.js`'te YAZMAZ.** Yalnız PBKDF2-HMAC-SHA256 özeti durur
+  (`HK_ADMIN.tuz / tur / ozet`); kullanıcı adı ve parola birlikte özetlenir.
+  Giriş sırasında aynı türetme tarayıcıda WebCrypto ile tekrarlanır.
+- **Yeni kimlik üretmek:** `node tools/yonetici-kimligi.mjs` — kullanıcı adı,
+  parola ve `data.js`'e yapıştırılacak bloğu ekrana basar. Parolayı hiçbir
+  dosyaya yazmaz; parola yöneticinize kaydedin, depoya koymayın.
+- **Kaba kuvvet:** hata sayacı `localStorage → hg_adm_lock_v1` içinde
+  KALICI tutulur; sayfayı yenilemek kilidi düşürmez. Basamaklar
+  `HK_ADMIN.gecikme`: 3. hatada 1 dk, 4.'te 5 dk, 5.'te 15 dk, 7.'de 1 saat,
+  10.'da 6 saat. Kilit bitince sayaç sıfırlanmaz — ısrar eden her turda
+  daha uzun bekler.
+- **Neyi korumaz:** özet herkese açıktır (çevrimdışı deneme mümkün — parolanın
+  24 karakter olması bunu anlamsız kılar) ve kilit sayacı devtools ile
+  silinebilir. Asıl koruma şudur: portaldaki değişiklik yalnız o tarayıcıda
+  kalır, yayına ancak commit ile çıkar.
+- Portal `https://` ya da `localhost` gerektirir: WebCrypto güvenli bağlam
+  ister. Güvenli bağlam yoksa giriş verilmez, açık uyarı gösterilir.
+
+## Demo akışı (Faz 2 — şu an KAPALI)
+
+- **Müşteri girişi:** ana sitedeki hesap düğmesinden, demo şifresi
+  `portal-store.js → HGP_DEMO_PASS`. `HK_FEATURES.hesapBasvurusu` ve
+  `siparis` bayrakları `false` olduğu için bu akış şu an kapalıdır.
 - ⚠️ Demo şifresi kaynak kodda ve depo public — gerçek müşteri verisi girmeden önce Supabase Auth'a geçilmeli (bkz. `herkim-backend/README.md`).
 - Uçtan uca: `hesap.html`'den başvur → portalda **Satış → Müşteri Kartları**'nda onayla → o e-postayla ana siteden gir → sepetten sipariş ver → sipariş satış onayına, depo panosuna, yönetim dashboard'una düşer → müşteri `siparislerim.html`'den izler.
 - Veriler tarayıcıda (`localStorage`) yaşar; portalda "Demoyu sıfırla" ile başa döner. Gerçek kuruluma geçişte bu katman küçük bir API + Logo Tiger/ATLAS entegrasyonuyla değişecek; ekranlar aynı kalır.
