@@ -42,7 +42,10 @@
   var HGP_SESSION_KEY = "hg_portal_session";
   var HGP_LOCK_KEY = "hg_login_lock";
   var HGP_LAST_LOGIN = "hg_last_login_";
-  var HGP_DEMO_PASS = "demo1234";
+  /* DEMO PAROLASI SİLİNDİ. Burada "demo1234" yazıyordu ve depo herkese açık.
+     Faz 1'de müşteri girişi kapalı olduğu için geçerli parola yoktur; Faz 2'de
+     yerine sunucu tarafı kimlik doğrulama gelecek (bkz. herkim-backend). */
+  var HGP_DEMO_PASS = null;
   var HGP_IDLE_MS = 15 * 60 * 1000;
   var HGP_LOCK_MS = 60 * 1000;
   var HGP_MAX_FAILS = 3;

@@ -5,7 +5,7 @@
    Kilitlenme ve boşta kalma kuralları portalla birebir aynıdır.
 
    UYARI — BU BİR DEMO GİRİŞİDİR, GÜVENLİK DEĞERİ YOKTUR:
-   - Parola (HGP_DEMO_PASS) tarayıcıya inen paketin içindedir; gizli bir şey
+   - Faz 1'de geçerli parola YOKTUR (demo parolası silindi); gizli bir şey
      değildir. EKRANA YAZILMAZ (bilerek kaldırıldı) ama kaynak koddan okunabilir.
    - Oturum, localStorage'da düz bir nesnedir. Konsoldan tek satırla rol
      yazan herkes istediği hesap gibi görünür. Doğrulama yapılmaz.
@@ -33,7 +33,11 @@
      tanımlıdır; burada yalnızca kısa okunur takma adları veriliyor.
      Değerleri BURAYA yeniden yazmayın, iki dosya sessizce ayrışır. */
   const SES = HGP_SESSION_KEY, LOCK = HGP_LOCK_KEY, LAST = HGP_LAST_LOGIN;
-  const PASS = HGP_DEMO_PASS, IDLE = HGP_IDLE_MS;
+  /* Faz 1'de geçerli müşteri parolası YOKTUR. Eskiden burada kaynak koda
+     gömülü "demo1234" vardı; silindi. Aşağıdaki karşılaştırma bu yüzden her
+     zaman başarısız olur — pencere zaten OZELLIK_ACIK ile kapalı, bu ikinci
+     bir emniyet. Faz 2'de yerine Supabase Auth gelecek. */
+  const PASS = null, IDLE = HGP_IDLE_MS;
 
   /* Oturumu her etkinlikte değil, en fazla bu sıklıkta diske yazarız
      (scroll/touch sırasında sürekli localStorage yazmamak için). */
@@ -271,26 +275,13 @@
     form.appendChild(submit);
     panel.appendChild(form);
 
-    const demo = el("div", "auth-demo");
-    const hint = el("p");
-    hint.style.cssText = "font-size:12.5px;color:var(--ink-3);margin-bottom:9px";
-    /* GÜVENLİK: demo şifresi EKRANA YAZILMAZ. Depo herkese açık ve bu metin
-       giriş penceresinde herkese görünür olurdu. Özellik Faz 2'de açıldığında
-       da bu satır geri gelmemeli. */
-    hint.appendChild(document.createTextNode(T("auth.demoHint")));
-    demo.appendChild(hint);
-    const db = el("button", "btn btn--ghost btn--sm", T("auth.demoBtn"));
-    db.type = "button";
-    db.style.cssText = "width:100%;justify-content:center";
-    db.addEventListener("click", () => login("musteri", null, rem.checked));
-    demo.appendChild(db);
-    const apply = el("p");
-    apply.style.cssText = "margin-top:12px;font-size:12.5px;color:var(--ink-3)";
-    const aa = el("a", "accent", T("auth.applyLink"));
-    aa.href = "hesap.html";
-    apply.appendChild(aa);
-    demo.appendChild(apply);
-    panel.appendChild(demo);
+    /* DEMO GİRİŞİ SİLİNDİ (kalıcı).
+       Burada "Demo müşteri olarak gir" düğmesi vardı ve login("musteri", null)
+       çağırıyordu: parolasız bir arka kapıydı. Yanında demo parolası da ekrana
+       yazılıyordu. İkisi de kaldırıldı; Faz 2'de müşteri girişi açıldığında
+       gerçek kimlik doğrulamayla (Supabase Auth) gelecek, demo kısayoluyla
+       değil. Hesap başvurusu bağlantısı da burada değil — başvuru Faz 1'de
+       kapalı, alıcılar satış ekibiyle iletişime geçiyor. */
 
     overlay.appendChild(panel);
     overlay.addEventListener("click", (e) => { if (e.target === overlay) cancelModal(); });
@@ -326,7 +317,7 @@
         if (l.until > Date.now()) lockUI();
         else showErr(msg.replace("{n}", l.n));
       };
-      if (i2.value !== PASS) { fail(T("auth.err")); return; }
+      if (!PASS || i2.value !== PASS) { fail(T("auth.err")); return; }
       // E-posta → hesap eşleme: varsayılan demo müşteri ya da onaylı web hesabı
       const em = i1.value.trim().toLowerCase();
       if (!em || em === "satinalma@derimderi.com.tr") { login("musteri", null, rem.checked); return; }
