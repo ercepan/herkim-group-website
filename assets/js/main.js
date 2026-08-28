@@ -741,11 +741,10 @@
     meta.appendChild(el("span", null, SUB_LABEL(p.sub)));
     card.appendChild(meta);
 
-    const add = el("button", "ec-add", "+");
-    add.setAttribute("aria-label", T("basket.addAria"));
-    add.setAttribute("title", T("basket.addAria"));
-    add.addEventListener("click", () => addToBasket(p.id));
-    card.appendChild(add);
+    /* Katalog kartında "+" düğmesi YOK (kullanıcı isteği): kart yalnızca
+       tanıtım amaçlıdır. Teklif sepetine ekleme, etiketi açıkça yazan
+       "+ Teklif" düğmesiyle Ürün Listesi sayfasında yapılır — çıplak bir
+       artı işareti ne yaptığını anlatmıyordu. */
     return card;
   }
 

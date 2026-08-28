@@ -43,7 +43,28 @@
 const HK_FEATURES = {
   hesapBasvurusu: false,  // hesap.html, giris penceresi, basliktaki hesap dugmesi
   siparis: false,         // sepetten dogrudan siparis + siparislerim.html
-  portal: false           // ic personel portali (portal.html - zaten linksiz)
+  portal: false,          // ic personel portali: CRM, siparisler, musteri kartlari
+  urunYonetimi: true      // TEK YONETICI: portal.html yalnizca urun/dokuman
+                          // yonetimi icin acilir. CRM ve siparis ekranlari
+                          // "portal" bayragina baglidir, bu bayrakla ACILMAZ.
+};
+
+/* ============================================================
+   YONETICI HESABI (urun yonetimi)
+   Portal adresini bilen + asagidaki parolayi giren kisi urun ve dokuman
+   ekleyip cikarabilir.
+
+   DURUST SINIR — bu parola GERCEK BIR GUVENLIK DEGILDIR:
+   site statik oldugu icin parola tarayiciya inen kodun icindedir ve
+   kaynak goruntulenerek okunabilir. ASIL koruma sudur: portalda yapilan
+   ekleme/cikarma YALNIZCA o kisinin kendi tarayicisinda durur. Degisiklik
+   siteye ancak "Disa aktar" ciktisi data.js'e yapistirilip commit edilince
+   yansir. Yani yetkisiz biri girse bile YAYINDAKI siteyi degistiremez.
+
+   Gercek parola korumasi ancak sunucu tarafiyla gelir (bkz. herkim-backend).
+   ============================================================ */
+const HK_ADMIN = {
+  parola: "herkim2026"   // DEGISTIRIN. Kaynak kodda gorunur; gizli bilgi koymayin.
 };
 
 /* Şirket künyesi.
