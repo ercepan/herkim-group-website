@@ -5,8 +5,8 @@
    Kilitlenme ve boşta kalma kuralları portalla birebir aynıdır.
 
    UYARI — BU BİR DEMO GİRİŞİDİR, GÜVENLİK DEĞERİ YOKTUR:
-   - Parola (HGP_DEMO_PASS) tarayıcıya inen paketin içindedir ve giriş
-     penceresinde ipucu olarak zaten ekrana yazılır. Gizli bir şey değildir.
+   - Parola (HGP_DEMO_PASS) tarayıcıya inen paketin içindedir; gizli bir şey
+     değildir. EKRANA YAZILMAZ (bilerek kaldırıldı) ama kaynak koddan okunabilir.
    - Oturum, localStorage'da düz bir nesnedir. Konsoldan tek satırla rol
      yazan herkes istediği hesap gibi görünür. Doğrulama yapılmaz.
    - Kilitlenme (HGP_LOCK_MS) ve boşta kalma (HGP_IDLE_MS) sayaçları da
@@ -274,8 +274,10 @@
     const demo = el("div", "auth-demo");
     const hint = el("p");
     hint.style.cssText = "font-size:12.5px;color:var(--ink-3);margin-bottom:9px";
-    hint.appendChild(document.createTextNode(T("auth.demoHint") + " "));
-    hint.appendChild(el("b", "mono", PASS));
+    /* GÜVENLİK: demo şifresi EKRANA YAZILMAZ. Depo herkese açık ve bu metin
+       giriş penceresinde herkese görünür olurdu. Özellik Faz 2'de açıldığında
+       da bu satır geri gelmemeli. */
+    hint.appendChild(document.createTextNode(T("auth.demoHint")));
     demo.appendChild(hint);
     const db = el("button", "btn btn--ghost btn--sm", T("auth.demoBtn"));
     db.type = "button";
