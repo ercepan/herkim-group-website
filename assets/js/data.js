@@ -65,11 +65,19 @@ const HK_COMPANY = {
                               // Canlıya çıkmadan önce şirketin WhatsApp Business
                               // hattıyla değiştirilecek. Ülke kodu bitişik yazılır,
                               // başında + ve arada boşluk YOKTUR.
-  web3forms: "",              // portal-store.js hgNotify + main.js. Anahtar girilince
-                              // iletişim/teklif/sipariş/başvuru bildirimleri şirket
-                              // e-postasına ANINDA düşer; boşken mailto yedeğine düşülür.
-                              // Anahtar almak: web3forms.com → e-postayı gir →
-                              // gelen anahtarı buraya yapıştır.
+  web3forms: "",              // portal-store.js hgNotify. Anahtar girilince iletişim ve
+                              // teklif talepleri şirket e-postasına ANINDA düşer.
+                              // NASIL ALINIR: web3forms.com adresine girip aşağıdaki
+                              // notifyTo adresini (sales@herkimgroup.com) yazın; o adrese
+                              // gelen anahtarı buraya yapıştırın. Anahtar herkese açıktır,
+                              // gizli değildir — güvenlik domain kısıtlamasıyla sağlanır
+                              // (Web3Forms panelinden "Allowed Domains" alanına yayın
+                              //  adresinizi ekleyin, yoksa anahtarı gören başkası da
+                              //  sizin kotanızı kullanabilir).
+  notifyTo: "sales@herkimgroup.com",  // Web3Forms anahtarının kayıtlı olduğu adres.
+                                      // Talepler ÖNCE buraya düşer (ticari kutu).
+  notifyCc: "info@herkimgroup.com",   // Kopya. İki kutu da aynı talebi görsün diye.
+                                      // Boş bırakılırsa kopya gönderilmez.
 
   /* --- ŞU AN KOD TARAFINDAN OKUNMUYOR — sitede elle yazılmış ---
      Aşağıdakiler gerçek şirket verisidir ve ileride koda bağlanabilir; bu yüzden

@@ -527,6 +527,11 @@ const HK_I18N = {
     "f.title": "Size nasıl yardımcı olalım?",
     "f.name": "Ad Soyad",
     "f.firm": "Firma",
+    "f.sending": "Gönderiliyor…",
+    "f.failTitle": "Talebiniz gönderilemedi",
+    "f.failBody": "Bağlantı sorunu olabilir. Formu tekrar deneyebilir ya da aşağıdaki yollardan doğrudan bize ulaşabilirsiniz — mesai saatlerinde en kısa sürede dönüş yapıyoruz.",
+    "f.failWa": "WhatsApp'tan yazın",
+    "f.email": "E-posta *",
     "f.phone": "Telefon",
     "f.topic": "Konu",
     "f.msg": "Mesajınız",
@@ -545,6 +550,7 @@ const HK_I18N = {
     "kvkk.s1.body": "Herkim Kimya, 6698 sayılı KVKK kapsamında veri sorumlusu sıfatıyla hareket eder. İletişim ve teklif formları aracılığıyla paylaştığınız ad, firma, telefon ve e-posta bilgileri yalnızca talebinizin karşılanması amacıyla işlenir; açık rızanız olmadan üçüncü kişilerle paylaşılmaz. KVKK haklarınızı info@herkimgroup.com adresine başvurarak kullanabilirsiniz.",
     "kvkk.s2.title": "Çerez kullanımı",
     "kvkk.s2.body": "Sitemiz yalnızca gerekli çerezleri ve yerel depolamayı kullanır: teklif sepetiniz, dil tercihiniz ve çerez onayınız. Reklam veya izleme amaçlı üçüncü taraf çerezi kullanılmaz. Tarayıcı ayarlarınızdan bu verileri dilediğinizde temizleyebilirsiniz.",
+    "kvkk.transfer": "Yurt dışına aktarım: İletişim ve teklif formunu gönderdiğinizde, formda verdiğiniz bilgiler (ad, firma, e-posta, telefon, konu ve mesajınız) talebinizi şirket e-posta kutumuza iletebilmek için Web3Forms adlı form iletim hizmeti üzerinden geçer; bu hizmetin sunucuları yurt dışındadır. Aktarılan veriler yalnızca iletim amacıyla işlenir, pazarlama amacıyla kullanılmaz ve üçüncü kişilere satılmaz. Bu aktarımı istemiyorsanız bize doğrudan telefon, WhatsApp veya e-posta ile ulaşabilirsiniz.",
     "kvkk.note": "NOT: Bu metin bir şablondur; yayına almadan önce hukuk danışmanınızla güncelleyiniz."
   },
 
@@ -1018,6 +1024,11 @@ const HK_I18N = {
     "f.title": "How can we help?",
     "f.name": "Full Name",
     "f.firm": "Company",
+    "f.sending": "Sending…",
+    "f.failTitle": "Your message could not be sent",
+    "f.failBody": "There may be a connection problem. Please try again, or reach us directly using one of the options below — we reply as soon as possible during business hours.",
+    "f.failWa": "Message on WhatsApp",
+    "f.email": "E-mail *",
     "f.phone": "Phone",
     "f.topic": "Subject",
     "f.msg": "Your Message",
@@ -1036,6 +1047,7 @@ const HK_I18N = {
     "kvkk.s1.body": "Herkim Kimya acts as data controller under Turkey's KVKK (Law No. 6698). The name, company, phone and e-mail you share via contact and quote forms are processed solely to fulfill your request and are not shared with third parties without your explicit consent. You may exercise your rights by writing to info@herkimgroup.com.",
     "kvkk.s2.title": "Cookie usage",
     "kvkk.s2.body": "Our site uses only necessary cookies and local storage: your quote basket, language preference and cookie consent. No third-party advertising or tracking cookies are used. You can clear this data anytime from your browser settings.",
+    "kvkk.transfer": "International transfer: When you submit the contact or quote form, the information you provide (name, company, e-mail, phone, subject and message) is passed through a form delivery service called Web3Forms so that it reaches our company mailbox; this service's servers are located abroad. The data is processed solely for delivery, is not used for marketing and is not sold to third parties. If you prefer not to use this route, you can reach us directly by phone, WhatsApp or e-mail.",
     "kvkk.note": "NOTE: This text is a template; update it with your legal advisor before publishing."
   },
 
@@ -1509,6 +1521,11 @@ const HK_I18N = {
     "f.title": "Чем можем помочь?",
     "f.name": "Имя и фамилия",
     "f.firm": "Компания",
+    "f.sending": "Отправляется…",
+    "f.failTitle": "Не удалось отправить заявку",
+    "f.failBody": "Возможны проблемы со связью. Попробуйте ещё раз или свяжитесь с нами напрямую одним из способов ниже — мы отвечаем в рабочее время.",
+    "f.failWa": "Написать в WhatsApp",
+    "f.email": "E-mail *",
     "f.phone": "Телефон",
     "f.topic": "Тема",
     "f.msg": "Ваше сообщение",
@@ -1527,6 +1544,7 @@ const HK_I18N = {
     "kvkk.s1.body": "Herkim Kimya выступает оператором данных согласно закону Турции KVKK (№ 6698). Имя, компания, телефон и e-mail, переданные через формы, обрабатываются исключительно для выполнения вашего запроса и не передаются третьим лицам без вашего согласия. Свои права вы можете реализовать, написав на info@herkimgroup.com.",
     "kvkk.s2.title": "Использование cookie",
     "kvkk.s2.body": "Сайт использует только необходимые cookie и локальное хранилище: корзину запроса, выбор языка и согласие на cookie. Рекламные и трекинговые cookie третьих сторон не используются. Эти данные можно очистить в настройках браузера.",
+    "kvkk.transfer": "Передача за рубеж: при отправке формы обратной связи указанные вами данные (имя, компания, e-mail, телефон, тема и сообщение) проходят через сервис доставки форм Web3Forms, серверы которого расположены за рубежом, чтобы запрос попал в наш корпоративный почтовый ящик. Данные обрабатываются только для доставки, не используются в маркетинге и не передаются третьим лицам. Если вы против этого, свяжитесь с нами напрямую по телефону, WhatsApp или e-mail.",
     "kvkk.note": "ПРИМЕЧАНИЕ: этот текст — шаблон; обновите его с юристом перед публикацией."
   }
 };

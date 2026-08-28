@@ -934,6 +934,11 @@
         message: (lines || []).join("\n")
       };
       if (senderEmail && senderEmail.indexOf("@") > 0) body.email = senderEmail;
+      /* İkinci kutuya kopya: talep hem ticari (sales@) hem genel (info@)
+         kutuya düşsün. Adres data.js -> HK_COMPANY.notifyCc alanından gelir;
+         boş bırakılırsa kopya gönderilmez. */
+      var kopya = (typeof HK_COMPANY !== "undefined" && HK_COMPANY.notifyCc) || "";
+      if (kopya && kopya.indexOf("@") > 0) body.cc = [kopya];
       return fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
