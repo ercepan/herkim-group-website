@@ -320,7 +320,11 @@
     localStorage.setItem(BASKET_KEY, "[]");
     localStorage.removeItem(BASKET_OWNER_KEY);
   }
-  const isCust = () => !!(window.hkAuth && window.hkAuth.isCustomer());
+  /* Yayın aşaması: sipariş kapalıyken sepet DAİMA teklif modunda kalır.
+     Bu tek satır, sipariş akışının bütün giriş kapılarını kapatır
+     (sepet başlığı, adet kutusu etiketi, onay ekranı, ürün kartı düğmesi). */
+  const SIPARIS_ACIK = (typeof HK_FEATURES === "undefined") || HK_FEATURES.siparis !== false;
+  const isCust = () => SIPARIS_ACIK && !!(window.hkAuth && window.hkAuth.isCustomer());
 
   let bdView = "cart"; // cart | confirm | quoteform | success
   let lastOrderId = "";
@@ -333,7 +337,7 @@
     const line = b.find(x => x.id === id);
     bdView = "cart";
     if (line) {
-      line.qty = Math.min(QTY_MAX, (line.qty || 1) + 1);
+      line.qty = Math.min(qtyMaxFor(p), (line.qty || 1) + 1);
       setBasket(b);
       toast("“" + PNAME(p) + "” — " + T("basket.inc") + ": " + line.qty);
       openBasket();
@@ -470,7 +474,7 @@
       cta.textContent = "✓ " + T("order.place");
       cta.addEventListener("click", () => { bdView = "confirm"; renderBasket(); });
       body.appendChild(cta);
-    } else {
+    } else if (SIPARIS_ACIK) {
       cta.textContent = T("basket.loginToOrder");
       cta.addEventListener("click", () => {
         if (!window.hkAuth) return;
@@ -482,7 +486,10 @@
       ap.style.cssText = "width:100%;justify-content:center;margin-top:10px";
       body.appendChild(ap);
     }
-    body.appendChild(smallNote(cust ? T("order.info") : T("basket.memberNote")));
+    /* Sipariş kapalıyken sepetin tek çıkışı alttaki teklif düğmeleridir
+       (WhatsApp / e-posta) — üstte ayrıca bir çağrı düğmesi gösterilmez. */
+    body.appendChild(smallNote(cust ? T("order.info")
+                              : (SIPARIS_ACIK ? T("basket.memberNote") : T("basket.quoteOnlyNote"))));
   }
 
   function renderConfirm(body, b) {
@@ -734,6 +741,9 @@
     meta.appendChild(el("span", null, SUB_LABEL(p.sub)));
     card.appendChild(meta);
 
+    /* "+" teklif sepetine ekler. Faz 1'de sepet yalnızca TEKLİF sepetidir:
+       sipariş verme kapalı (HK_FEATURES.siparis === false), sepetten
+       çıkan tek şey satış ekibine giden teklif talebidir. */
     const add = el("button", "ec-add", "+");
     add.setAttribute("aria-label", T("basket.addAria"));
     add.setAttribute("title", T("basket.addAria"));
@@ -996,43 +1006,95 @@
   }
 
   /* ============ 11) Formlar ============ */
+  /* ============ İletişim / teklif formu ============
+     Gönderim Web3Forms üzerinden yapılır (data.js -> HK_COMPANY.web3forms).
+     Anahtar boşken veya gönderim başarısızken ziyaretçiyi karanlıkta
+     bırakmıyoruz: doğrudan iletişim yollarını (WhatsApp / telefon /
+     e-posta) gösteren bir kutu açılıyor. Eski davranış (mailto ile
+     ziyaretçinin posta programını açmaya çalışmak) kaldırıldı —
+     mobilde çoğu kullanıcıda sessizce hiçbir şey olmuyordu. */
   const cform = $("#contact-form");
-  if (cform) cform.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const data = new FormData(cform);
-    const name = (data.get("name") || "").toString().trim();
-    const firm = (data.get("firm") || "").toString().trim();
-    const msg = (data.get("msg") || "").toString().trim();
-    if (!name || !msg) { toast(T("toast.formErr")); return; }
-    const phone = (data.get("phone") || "").toString().trim();
-    const topic = (data.get("topic") || "").toString().trim();
-    // Landing → CRM: talep portaldaki satış kutusuna da düşer (demo)
-    try {
-      const q = JSON.parse(localStorage.getItem(HGP_QUEUE) || "[]");
-      const d = new Date();
-      const pad = (x) => (x < 10 ? "0" : "") + x;
-      q.push({ name, firm, topic, msg,
-               date: pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() });
-      localStorage.setItem(HGP_QUEUE, JSON.stringify(q));
-    } catch (err) {}
-    // Önce gerçek gönderim (Web3Forms); anahtar yoksa/başarısızsa e-posta yedeği
-    const mailFallback = () => {
-      const body = "Ad/Name: " + name + "\nFirma/Company: " + firm +
-        "\nTel: " + phone + "\nKonu/Subject: " + topic + "\n\n" + msg;
-      location.href = "mailto:" + HK.email + "?subject=" + encodeURIComponent("Web — " + (firm || name)) + "&body=" + encodeURIComponent(body);
-      toast(T("toast.mailOpening"));
-    };
+  if (cform) {
+    /* Bot kalkanı: gizli tuzak alan + en az doldurma süresi + hız sınırı.
+       İstemci tarafıdır; kararlı saldırganı durdurmaz, otomatik bot
+       trafiğinin ve kazara çift gönderimin maliyetini yükseltir. */
+    const tuzak = el("input");
+    tuzak.type = "text";
+    tuzak.name = "hk_website";
+    tuzak.tabIndex = -1;
+    tuzak.autocomplete = "off";
+    tuzak.setAttribute("aria-hidden", "true");
+    tuzak.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;opacity:0";
+    cform.appendChild(tuzak);
+    /* Doldurma süresi ölçümü. DİKKAT: sayfa açılışı değil, formun ilk
+       ELLE dokunulduğu an baz alınır — sayfa açık unutulduğunda kapı
+       kendiliğinden açılmasın diye. İlk etkileşim yoksa açılış anı kullanılır. */
+    let ilkTemas = 0;
+    ["input", "change", "focusin"].forEach(function (ev) {
+      cform.addEventListener(ev, function () { if (!ilkTemas) ilkTemas = Date.now(); }, { once: false, passive: true });
+    });
+    const acilis = Date.now();
+
     const sbtn = cform.querySelector("[type=submit]");
-    if (sbtn) sbtn.disabled = true;
-    hgNotify("Web İletişim Formu — " + (firm || name),
-      ["Ad: " + name, "Firma: " + (firm || "—"), "Tel: " + (phone || "—"), "Konu: " + (topic || "—"), "", msg],
-      name)
-      .then(ok => {
-        if (sbtn) sbtn.disabled = false;
-        if (ok) { cform.reset(); toast(T("toast.sentOk")); }
-        else mailFallback();
-      });
-  });
+    const sbtnMetni = sbtn ? sbtn.textContent : "";
+
+    /* Gönderim başarısızsa: ne olduğunu söyle, alternatif kanalları göster */
+    function dogrudanIletisim() {
+      let kutu = $("#cf-fallback");
+      if (kutu) kutu.remove();
+      kutu = el("div", "cf-fallback");
+      kutu.id = "cf-fallback";
+      kutu.appendChild(el("b", null, T("f.failTitle")));
+      kutu.appendChild(el("p", null, T("f.failBody")));
+      const sira = el("div", "cf-fallback-links");
+      const wa = el("a", "btn btn--primary btn--sm", T("f.failWa"));
+      wa.href = "https://wa.me/" + HK.whatsapp + "?text=" + encodeURIComponent(T("wa.msg"));
+      wa.target = "_blank"; wa.rel = "noopener noreferrer";
+      const tel = el("a", "btn btn--sm", HK.phone);
+      tel.href = "tel:" + String(HK.phone).replace(/\s/g, "");
+      sira.appendChild(wa); sira.appendChild(tel);
+      /* Her iki kurumsal kutu da gösterilir: ticari talepler sales@, genel
+         konular info@ adresine gider. Ziyaretçi hangisini isterse seçer. */
+      [HK.notifyTo || HK.mailQuote, HK.notifyCc || HK.email]
+        .filter(function (a, i, d) { return a && d.indexOf(a) === i; })
+        .forEach(function (adres) {
+          const m = el("a", "btn btn--sm", adres);
+          m.href = "mailto:" + adres;
+          sira.appendChild(m);
+        });
+      kutu.appendChild(sira);
+      cform.appendChild(kutu);
+      kutu.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+
+    cform.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (tuzak.value) return;                                   // bot doldurdu
+      if (Date.now() - (ilkTemas || acilis) < 2500) { toast(T("guard.tooFast")); return; }
+
+      const data = new FormData(cform);
+      const al = (k) => (data.get(k) || "").toString().trim();
+      const name = al("name"), firm = al("firm"), msg = al("msg");
+      const email = al("email"), phone = al("phone"), topic = al("topic");
+
+      if (!name || !msg) { toast(T("toast.formErr")); return; }
+      if (!email || email.indexOf("@") < 1) { toast(T("toast.mailErr")); $("#cf-email").focus(); return; }
+      if (typeof hgpRateOk === "function" && !hgpRateOk("form", 3, 10)) { toast(T("guard.tooMany")); return; }
+
+      const eskiKutu = $("#cf-fallback"); if (eskiKutu) eskiKutu.remove();
+      if (sbtn) { sbtn.disabled = true; sbtn.textContent = T("f.sending"); }
+
+      hgNotify("Web İletişim Formu — " + (firm || name),
+        ["Ad: " + name, "Firma: " + (firm || "—"), "E-posta: " + email,
+         "Tel: " + (phone || "—"), "Konu: " + (topic || "—"), "", msg],
+        name, email)
+        .then(ok => {
+          if (sbtn) { sbtn.disabled = false; sbtn.textContent = sbtnMetni; }
+          if (ok) { cform.reset(); toast(T("toast.sentOk")); }
+          else dogrudanIletisim();
+        });
+    });
+  }
 
   /* Hesap başvurusu (hesap.html) — NGB modeli: başvur → doğrula → onayla → hesap açılır */
   const aform = $("#acct-form");
@@ -1119,6 +1181,60 @@
         });
     });
   }
+
+  /* ============ 11.5) Kapalı bölüm perdesi ============
+     Yayın aşamasında hesap başvurusu ve sipariş takibi kapalı. Sayfalar
+     SİLİNMEDİ (sonraki faz için duruyor) ama ziyaretçiye boş/yarım ekran
+     göstermek yerine ne olduğunu söyleyip teklif akışına yönlendiriyoruz.
+     Bayrak açılınca bu perde kendiliğinden kalkar. */
+  (function kapaliBolumPerdesi() {
+    const dosya = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+    const kapali =
+      (dosya === "hesap.html" && (typeof HK_FEATURES !== "undefined") && HK_FEATURES.hesapBasvurusu === false) ||
+      (dosya === "siparislerim.html" && (typeof HK_FEATURES !== "undefined") && HK_FEATURES.siparis === false);
+    if (!kapali) return;
+
+    const ana = $("main");
+    if (!ana) return;
+    ana.replaceChildren();
+
+    const bolum = el("section", "section");
+    const sarmal = el("div", "wrap");
+    sarmal.style.maxWidth = "720px";
+
+    const kutu = el("div");
+    kutu.style.cssText = "border:1px solid var(--line);border-radius:var(--radius);" +
+      "background:var(--white);box-shadow:var(--shadow-offset-sm);padding:52px 34px;text-align:center";
+
+    const h = el("h1", "display");
+    h.style.fontSize = "26px";
+    h.setAttribute("data-i18n", "soon.title");
+    h.textContent = T("soon.title");
+    kutu.appendChild(h);
+
+    const p1 = el("p");
+    p1.style.cssText = "color:var(--ink-2);max-width:460px;margin:14px auto 0;font-size:var(--fs-body)";
+    p1.setAttribute("data-i18n", "soon.body");
+    p1.textContent = T("soon.body");
+    kutu.appendChild(p1);
+
+    const dugmeler = el("div");
+    dugmeler.style.cssText = "display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px";
+    const b1 = el("a", "btn btn--primary");
+    b1.href = "urunler.html";
+    b1.setAttribute("data-i18n", "soon.catalog");
+    b1.textContent = T("soon.catalog");
+    const b2 = el("a", "btn");
+    b2.href = "iletisim.html";
+    b2.setAttribute("data-i18n", "soon.contact");
+    b2.textContent = T("soon.contact");
+    dugmeler.appendChild(b1); dugmeler.appendChild(b2);
+    kutu.appendChild(dugmeler);
+
+    sarmal.appendChild(kutu);
+    bolum.appendChild(sarmal);
+    ana.appendChild(bolum);
+  })();
 
   /* ============ 12) Siparişlerim (siparislerim.html) ============ */
   const moWrap = $("#my-orders");

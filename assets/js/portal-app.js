@@ -32,6 +32,46 @@
 (function () {
   "use strict";
 
+  /* ============================================================
+     YAYIN FAZI KAPISI — portal kapalıyken hiç çalışmaz.
+     Faz 1'de site yalnız teklif sistemiyle yayında; portal.html
+     adresini bulan birinin tek tıkla Satış/Depo/Yönetim ekranına
+     (ve içindeki temsilî müşteri kayıtlarına) girmesi engellenir.
+     data.js -> HK_FEATURES.portal true olunca kendiliğinden açılır.
+     ============================================================ */
+  /* YÖNETİCİ MODU: portal kapalı ama ürün yönetimi açıksa, portal
+     yalnızca "Ürünler + Dokümanlar" ekranlarıyla, tek yönetici hesabıyla
+     açılır. CRM, siparişler, müşteri kartları ve operasyon panosu KAPALI
+     kalır (onlar HK_FEATURES.portal bayrağına bağlıdır). */
+  var YONETICI_MODU = (typeof HK_FEATURES !== "undefined")
+    && HK_FEATURES.portal === false
+    && HK_FEATURES.urunYonetimi === true;
+
+  if (typeof HK_FEATURES !== "undefined" && HK_FEATURES.portal === false && !YONETICI_MODU) {
+    var kapat = function () {
+      document.title = "Kullanımda değil";
+      var g = document.getElementById("login-view"); if (g) g.remove();
+      var u = document.getElementById("app-view"); if (u) u.remove();
+      var k = document.createElement("div");
+      k.style.cssText = "min-height:100vh;display:grid;place-items:center;padding:40px;" +
+        "font-family:system-ui,sans-serif;background:#FAF6F1;color:#43333A;text-align:center";
+      var i = document.createElement("div");
+      var b = document.createElement("p");
+      b.style.cssText = "font-size:17px;font-weight:600;color:#1B1216;margin-bottom:8px";
+      b.textContent = "Bu bölüm şu an kullanımda değil.";
+      var a = document.createElement("a");
+      a.href = "index.html";
+      a.style.cssText = "color:#A31C3C;font-weight:600;text-decoration:none";
+      a.textContent = "Herkim Group ana sayfasına dön";
+      i.appendChild(b); i.appendChild(a); k.appendChild(i);
+      document.body.replaceChildren(k);
+    };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", kapat);
+    else kapat();
+    return;
+  }
+
+
   /* ---------- 1. Yardımcılar ---------- */
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
@@ -307,12 +347,17 @@
      4. bölümdeki uyarı burası için de geçerlidir, gerçek yetki denetimi
      sunucuda yapılır. Amacı yanlış ekrana düşmeyi önlemek. */
   function allowed(v) {
+    /* Yönetici modunda YALNIZ iki ekran vardır. Özet/CRM/sipariş/müşteri
+       ekranları örnek müşteri verisi gösterdiği için tamamen kapalıdır —
+       menüde olmamaları yetmez, buradan da geçemesinler (adres çubuğundaki
+       #crm, logoya tıklama, derin bağlantı… hepsi bu fonksiyondan geçer). */
+    if (YONETICI_MODU) return v === "products" || v === "docs";
     if (v === "products" || v === "docs") return !!CAN_EDIT_CATALOG[USER.role];
     return true;
   }
 
   function show(v) {
-    if (!allowed(v)) v = "dash";
+    if (!allowed(v)) v = YONETICI_MODU ? "products" : "dash";
     curView = v;
     VIEWS.forEach(function (x) {
       var p = $("#view-" + x);
@@ -974,10 +1019,12 @@
   var prodBuilt = false;             // ekran bir kez kurulur (bkz. 14. bölüm)
   var prodF = null;                  // form alanlarının düğümleri
   var prodBodyEl = null, prodCountEl = null;
+  var baseBodyEl = null, baseCountEl = null, baseSearchEl = null;
 
   function buildProductScreen() {
     if (prodBuilt) return;
     var fp = need("#prod-form-panel"), lp = need("#prod-list-panel"), xp = need("#prod-export-panel");
+    var bp = need("#prod-base-panel"), hxp = need("#prod-hidden-export-panel");
     if (!fp || !lp || !xp) return;
     prodBuilt = true;
 
@@ -1126,6 +1173,53 @@
     wrap.appendChild(tbl);
     lp.appendChild(wrap);
 
+    /* --- data.js'teki sabit katalog: listeden çıkarma ---
+       Bu tablo HK_PRODUCTS'ı OLDUĞU GİBİ gösterir. "Listeden çıkar" ürünü
+       katalogdan gizler (bu tarayıcıda); kalıcı olması için en alttaki
+       panelin yönergesi uygulanıp commit edilmelidir. */
+    bp.textContent = "";
+    baseCountEl = el("span", "ops-note", "");
+    bp.appendChild(panelHead(T("portal.base.title", "data.js kataloğu — listeden çıkarma"), baseCountEl));
+
+    var araWrap = el("div");
+    araWrap.style.cssText = "padding:var(--space-md) var(--space-md) 0";
+    baseSearchEl = el("input");
+    baseSearchEl.type = "search";
+    baseSearchEl.maxLength = 60;
+    baseSearchEl.placeholder = T("portal.base.search", "Ada, markaya ya da kimliğe göre ara");
+    baseSearchEl.style.cssText = "width:100%";
+    baseSearchEl.setAttribute("aria-label", T("portal.base.search", "Ada, markaya ya da kimliğe göre ara"));
+    baseSearchEl.addEventListener("input", renderBaseProducts);
+    araWrap.appendChild(baseSearchEl);
+    bp.appendChild(araWrap);
+
+    var bwrap = el("div", "tbl-wrap");
+    var btbl = el("table", "ptbl");
+    var bthead = el("thead"), bhtr = el("tr");
+    [
+      T("portal.prod.colId", "KİMLİK"),
+      T("portal.prod.colName", "AD (TR / EN / RU)"),
+      T("portal.prod.colCat", "KATEGORİ"),
+      T("portal.prod.colBrand", "MARKA"),
+      T("portal.base.colState", "DURUM"),
+      T("portal.cat.colAction", "İŞLEM")
+    ].forEach(function (c) { bhtr.appendChild(el("th", null, c)); });
+    bthead.appendChild(bhtr);
+    baseBodyEl = el("tbody");
+    btbl.appendChild(bthead); btbl.appendChild(baseBodyEl);
+    bwrap.appendChild(btbl);
+    bp.appendChild(bwrap);
+
+    buildExportPanel(hxp, {
+      title: T("portal.hid.expTitle", "Listeden çıkarılanları kalıcı yap"),
+      note: T("portal.hid.expNote", "data.js'ten silinecek satırların listesi"),
+      warn: T("portal.hid.expWarn",
+        "Listeden çıkarma yalnızca bu tarayıcıda geçerlidir. Başka bir bilgisayardan siteye giren müşteri ürünü HÂLÂ GÖRÜR. Kalıcı olması için aşağıdaki yönergeyi üretip belirtilen satırları assets/js/data.js dosyasından silin, sonra commit edip push edin."),
+      label: T("portal.hid.expLabel", "Silinecek satırlar"),
+      empty: T("portal.hid.expEmpty", "Listeden çıkarılmış ürün yok."),
+      build: function () { return hgpExportHidden(); }
+    });
+
     /* --- data.js'e aktarım --- */
     buildExportPanel(xp, {
       title: T("portal.prod.expTitle", "data.js'e aktar"),
@@ -1171,9 +1265,70 @@
     return tr;
   }
 
+  /* data.js kataloğu tablosu. Arama kutusu boşsa hepsi listelenir; 42 satır
+     kısa bir tablodur, sayfalama gereksiz karmaşıklık olurdu. */
+  function renderBaseProducts() {
+    if (!baseBodyEl) return;
+    var gizli = hgpHiddenIds();
+    var hepsi = baseProducts();
+    var q = (baseSearchEl && baseSearchEl.value || "").trim().toLocaleLowerCase("tr");
+    var list = !q ? hepsi : hepsi.filter(function (p) {
+      var ad = [(p.n && p.n.tr) || "", (p.n && p.n.en) || "", (p.n && p.n.ru) || "",
+                p.brand || "", "#" + p.id].join(" ").toLocaleLowerCase("tr");
+      return ad.indexOf(q) !== -1;
+    });
+    if (baseCountEl) {
+      baseCountEl.textContent = T("portal.base.count", "data.js'te sabit: ") + hepsi.length +
+        T("portal.base.hidden", "  ·  listeden çıkarılan: ") + gizli.length;
+    }
+    baseBodyEl.textContent = "";
+    if (!list.length) {
+      var etr = el("tr"), etd = el("td", "empty2", T("portal.base.noMatch", "Aramaya uyan ürün yok."));
+      etd.colSpan = 6; etr.appendChild(etd); baseBodyEl.appendChild(etr);
+      return;
+    }
+    list.forEach(function (p) {
+      var cikarildi = gizli.indexOf(Number(p.id)) !== -1;
+      var tr = el("tr");
+      tr.style.cursor = "default";
+      if (cikarildi) tr.style.opacity = "0.55";
+      tr.appendChild(el("td", "mono", "#" + p.id));
+      var td2 = el("td");
+      td2.appendChild(el("b", null, (p.n && p.n.tr) || "—"));
+      td2.appendChild(el("span", "t-cust", ((p.n && p.n.en) || "—") + " · " + ((p.n && p.n.ru) || "—")));
+      tr.appendChild(td2);
+      tr.appendChild(el("td", null, subLabel(p.sub)));
+      tr.appendChild(el("td", null, p.brand || "—"));
+      tr.appendChild(el("td", null, cikarildi
+        ? T("portal.base.stateOut", "Listeden çıkarıldı")
+        : T("portal.base.stateIn", "Katalogda")));
+      var tda = el("td");
+      var d = el("button", "advance-btn", cikarildi
+        ? T("portal.base.undo", "Geri al")
+        : T("portal.base.remove", "Listeden çıkar"));
+      d.type = "button";
+      d.addEventListener("click", function () {
+        if (cikarildi) {
+          hgpUnhideProduct(p.id, USER.name);
+          toast(T("portal.base.undone", "Ürün katalogda yeniden görünür."));
+        } else {
+          if (!window.confirm(T("portal.base.confirm",
+            "Bu ürün katalogdan gizlenecek. Kalıcı olması için en alttaki yönergeyi uygulayıp commit etmeniz gerekir. Devam edilsin mi?"))) return;
+          hgpHideProduct(p.id, USER.name);
+          toast(T("portal.base.removed", "Ürün listeden çıkarıldı."));
+        }
+        renderAll();
+      });
+      tda.appendChild(d);
+      tr.appendChild(tda);
+      baseBodyEl.appendChild(tr);
+    });
+  }
+
   function renderProducts() {
     if (!USER || !CAN_EDIT_CATALOG[USER.role]) return;
     buildProductScreen();
+    renderBaseProducts();
     if (!prodBodyEl) return;
     var list = hgpListProducts();
     if (prodCountEl) prodCountEl.textContent = countsLine(baseProducts().length, list.length);
@@ -1588,5 +1743,288 @@
     var hv = (location.hash || "").replace("#", "");
     if (hv && NAV[USER.role].some(function (n) { return n.v === hv; })) show(hv);
   }
+  /* ============================================================
+     YÖNETİCİ MODU KURULUMU
+     Faz 1'de portal yalnızca ürün/doküman yönetimi için açılır. Tek hesap,
+     tek parola. CRM / siparişler / müşteri kartları / operasyon panosu bu
+     modda menüde YOKTUR ve açılamaz.
+
+     Parola gerçek bir güvenlik sınırı DEĞİLDİR (statik site; parola tarayıcıya
+     inen kodun içinde). Asıl koruma: buradan yapılan ekleme/çıkarma yalnızca
+     bu tarayıcıda durur; yayına çıkması için "Dışa aktar" çıktısının data.js'e
+     yapıştırılıp commit edilmesi gerekir.
+     ============================================================ */
+  /* ---------- Kaba kuvvet kilidi ----------
+     Sayaç localStorage'da tutulur: sayfayı yenilemek ya da sekmeyi kapatıp
+     açmak kilidi SIFIRLAMAZ. (Önceki sürümde sayaç bellekteydi; yenileyen
+     herkes sıfırdan başlıyordu — deneme yanılmaya hiçbir engel değildi.)
+
+     Basamaklar data.js'teki HK_ADMIN.gecikme dizisindedir. Kilit bittiğinde
+     sayaç SIFIRLANMAZ: bir sonraki hata bir üst basamağa çıkar, yani ısrar
+     eden biri her turda daha uzun bekler.
+
+     Dürüst sınır: devtools bilen biri bu anahtarı silip sayacı sıfırlayabilir.
+     Bu kilit, klavye başında deneyen birini durdurur. Çevrimdışı denemeye
+     karşı koruyan şey kilit değil, parolanın uzunluğu ve PBKDF2 tur sayısıdır. */
+  var HK_ADM_KILIT = "hg_adm_lock_v1";
+
+  function admKilitOku() {
+    try {
+      var v = JSON.parse(localStorage.getItem(HK_ADM_KILIT) || "null");
+      if (!v || typeof v !== "object") return { hata: 0, bitis: 0 };
+      return {
+        hata: Math.max(0, parseInt(v.hata, 10) || 0),
+        bitis: Math.max(0, parseInt(v.bitis, 10) || 0)
+      };
+    } catch (e) { return { hata: 0, bitis: 0 }; }
+  }
+
+  function admKilitYaz(d) {
+    try { localStorage.setItem(HK_ADM_KILIT, JSON.stringify(d)); } catch (e) { /* dolu/kapalı depo: kilitsiz devam */ }
+  }
+
+  /* Kaçıncı hatada kaç saniye bekleneceği. Dizi yoksa makul bir yedek
+     kullanılır — data.js elden geçerken bu satır silinirse kilit tamamen
+     kalkmasın. */
+  function admGecikme(hataSayisi) {
+    var basamaklar = (typeof HK_ADMIN !== "undefined" && HK_ADMIN.gecikme) || [[10, 21600], [7, 3600], [5, 900], [4, 300], [3, 60]];
+    for (var i = 0; i < basamaklar.length; i++) {
+      if (hataSayisi >= basamaklar[i][0]) return basamaklar[i][1] * 1000;
+    }
+    return 0;
+  }
+
+  function admSureYazisi(ms) {
+    var sn = Math.ceil(ms / 1000);
+    if (sn < 60) return sn + " saniye";
+    if (sn < 3600) return Math.ceil(sn / 60) + " dakika";
+    return Math.ceil(sn / 3600) + " saat";
+  }
+
+  /* ---------- PBKDF2 doğrulama ----------
+     Aynı türetme data.js'teki özet üretilirken node tarafında yapıldı
+     (tools/yonetici-kimligi.mjs). Burada tarayıcının WebCrypto'su ile
+     tekrarlanır; parola hiçbir zaman saklanmaz, yalnız türetilir ve atılır. */
+  function admHexBayt(hex) {
+    var n = hex.length / 2, u = new Uint8Array(n), i;
+    for (i = 0; i < n; i++) u[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return u;
+  }
+
+  function admBaytHex(buf) {
+    var u = new Uint8Array(buf), out = "", i;
+    for (i = 0; i < u.length; i++) out += (u[i] < 16 ? "0" : "") + u[i].toString(16);
+    return out;
+  }
+
+  function admTuret(kullanici, parola) {
+    var A = (typeof HK_ADMIN !== "undefined") ? HK_ADMIN : null;
+    if (!A || !A.tuz || !A.ozet || !A.tur) {
+      return Promise.reject(new Error("yapilandirma"));
+    }
+    var kripto = window.crypto && window.crypto.subtle;
+    if (!kripto) return Promise.reject(new Error("guvenli-baglam"));
+
+    /* Kullanıcı adı ve parola BİRLİKTE türetilir; ayırıcı boşluktur ve
+       data.js'teki özet de böyle üretildi. İkisi tek parça olduğu için
+       giriş ekranı hangisinin yanlış olduğunu söyleyemez — söyleseydi
+       saldırgan işi yarıya indirirdi. */
+    var ham = new TextEncoder().encode(kullanici + " " + parola);
+    return kripto.importKey("raw", ham, "PBKDF2", false, ["deriveBits"])
+      .then(function (k) {
+        return kripto.deriveBits({
+          name: "PBKDF2",
+          salt: admHexBayt(A.tuz),
+          iterations: A.tur,
+          hash: "SHA-256"
+        }, k, 256);
+      })
+      .then(function (bits) { return admBaytHex(bits) === String(A.ozet).toLowerCase(); });
+  }
+
+  if (YONETICI_MODU) {
+    // 1) Menüyü kısıtla: yalnız ürün ve doküman yönetimi
+    NAV.yonetim = [
+      { v: "products", t: "Ürünler" },
+      { v: "docs", t: "Dokümanlar" }
+    ];
+    delete NAV.satis;
+    delete NAV.depo;
+    ROLE_LABEL.yonetim = "YÖNETİCİ";
+
+    /* Rol değiştirme kapısı ve demo sıfırlama kaldırılır: tek hesap var,
+       değiştirilecek rol yok; "demoyu sıfırla" ise yöneticinin eklediği
+       ürünleri de geri alacağı için tehlikeli. */
+    ["#btn-switch", "#btn-reset"].forEach(function (sec) {
+      var d = document.querySelector(sec);
+      if (d) d.remove();
+    });
+    if (HGP_USERS.yonetim) {
+      HGP_USERS.yonetim.name = "Yönetici";
+      HGP_USERS.yonetim.title = "Ürün & Doküman Yönetimi";
+    }
+
+    // 2) Giriş ekranını kullanıcı adı + parola formuna çevir
+    var girisKart = document.querySelector("#login-view .lg-card");
+    if (girisKart) {
+      var rolBar = girisKart.querySelector(".rolebar");
+      if (rolBar) rolBar.remove();
+      var altNot = girisKart.querySelector("p[style]");
+      if (altNot) altNot.remove();
+
+      var baslik = girisKart.querySelector("h2");
+      if (baslik) baslik.textContent = "Yönetici girişi";
+      var altBaslik = girisKart.querySelector(".sub");
+      if (altBaslik) altBaslik.textContent = "Ürün ve doküman yönetimi. Yalnız yetkili personel.";
+
+      var form = document.createElement("form");
+      form.id = "adm-form";
+
+      function admAlan(id, etiketMetni, tur, otomatik) {
+        var alan = document.createElement("div");
+        alan.className = "field";
+        alan.style.marginBottom = "14px";
+        var etiket = document.createElement("label");
+        etiket.setAttribute("for", id);
+        etiket.textContent = etiketMetni;
+        var girdi = document.createElement("input");
+        girdi.type = tur;
+        girdi.id = id;
+        girdi.autocomplete = otomatik;
+        girdi.maxLength = 128;
+        girdi.spellcheck = false;
+        girdi.setAttribute("autocapitalize", "off");
+        girdi.setAttribute("autocorrect", "off");
+        alan.appendChild(etiket);
+        alan.appendChild(girdi);
+        form.appendChild(alan);
+        return girdi;
+      }
+
+      var kulGirdi = admAlan("adm-user", "KULLANICI ADI", "text", "username");
+      var parGirdi = admAlan("adm-pass", "PAROLA", "password", "current-password");
+
+      var dugme = document.createElement("button");
+      dugme.className = "btn btn--primary";
+      dugme.type = "submit";
+      dugme.style.cssText = "width:100%;justify-content:center";
+      dugme.textContent = "Giriş yap";
+      form.appendChild(dugme);
+
+      var sec = girisKart.querySelector(".sec-strip");
+      if (sec) girisKart.insertBefore(form, sec);
+      else girisKart.appendChild(form);
+
+      function admHata(metin) {
+        if (!errBox) return;
+        errBox.textContent = metin;
+        errBox.classList.remove("show");
+        void errBox.offsetWidth;
+        errBox.classList.add("show");
+      }
+
+      /* Kilitliyken formu kapalı tutar ve kalan süreyi saniye saniye yazar.
+         Süre dolunca kendiliğinden açılır — kullanıcı sayfayı yenilemek
+         zorunda kalmasın. */
+      var geriSayim = 0;
+      function admKilidiUygula() {
+        var d = admKilitOku();
+        var kalan = d.bitis - nowMs();
+        if (kalan > 0) {
+          dugme.disabled = true;
+          kulGirdi.disabled = true;
+          parGirdi.disabled = true;
+          dugme.textContent = "Kilitli — " + admSureYazisi(kalan);
+          if (!geriSayim) {
+            geriSayim = setInterval(admKilidiUygula, 1000);
+          }
+          return true;
+        }
+        if (geriSayim) { clearInterval(geriSayim); geriSayim = 0; }
+        dugme.disabled = false;
+        kulGirdi.disabled = false;
+        parGirdi.disabled = false;
+        dugme.textContent = "Giriş yap";
+        return false;
+      }
+
+      if (admKilidiUygula()) {
+        admHata("Çok fazla hatalı deneme yapıldı. Süre dolunca form yeniden açılacak.");
+      }
+
+      var admMesgul = false;
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (admMesgul) return;
+        if (admKilidiUygula()) {
+          var k = admKilitOku();
+          admHata("Çok fazla hatalı deneme. " + admSureYazisi(k.bitis - nowMs()) + " sonra tekrar deneyin.");
+          return;
+        }
+
+        var kullanici = kulGirdi.value.trim();
+        var parola = parGirdi.value;
+        if (!kullanici || !parola) {
+          admHata("Kullanıcı adı ve parola gerekli.");
+          return;
+        }
+
+        /* PBKDF2 600.000 tur bu makinede ~0,12 sn sürüyor; eski bir telefonda
+           saniyeleri bulabilir. Bekleme kaba kuvvete karşı bir maliyettir, ama
+           kullanıcı ekranın donmadığını görsün diye düğme durumu yazılır. */
+        admMesgul = true;
+        dugme.disabled = true;
+        dugme.textContent = "Denetleniyor…";
+
+        admTuret(kullanici, parola).then(function (dogruMu) {
+          admMesgul = false;
+          dugme.disabled = false;
+          dugme.textContent = "Giriş yap";
+
+          if (dogruMu) {
+            try { localStorage.removeItem(HK_ADM_KILIT); } catch (e) { /* önemsiz */ }
+            parGirdi.value = "";
+            enter("yonetim");
+            return;
+          }
+
+          var d = admKilitOku();
+          d.hata += 1;
+          var bekle = admGecikme(d.hata);
+          if (bekle > 0) d.bitis = nowMs() + bekle;
+          admKilitYaz(d);
+
+          parGirdi.value = "";
+          if (admKilidiUygula()) {
+            admHata("Kullanıcı adı veya parola hatalı. Çok fazla deneme yapıldı: " +
+              admSureYazisi(bekle) + " beklemeniz gerekiyor.");
+          } else {
+            /* Kalan hak yazılır: meşru yönetici yanlış tuşa bastığını
+               anlasın, kilide yakalanmadan düzeltsin. */
+            var kalanHak = 3 - d.hata;
+            admHata("Kullanıcı adı veya parola hatalı." +
+              (kalanHak > 0 ? " Kilitlenmeden önce " + kalanHak + " deneme hakkınız kaldı." : ""));
+            kulGirdi.focus();
+          }
+        }).catch(function (err) {
+          admMesgul = false;
+          dugme.disabled = false;
+          dugme.textContent = "Giriş yap";
+          /* Doğrulama YAPILAMADIYSA giriş verilmez. Sessizce düz metin
+             karşılaştırmaya düşmek, korumanın tamamını iptal ederdi. */
+          if (err && err.message === "guvenli-baglam") {
+            admHata("Bu sayfa güvenli bağlamda açılmadığı için parola doğrulanamıyor. " +
+              "Portalı https:// adresinden ya da localhost üzerinden açın.");
+          } else if (err && err.message === "yapilandirma") {
+            admHata("Yönetici kimliği tanımlı değil (data.js → HK_ADMIN). " +
+              "node tools/yonetici-kimligi.mjs ile üretip yapıştırın.");
+          } else {
+            admHata("Parola doğrulanamadı. Sayfayı yenileyip tekrar deneyin.");
+          }
+        });
+      });
+    }
+  }
+
   boot();
 })();

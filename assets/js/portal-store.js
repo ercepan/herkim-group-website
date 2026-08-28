@@ -42,7 +42,10 @@
   var HGP_SESSION_KEY = "hg_portal_session";
   var HGP_LOCK_KEY = "hg_login_lock";
   var HGP_LAST_LOGIN = "hg_last_login_";
-  var HGP_DEMO_PASS = "demo1234";
+  /* DEMO PAROLASI SİLİNDİ. Burada "demo1234" yazıyordu ve depo herkese açık.
+     Faz 1'de müşteri girişi kapalı olduğu için geçerli parola yoktur; Faz 2'de
+     yerine sunucu tarafı kimlik doğrulama gelecek (bkz. herkim-backend). */
+  var HGP_DEMO_PASS = null;
   var HGP_IDLE_MS = 15 * 60 * 1000;
   var HGP_LOCK_MS = 60 * 1000;
   var HGP_MAX_FAILS = 3;
@@ -152,7 +155,8 @@
       customers: [],  // onaylı başvurulardan doğan CRM kartları
       customProducts: [], // portalda eklenen ürünler (bkz. KATALOG EKLERİ bölümü)
       customDocs: [],     // portalda eklenen dokümanlar
-      customSeq: {}       // katalog eklerinde dağıtılmış en yüksek kimlik (geri sayılmaz)
+      customSeq: {},      // katalog eklerinde dağıtılmış en yüksek kimlik (geri sayılmaz)
+      hiddenProducts: []  // listeden çıkarılan data.js ürünlerinin kimlikleri
     };
   }
 
@@ -261,10 +265,11 @@
        eksiksiz tamamlansın, mevcut kayıtlar ezilmesin. customSeq boş bir nesne
        olarak başlar; ilk ekleme sırasında listedeki en büyük kimlikten devam
        eder, yani taşınan depoda kimlik çakışmaz. */
-    if (!s.customProducts || !s.customDocs || !s.customSeq) {
+    if (!s.customProducts || !s.customDocs || !s.customSeq || !s.hiddenProducts) {
       if (!s.customProducts) s.customProducts = [];
       if (!s.customDocs) s.customDocs = [];
       if (!s.customSeq) s.customSeq = {};
+      if (!s.hiddenProducts) s.hiddenProducts = [];
       hgpSave(s);
     }
     // Ana sitedeki iletişim formundan düşen talepleri içeri al (Landing → CRM)
@@ -737,13 +742,91 @@
     catch (e) { return []; }
   }
 
+  /* ---------------- data.js ürünlerini listeden çıkarma ----------------
+     Portal data.js dosyasını DEĞİŞTİREMEZ (arka uç yok). Bu yüzden "çıkarma"
+     şöyle çalışır: kimlik bir gizleme listesine yazılır, hgpAllProducts o
+     kimlikleri eler, böylece ürün katalogda görünmez. Kalıcı olması için
+     dışa aktarım panelindeki satırın data.js'ten silinmesi ve commit'lenmesi
+     gerekir — tıpkı ekleme gibi.
+
+     Yalnız data.js ürünleri için: portalda eklenen kayıt zaten hgpDeleteProduct
+     ile gerçekten silinir, gizlenmesine gerek yok. */
+  function hgpHiddenIds() {
+    try {
+      var h = (hgpPeek() || {}).hiddenProducts;
+      return Object.prototype.toString.call(h) === "[object Array]" ? h.slice() : [];
+    } catch (e) { return []; }
+  }
+
+  function hgpHideProduct(id, who) {
+    var s = hgpGet(), key = Number(id);
+    if (!isFinite(key)) return false;
+    // Portal eklerinde gizleme anlamsız: onlar için gerçek silme vardır
+    var i;
+    for (i = 0; i < s.customProducts.length; i++) {
+      if (Number(s.customProducts[i].id) === key) return false;
+    }
+    var base = hgpBaseProducts(), varMi = false, ad = "";
+    for (i = 0; i < base.length; i++) {
+      if (Number(base[i].id) === key) { varMi = true; ad = (base[i].n && base[i].n.tr) || "—"; break; }
+    }
+    if (!varMi) return false;
+    if (!s.hiddenProducts) s.hiddenProducts = [];
+    if (s.hiddenProducts.indexOf(key) !== -1) return false;
+    s.hiddenProducts.push(key);
+    hgpAct(s, who || "Portal", "Ürün listeden çıkarıldı: " + ad + " (#" + key + ")", "genel");
+    hgpSave(s);
+    return true;
+  }
+
+  function hgpUnhideProduct(id, who) {
+    var s = hgpGet(), key = Number(id);
+    if (!s.hiddenProducts) return false;
+    var i = s.hiddenProducts.indexOf(key);
+    if (i === -1) return false;
+    s.hiddenProducts.splice(i, 1);
+    hgpAct(s, who || "Portal", "Ürün listeye geri alındı: #" + key, "genel");
+    hgpSave(s);
+    return true;
+  }
+
+  /* Çıkarılan data.js ürünlerini data.js'te kalıcı yapmak için yönerge üretir.
+     Kod üretmiyoruz — silinecek satırları göstermek daha güvenli: operatör
+     yanlış satırı silmesin diye her ürünün kimliği ve tam adı yazılır. */
+  function hgpExportHidden() {
+    var ids = hgpHiddenIds();
+    if (!ids.length) return "";
+    var base = hgpBaseProducts(), harita = {}, i;
+    for (i = 0; i < base.length; i++) harita[Number(base[i].id)] = base[i];
+    var out = [
+      "/* ============================================================",
+      "   LİSTEDEN ÇIKARILAN ÜRÜNLER — " + hgpToday(),
+      "   NEREYE: assets/js/data.js → HK_PRODUCTS dizisi.",
+      "   NASIL: aşağıda kimliği yazan satırları diziden SİLİN. Silmek yerine",
+      "   başına // koymayın: dizide bozuk satır kalır.",
+      "   SONRA: commit edip push edin. Bunu yapmadan ürün yalnızca bu",
+      "   tarayıcıda gizli kalır; başka cihazdan giren müşteri onu HÂLÂ GÖRÜR.",
+      "   ============================================================ */"
+    ];
+    for (i = 0; i < ids.length; i++) {
+      var u = harita[Number(ids[i])];
+      out.push("// SİL → id: " + ids[i] + "  →  " + (u ? ((u.n && u.n.tr) || "—") + "  ·  " + (u.brand || "—") : "(data.js'te artık yok)"));
+    }
+    return out.join("\n");
+  }
+
   /* data.js listesi + portal ekleri, BU sırayla.
      Ana site her render'da çağırır: asla istisna fırlatmaz, her zaman dizi
      döner, HK_PRODUCTS'ı değiştirmez (concat yeni dizi üretir). */
   function hgpAllProducts() {
-    var custom = [];
+    var custom = [], gizli = [];
     try { custom = (hgpPeek() || {}).customProducts || []; } catch (e) { custom = []; }
-    return hgpBaseProducts().concat(custom);
+    try { gizli = hgpHiddenIds(); } catch (e) { gizli = []; }
+    var taban = hgpBaseProducts();
+    if (gizli.length) {
+      taban = taban.filter(function (p) { return gizli.indexOf(Number(p.id)) === -1; });
+    }
+    return taban.concat(custom);
   }
 
   /* ---------------- Dokümanlar ---------------- */
@@ -919,6 +1002,46 @@
      çıkmadığı anlamına gelir. Çağıran taraf false gelirse kullanıcıya
      "iletildi" demek yerine telefon/e-posta gibi alternatif kanalı
      göstermelidir; aksi halde talep kimseye ulaşmadan kaybolur. */
+  /* ------------------------------------------------------------
+     Bildirim yardımcıları
+
+     hgpClean: kullanıcı metnini e-posta gövdesine koymadan önce
+     kontrol karakterlerinden arındırır. Satır sonu ile sahte başlık
+     eklemeyi (Bcc:, X-...) etkisiz kılar ve aşırı uzunluğu keser.
+
+     hgpRateOk: aynı tarayıcıdan kısa sürede tekrar gönderimi keser.
+     DÜRÜST SINIR — bu bir güvenlik kontrolü DEĞİLDİR: localStorage
+     temizlenerek ya da doğrudan api.web3forms.com'a POST atılarak
+     aşılır (anahtar zaten herkese açık). Amacı yalnızca kazara çift
+     gönderimi ve naif bot trafiğini engellemektir. Kotanın ASIL
+     koruması Web3Forms panelindeki captcha + "Allowed Domains"
+     kısıtlamasıdır; anahtar girilmeden önce ikisi de açılmalıdır.
+     ------------------------------------------------------------ */
+  function hgpClean(v, max) {
+    var out = String(v == null ? "" : v);
+    out = out.replace(/[\u0000-\u001F\u007F]+/g, " ");
+    out = out.replace(/\s{2,}/g, " ");
+    return out.trim().slice(0, max || 400);
+  }
+
+  var HGP_RL_KEY = "hg_rl_v1";
+  function hgpRateOk(kova, limit, pencereDk) {
+    try {
+      var now = Date.now(), span = (pencereDk || 10) * 60000, hepsi = {};
+      try { hepsi = JSON.parse(localStorage.getItem(HGP_RL_KEY) || "{}") || {}; } catch (e) { hepsi = {}; }
+      var vurus = (Array.isArray(hepsi[kova]) ? hepsi[kova] : [])
+        .filter(function (t) { return typeof t === "number" && now - t < span; });
+      hepsi[kova] = vurus;
+      if (vurus.length >= (limit || 3)) {
+        localStorage.setItem(HGP_RL_KEY, JSON.stringify(hepsi));
+        return false;
+      }
+      vurus.push(now);
+      localStorage.setItem(HGP_RL_KEY, JSON.stringify(hepsi));
+      return true;
+    } catch (e) { return true; }   // depo kapalıysa akışı engelleme
+  }
+
   function hgNotify(subject, lines, senderName, senderEmail) {
     try {
       var key = (typeof HK_COMPANY !== "undefined" && HK_COMPANY.web3forms) || "";
@@ -928,12 +1051,18 @@
       }
       var body = {
         access_key: key,
-        subject: subject,
+        subject: hgpClean(subject, 120),
         from_name: "Herkim Web Sitesi",
-        name: senderName || "Web ziyaretçisi",
-        message: (lines || []).join("\n")
+        name: hgpClean(senderName || "Web ziyaretçisi", 80),
+        message: (lines || []).map(function (l) { return hgpClean(l, 400); }).join("\n")
       };
-      if (senderEmail && senderEmail.indexOf("@") > 0) body.email = senderEmail;
+      var gonderen = hgpClean(senderEmail, 80);
+      if (gonderen && gonderen.indexOf("@") > 0 && !/[\s,;<>]/.test(gonderen)) body.email = gonderen;
+      /* İkinci kutuya kopya: talep hem ticari (sales@) hem genel (info@)
+         kutuya düşsün. Adres data.js -> HK_COMPANY.notifyCc alanından gelir;
+         boş bırakılırsa kopya gönderilmez. */
+      var kopya = (typeof HK_COMPANY !== "undefined" && HK_COMPANY.notifyCc) || "";
+      if (kopya && kopya.indexOf("@") > 0) body.cc = [kopya];
       return fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -999,6 +1128,10 @@
   window.hgpUpdateProduct = hgpUpdateProduct;
   window.hgpDeleteProduct = hgpDeleteProduct;
   window.hgpListProducts = hgpListProducts;
+  window.hgpHiddenIds = hgpHiddenIds;
+  window.hgpHideProduct = hgpHideProduct;
+  window.hgpUnhideProduct = hgpUnhideProduct;
+  window.hgpExportHidden = hgpExportHidden;
   window.hgpAllProducts = hgpAllProducts;
   window.hgpAddDoc = hgpAddDoc;
   window.hgpDeleteDoc = hgpDeleteDoc;
@@ -1009,5 +1142,7 @@
   window.hgpExportDocs = hgpExportDocs;
 
   window.hgpReset = hgpReset;
+  window.hgpClean = hgpClean;
+  window.hgpRateOk = hgpRateOk;
   window.hgNotify = hgNotify;
 })();

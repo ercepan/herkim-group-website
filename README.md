@@ -19,7 +19,7 @@
 | `hesap.html` | Müşteri hesap başvurusu (NGB modeli): VKN/TCKN sağlama basamağı denetimi |
 | `siparislerim.html` | Girişli müşterinin sipariş takibi (durum, zaman çizelgesi, takip no) |
 | `kvkk.html` | KVKK + çerez politikası (şablon — hukukçuya danışılacak) |
-| `portal.html` | **İç operasyon portalı — menülerde LİNKİ YOK, bilinçli gizli.** 4 rol: müşteri / satış (CRM + başvuru onayı) / depo / yönetim |
+| `portal.html` | **İç PERSONEL portalı — menülerde LİNKİ YOK, bilinçli gizli.** Faz 1'de tek yönetici hesabı, yalnız ürün/doküman yönetimi (bkz. "Yayın modu"). Kapalı duran Faz 2'de 3 rol vardır: satış (CRM + başvuru onayı) / depo / yönetim. Müşteri rolü portaldan çıkarıldı; müşteri kendi siparişini ana sitedeki `siparislerim.html` sayfasından izler. |
 
 `pan/` klasörü: Pan Holding örnek sitesi (ayrı iş, Herkim'den bağımsız).
 
@@ -34,10 +34,45 @@
 | `main.js` | Site etkileşimi: sepet (teklif + doğrudan sipariş), filtreler, arama, formlar, Siparişlerim, hesap başvurusu |
 | `portal-app.js` | Portal uygulaması (yalnız `portal.html`) |
 
-## Demo akışı
+## Backend (herkim-backend/)
 
-- **Demo şifresi:** `demo1234` (tüm roller). Varsayılan müşteri: `satinalma@derimderi.com.tr`.
-- Uçtan uca: `hesap.html`'den başvur → portalda **Satış → Müşteri Kartları**'nda onayla → o e-postayla siteden gir → sepetten sipariş ver → sipariş satış onayına, depo panosuna, yönetim dashboard'una düşer → müşteri `siparislerim.html`'den izler.
+Gerçek veritabanı katmanı — Supabase hesabı açıldığı an devreye girer.
+Şema, satır seviyesi güvenlik politikaları, sipariş fonksiyonu, e-posta
+şablonları ve 29 sızıntı testi orada. Kurulum: `herkim-backend/README.md`.
+Site şu an hâlâ yerel demo modunda (`assets/js/hg-config.js` → `demo: true`).
+
+## Yayın modu: yönetici girişi
+
+Faz 1'de portal **tek bir yönetici hesabıyla** ve yalnız ürün/doküman
+yönetimi için açılır (`data.js → HK_FEATURES.urunYonetimi`). Rol düğmeleri,
+CRM, siparişler ve müşteri kartları kapalıdır.
+
+- **Kimlik `data.js`'te YAZMAZ.** Yalnız PBKDF2-HMAC-SHA256 özeti durur
+  (`HK_ADMIN.tuz / tur / ozet`); kullanıcı adı ve parola birlikte özetlenir.
+  Giriş sırasında aynı türetme tarayıcıda WebCrypto ile tekrarlanır.
+- **Yeni kimlik üretmek:** `node tools/yonetici-kimligi.mjs` — kullanıcı adı,
+  parola ve `data.js`'e yapıştırılacak bloğu ekrana basar. Parolayı hiçbir
+  dosyaya yazmaz; parola yöneticinize kaydedin, depoya koymayın.
+- **Kaba kuvvet:** hata sayacı `localStorage → hg_adm_lock_v1` içinde
+  KALICI tutulur; sayfayı yenilemek kilidi düşürmez. Basamaklar
+  `HK_ADMIN.gecikme`: 3. hatada 1 dk, 4.'te 5 dk, 5.'te 15 dk, 7.'de 1 saat,
+  10.'da 6 saat. Kilit bitince sayaç sıfırlanmaz — ısrar eden her turda
+  daha uzun bekler.
+- **Neyi korumaz:** özet herkese açıktır (çevrimdışı deneme mümkün — parolanın
+  24 karakter olması bunu anlamsız kılar) ve kilit sayacı devtools ile
+  silinebilir. Asıl koruma şudur: portaldaki değişiklik yalnız o tarayıcıda
+  kalır, yayına ancak commit ile çıkar.
+- Portal `https://` ya da `localhost` gerektirir: WebCrypto güvenli bağlam
+  ister. Güvenli bağlam yoksa giriş verilmez, açık uyarı gösterilir.
+
+## Demo akışı (Faz 2 — şu an KAPALI)
+
+- **Müşteri girişi kapalı** (`HK_FEATURES.hesapBasvurusu` ve `siparis` = `false`).
+  Demo girişi ve demo şifresi **kalıcı olarak silindi** — parolasız bir arka
+  kapıydı ve şifre kaynak kodda görünüyordu. Faz 2'de müşteri girişi gerçek
+  kimlik doğrulamayla (Supabase Auth) gelecek, demo kısayoluyla değil.
+- Alıcılar Faz 1'de teklif sepetini doldurup satış ekibiyle iletişime geçer.
+- Uçtan uca: `hesap.html`'den başvur → portalda **Satış → Müşteri Kartları**'nda onayla → o e-postayla ana siteden gir → sepetten sipariş ver → sipariş satış onayına, depo panosuna, yönetim dashboard'una düşer → müşteri `siparislerim.html`'den izler.
 - Veriler tarayıcıda (`localStorage`) yaşar; portalda "Demoyu sıfırla" ile başa döner. Gerçek kuruluma geçişte bu katman küçük bir API + Logo Tiger/ATLAS entegrasyonuyla değişecek; ekranlar aynı kalır.
 
 ## Altın kurallar (bozmayın)
@@ -64,6 +99,26 @@ python3 -m http.server 4173   # → http://localhost:4173
 2. Küçük ve sık commit; mesaj Türkçe, ilk satır özet (örn. `Ürün kartlarına stok rozeti eklendi`).
 3. Push etmeden önce siteyi yerelde açıp değiştirdiğin akışı elle dene; tarayıcı konsolunda hata olmadığını kontrol et.
 4. `git push origin main` → 1 dk sonra canlıda. Aynı dosyada çakışmamak için kim neyi alacaksa kısaca haberleşin; büyük işlerde dal açın: `git checkout -b ozellik-adi` → push → GitHub'da Pull Request.
+
+## Önbellek kuralı (ÖNEMLİ — ikiniz de okuyun)
+
+CSS/JS bağlantılarının sonundaki `?v=2026-08-25b` bir **sürüm damgasıdır**.
+Tarayıcılar (ve GitHub Pages) bu dosyaları günlerce önbellekte tutar; damga
+olmadan yeni kodu yayınlasanız bile ziyaretçi **eski CSS/JS ile yeni HTML'i**
+karıştırır ve site bozuk görünür (yazı tipleri gitmiş, ham `a11y.skip` gibi
+çeviri anahtarları ekranda görünmüş gibi).
+
+**Kural:** `assets/css/` veya `assets/js/` içinde bir dosyayı değiştirdiğinizde
+11 HTML dosyasındaki damgayı da güncelleyin:
+
+```bash
+# Bugünün tarihiyle damgayı yenile (aynı gün ikinci kez değiştirdiyseniz
+# sonuna bir harf ekleyin: ...-25b, ...-25c)
+sed -i '' "s/?v=[^\"]*/?v=$(date +%Y-%m-%d)/g" *.html
+```
+
+**Kendi tarayıcınızda eski hali görüyorsanız** (damga güncellenmeden önce):
+macOS Chrome/Edge'de `Cmd+Shift+R`, Safari'de `Cmd+Option+E` sonra `Cmd+R`.
 
 ## Araçlar
 

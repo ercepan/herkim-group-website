@@ -29,6 +29,74 @@
      dizi + varsa portal ekleri.
    ============================================================ */
 
+/* ============================================================
+   YAYIN AŞAMASI — ÖZELLİK ANAHTARLARI
+   Faz 1 (canlı): yalnız TEKLİF sistemi. Ziyaretçi katalogu görür,
+   sepete ürün ekler, WhatsApp/e-posta ile fiyat teklifi ister.
+   Müşteri girişi, hesap başvurusu ve doğrudan sipariş KAPALI —
+   kod silinmedi, sonraki faz için hazır bekliyor.
+
+   AÇMAK İÇİN: ilgili satırı true yapın. Başka hiçbir yere
+   dokunmanız gerekmez; arayüz kendini buna göre kurar.
+   Önerilen açılış sırası: hesapBasvurusu -> siparis -> portal.
+   ============================================================ */
+const HK_FEATURES = {
+  hesapBasvurusu: false,  // hesap.html, giris penceresi, basliktaki hesap dugmesi
+  siparis: false,         // sepetten dogrudan siparis + siparislerim.html
+  portal: false,          // ic personel portali: CRM, siparisler, musteri kartlari
+  urunYonetimi: true      // TEK YONETICI: portal.html yalnizca urun/dokuman
+                          // yonetimi icin acilir. CRM ve siparis ekranlari
+                          // "portal" bayragina baglidir, bu bayrakla ACILMAZ.
+};
+
+/* ============================================================
+   YONETICI HESABI (urun yonetimi)
+   Kullanici adi ve parolayi giren kisi urun ve dokuman ekleyip cikarabilir.
+
+   PAROLA BURADA YAZMAZ. Asagidaki "ozet", kullanici adi ile parolanin
+   birlesiminden PBKDF2-HMAC-SHA256 ile 600.000 turda turetildi. Bu dosyayi
+   okuyan kimlikleri OGRENEMEZ. Portal girisinde ayni turetme tarayicida
+   (WebCrypto) yeniden yapilir ve sonuc bu ozetle karsilastirilir.
+
+   Yeni kimlik uretmek icin:  node tools/yonetici-kimligi.mjs
+   Arac parolayi hicbir dosyaya yazmaz, yalniz ekrana basar.
+
+   DURUST SINIR — bunun neyi koruyup neyi korumadigi:
+   KORUR:   kaynagi okuyan parolayi goremez; deneme yaniltma pahalidir
+            (her deneme yeniden PBKDF2 turetmesi gerektirir + artan
+            kilit sureleri).
+   KORUMAZ: ozet herkese aciktir, yani sabirli biri CEVRIMDISI deneme
+            yapabilir. Bunu anlamsiz kilan sey parolanin uzunlugudur —
+            arac 24 karakterlik (~139 bit) parola uretir; bu uzunlukta
+            cevrimdisi deneme pratikte imkansizdir. KENDI parolanizi
+            koyacaksaniz kisa ya da tahmin edilebilir olmasin.
+   KORUMAZ: tarayicidaki kilit sayaci localStorage'dadir; devtools bilen
+            biri onu silebilir. Kilit, klavye basinda deneyen birini
+            durdurur — kararli bir saldirgani degil.
+
+   ASIL koruma bunlarin hicbiri degil, sudur: portalda yapilan ekleme ve
+   cikarma YALNIZCA o kisinin kendi tarayicisinda durur. Degisiklik siteye
+   ancak "Disa aktar" ciktisi data.js'e yapistirilip commit edilince yansir.
+   Yani yetkisiz biri girse bile YAYINDAKI siteyi degistiremez.
+
+   Gercek parola korumasi ancak sunucu tarafiyla gelir (bkz. herkim-backend).
+   ============================================================ */
+const HK_ADMIN = {
+  tuz: "d4235bb9d8424cbbe9ff8544a2ff2ebf",
+  tur: 600000,
+  ozet: "2632df19fd61445b944be8c39dccc7b60ff3448331798dcedc0305ea450b6a89",
+
+  /* Kaba kuvvet basamaklari: [kacinci hatadan itibaren, kac saniye kilit].
+     Yukaridan asagiya okunur, ilk uyan basamak uygulanir. */
+  gecikme: [
+    [10, 21600],  // 10. hatadan sonra 6 saat
+    [7, 3600],    // 7. hatadan sonra 1 saat
+    [5, 900],     // 5. hatadan sonra 15 dakika
+    [4, 300],     // 4. hatadan sonra 5 dakika
+    [3, 60]       // 3. hatadan sonra 1 dakika
+  ]
+};
+
 /* Şirket künyesi.
    DİKKAT: burası "tek kaynak" DEĞİL. Yalnız ilk bloktaki alanlar koddan
    okunur. İkinci bloktaki değerler sitede elle yazılıdır; burayı değiştirmek
@@ -43,14 +111,24 @@ const HK_COMPANY = {
   // yanlıştı ve zaten hiçbir yerden okunmuyordu).
   email: "info@herkimgroup.com",      // main.js — iletişim formu mailto yedeği
   mailQuote: "sales@herkimgroup.com", // main.js — sepetten teklif mailto yedeği
-  whatsapp: "902163941125",   // main.js — wa.me bağlantıları ve sepet teklif butonu.
-                              // WhatsApp Business hattınızın numarası; ülke kodu
-                              // bitişik yazılır, başında + ve arada boşluk YOKTUR.
-  web3forms: "",              // portal-store.js hgNotify + main.js. Anahtar girilince
-                              // iletişim/teklif/sipariş/başvuru bildirimleri şirket
-                              // e-postasına ANINDA düşer; boşken mailto yedeğine düşülür.
-                              // Anahtar almak: web3forms.com → e-postayı gir →
-                              // gelen anahtarı buraya yapıştır.
+  whatsapp: "905301447373",   // main.js — wa.me bağlantıları ve sepet teklif butonu.
+                              // GEÇİCİ TEST NUMARASI (+90 530 144 73 73).
+                              // Canlıya çıkmadan önce şirketin WhatsApp Business
+                              // hattıyla değiştirilecek. Ülke kodu bitişik yazılır,
+                              // başında + ve arada boşluk YOKTUR.
+  web3forms: "",              // portal-store.js hgNotify. Anahtar girilince iletişim ve
+                              // teklif talepleri şirket e-postasına ANINDA düşer.
+                              // NASIL ALINIR: web3forms.com adresine girip aşağıdaki
+                              // notifyTo adresini (sales@herkimgroup.com) yazın; o adrese
+                              // gelen anahtarı buraya yapıştırın. Anahtar herkese açıktır,
+                              // gizli değildir — güvenlik domain kısıtlamasıyla sağlanır
+                              // (Web3Forms panelinden "Allowed Domains" alanına yayın
+                              //  adresinizi ekleyin, yoksa anahtarı gören başkası da
+                              //  sizin kotanızı kullanabilir).
+  notifyTo: "sales@herkimgroup.com",  // Web3Forms anahtarının kayıtlı olduğu adres.
+                                      // Talepler ÖNCE buraya düşer (ticari kutu).
+  notifyCc: "info@herkimgroup.com",   // Kopya. İki kutu da aynı talebi görsün diye.
+                                      // Boş bırakılırsa kopya gönderilmez.
 
   /* --- ŞU AN KOD TARAFINDAN OKUNMUYOR — sitede elle yazılmış ---
      Aşağıdakiler gerçek şirket verisidir ve ileride koda bağlanabilir; bu yüzden
