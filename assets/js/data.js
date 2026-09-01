@@ -109,7 +109,7 @@ const HK_COMPANY = {
   // içinde bulunulan yıldan founded'ı çıkararak hesaplar. Sabit sayı yazmayın —
   // yıl dönünce sessizce yanlışa döner (eski "experience: 54" alanı böyle
   // yanlıştı ve zaten hiçbir yerden okunmuyordu).
-  email: "info@herkimgroup.com",      // main.js — iletişim formu mailto yedeği
+  email: "sales@herkimgroup.com",     // main.js — iletişim formu mailto yedeği
   mailQuote: "sales@herkimgroup.com", // main.js — sepetten teklif mailto yedeği
   whatsapp: "905330206628",   // main.js — wa.me bağlantıları ve sepet teklif butonu.
                               // SATIŞ HATTI: +90 533 020 66 28. Sitedeki yüzen

@@ -1351,6 +1351,205 @@
     f.replaceWith(iframe);
   }));
 
+  /* ============ Dairesel fotoğraf sunumu ============
+     [data-sunum] taşıyan ızgarayı tek kareli bir sunuma çevirir.
+     Özgün ızgara DOM'da KALIR, sadece gizlenir: büyütme penceresi
+     aynı düğmeleri okuyor ve JS çalışmazsa ızgara görünür kalıyor.
+
+     Döngü daireseldir — sonraki/önceki her zaman çalışır, uçlarda
+     düğme sönmez: (i + n) % n ile iki yönde de sarar. */
+  $$("[data-sunum]").forEach(izgara => {
+    const kartlar = $$(".tesis-card", izgara);
+    if (kartlar.length < 2) return;
+
+    const kare = kartlar.map(k => {
+      const ic = k.querySelector("img");
+      return {
+        buyuk: k.getAttribute("data-lb"),
+        kucuk: ic ? ic.getAttribute("src") : k.getAttribute("data-lb"),
+        anahtar: k.getAttribute("data-lb-cap"),
+        alt: ic ? ic.alt : "",
+        dugme: k
+      };
+    });
+
+    const sunum = el("div", "sunum");
+    const sahne = el("div", "sunum-sahne");
+    const gorsel = el("img");
+    gorsel.decoding = "async";
+    /* İlk kare hemen, gerisi tembel: sunum sayfanın altındaysa
+       14 fotoğraf peşinen inmesin. */
+    gorsel.loading = "eager";
+
+    const geri = el("button", "sunum-ok sunum-prev", "‹");
+    geri.type = "button";
+    geri.setAttribute("aria-label", T("tesis.prev"));
+    const ileri = el("button", "sunum-ok sunum-next", "›");
+    ileri.type = "button";
+    ileri.setAttribute("aria-label", T("tesis.next"));
+
+    sahne.appendChild(gorsel);
+    sahne.appendChild(geri);
+    sahne.appendChild(ileri);
+
+    const alt = el("div", "sunum-alt");
+    const yazi = el("span", "sunum-cap");
+    const sayac = el("span", "sunum-sayac");
+    alt.appendChild(yazi); alt.appendChild(sayac);
+
+    const noktalar = el("div", "sunum-noktalar");
+    noktalar.setAttribute("role", "tablist");
+    const noktaDugme = kare.map((k, i) => {
+      const d = el("button", "sunum-nokta");
+      d.type = "button";
+      d.setAttribute("role", "tab");
+      d.setAttribute("aria-label", String(i + 1));
+      d.addEventListener("click", () => goster(i));
+      noktalar.appendChild(d);
+      return d;
+    });
+
+    /* Otomatik dönüş duraklatma düğmesi. Kendiliğinden ilerleyen içerik
+       için erişilebilirlik gereği: kullanıcı durdurabilmeli (WCAG 2.2.2). */
+    const durdur = el("button", "sunum-durdur", "❚❚");
+    durdur.type = "button";
+    durdur.setAttribute("aria-label", T("tesis.pause"));
+    sahne.appendChild(durdur);
+
+    sunum.appendChild(sahne); sunum.appendChild(alt); sunum.appendChild(noktalar);
+    izgara.parentNode.insertBefore(sunum, izgara);
+    izgara.classList.add("sunum-yok");
+
+    let sira = 0;
+
+    function onYukle(i) {
+      /* Komşu kareyi sessizce indir: ok tuşuna basınca beklemesin. */
+      const n = kare.length;
+      [(i + 1) % n, (i - 1 + n) % n].forEach(j => { const im = new Image(); im.src = kare[j].kucuk; });
+    }
+
+    function goster(i) {
+      const n = kare.length;
+      sira = ((i % n) + n) % n;          // iki yönde de sarar
+      const k = kare[sira];
+      gorsel.src = k.kucuk;
+      gorsel.alt = k.alt;
+      yazi.textContent = k.anahtar ? T(k.anahtar) : "";
+      sayac.textContent = (sira + 1) + " / " + n;
+      noktaDugme.forEach((d, j) => d.setAttribute("aria-current", j === sira ? "true" : "false"));
+      /* Animasyonu her geçişte yeniden tetikle */
+      gorsel.style.animation = "none";
+      void gorsel.offsetWidth;
+      gorsel.style.animation = "";
+      onYukle(sira);
+    }
+
+    geri.addEventListener("click", () => goster(sira - 1));
+    ileri.addEventListener("click", () => goster(sira + 1));
+    /* Büyük görseli açmak için: ilgili ızgara düğmesine tıklarız,
+       böylece büyütme penceresi doğru sıradan açılır. */
+    gorsel.addEventListener("click", () => kare[sira].dugme.click());
+
+    sunum.setAttribute("tabindex", "0");
+    sunum.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") { e.preventDefault(); goster(sira - 1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); goster(sira + 1); }
+    });
+
+    /* Dokunmatik: yatay kaydırma. Dikey kaydırmayı engellemiyoruz —
+       parmağını aşağı kaydıran kullanıcı sayfayı kaydırabilsin. */
+    let basX = 0, basY = 0;
+    sahne.addEventListener("touchstart", (e) => {
+      basX = e.changedTouches[0].clientX; basY = e.changedTouches[0].clientY;
+    }, { passive: true });
+    sahne.addEventListener("touchend", (e) => {
+      const dx = e.changedTouches[0].clientX - basX;
+      const dy = e.changedTouches[0].clientY - basY;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) goster(sira + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+
+    document.addEventListener("hk:langchange", () => {
+      geri.setAttribute("aria-label", T("tesis.prev"));
+      ileri.setAttribute("aria-label", T("tesis.next"));
+      const k = kare[sira];
+      yazi.textContent = k.anahtar ? T(k.anahtar) : "";
+    });
+
+    goster(0);
+
+    /* ---- Otomatik dönüş ----
+       Arkada kendi kendine ilerler; kullanıcı elle geçtiğinde durur ve
+       9 saniye sonra kaldığı yerden devam eder. Duraklama sebepleri
+       ayrı ayrı sayılır: fareyle üstüne gelme, odak, sekme arkaplana
+       düşünce ve sunum ekrandan çıkınca. Hepsi kalkmadan dönmez —
+       görünmeyen sunum boşuna fotoğraf indirmesin.
+
+       Hareket azaltma tercihi açıksa hiç dönmez. */
+    const AZ_HAREKET = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ARALIK = 5000, DEVAM_GECIKME = 9000;
+    let zamanlayici = 0, devamZaman = 0, elleDurduruldu = AZ_HAREKET;
+    let ustunde = false, odakta = false, ekranda = true;
+
+    function donebilirMi() {
+      return !elleDurduruldu && !ustunde && !odakta && ekranda && !document.hidden;
+    }
+    function tik() {
+      if (donebilirMi()) goster(sira + 1);
+    }
+    function baslat() {
+      if (zamanlayici || AZ_HAREKET) return;
+      zamanlayici = setInterval(tik, ARALIK);
+    }
+    function bitir() {
+      if (!zamanlayici) return;
+      clearInterval(zamanlayici); zamanlayici = 0;
+    }
+    function dugmeyiYaz() {
+      const duruyor = elleDurduruldu;
+      durdur.textContent = duruyor ? "▶" : "❚❚";
+      durdur.setAttribute("aria-label", T(duruyor ? "tesis.play" : "tesis.pause"));
+    }
+    /* Kullanıcı elle geçtiğinde: dönüşü kes, biraz sonra kendiliğinden
+       devam et. Tamamen durdurmak istiyorsa duraklat düğmesi var. */
+    function elleGecildi() {
+      if (elleDurduruldu) return;
+      bitir();
+      clearTimeout(devamZaman);
+      devamZaman = setTimeout(baslat, DEVAM_GECIKME);
+    }
+
+    [geri, ileri].forEach(d => d.addEventListener("click", elleGecildi));
+    noktaDugme.forEach(d => d.addEventListener("click", elleGecildi));
+    sahne.addEventListener("touchend", elleGecildi, { passive: true });
+    sunum.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") elleGecildi();
+    });
+
+    durdur.addEventListener("click", () => {
+      elleDurduruldu = !elleDurduruldu;
+      clearTimeout(devamZaman);
+      if (elleDurduruldu) bitir(); else baslat();
+      dugmeyiYaz();
+    });
+
+    sunum.addEventListener("pointerenter", () => { ustunde = true; });
+    sunum.addEventListener("pointerleave", () => { ustunde = false; });
+    sunum.addEventListener("focusin", () => { odakta = true; });
+    sunum.addEventListener("focusout", () => { odakta = false; });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && !elleDurduruldu) baslat(); });
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((girisler) => {
+        ekranda = girisler[0].isIntersecting;
+        if (ekranda && !elleDurduruldu) baslat(); else if (!ekranda) bitir();
+      }, { threshold: 0.25 }).observe(sunum);
+    }
+
+    document.addEventListener("hk:langchange", dugmeyiYaz);
+    dugmeyiYaz();
+    baslat();
+  });
+
   /* ============ Tesis galerisi — büyütme penceresi ============
      [data-lb] taşıyan her düğme tıklanınca büyük sürümü tam ekranda açar.
      Pencere TEK kez kurulur ve DOM'da kalır; her açılışta yeniden
