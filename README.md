@@ -75,6 +75,59 @@ CRM, siparişler ve müşteri kartları kapalıdır.
 - Uçtan uca: `hesap.html`'den başvur → portalda **Satış → Müşteri Kartları**'nda onayla → o e-postayla ana siteden gir → sepetten sipariş ver → sipariş satış onayına, depo panosuna, yönetim dashboard'una düşer → müşteri `siparislerim.html`'den izler.
 - Veriler tarayıcıda (`localStorage`) yaşar; portalda "Demoyu sıfırla" ile başa döner. Gerçek kuruluma geçişte bu katman küçük bir API + Logo Tiger/ATLAS entegrasyonuyla değişecek; ekranlar aynı kalır.
 
+## Alan adı geçişi — herkim.com.tr
+
+Site şu an `https://ercepan.github.io/herkim-group-website/` adresinde.
+Hedef: `https://herkim.com.tr`.
+
+**O alan adında ŞU AN ÇALIŞAN ESKİ BİR SİTE VAR** (Natro, 94.73.145.212) ve
+`info@herkim.com.tr` e-postası aktif (MX: `mail.herkim.com.tr`). Geçiş eski
+sitenin yerini alır; eski sayfa adresleri (`hakkimizda.html`,
+`hizmetlerimiz.html`, `fuar.html`…) 404 verecek — yönlendirme koymamaya
+karar verildi.
+
+### Sıra ÖNEMLİ
+
+DNS hazır olmadan depoya `CNAME` dosyası koymayın: GitHub Pages özel alan
+adına yönlenir ve `github.io` adresi de kırılır, site tamamen erişilemez olur.
+
+**1. Natro panelinde DNS** (bunu ben yapamam, hesap sizde)
+
+`herkim.com.tr` bir apex alan adıdır. **Apex'e CNAME KONULMAZ** — konursa
+MX kaydı geçersizleşir ve `info@herkim.com.tr` mailleri gelmez (RFC 1034).
+Mevcut `A → 94.73.145.212` kaydı şunlarla değiştirilir:
+
+```
+A     @      185.199.108.153
+A     @      185.199.109.153
+A     @      185.199.110.153
+A     @      185.199.111.153
+CNAME www    ercepan.github.io.
+```
+
+**MX kaydına DOKUNULMAZ.** E-posta çalışmaya devam eder.
+
+**2. DNS yayılınca** (`dig +short herkim.com.tr` GitHub adreslerini gösterince)
+
+```bash
+bash tools/alan-adi-gecisi.sh
+```
+
+Betik canonical, og:url, sitemap, robots.txt ve JSON-LD içindeki 59'dan fazla
+adresi günceller ve `CNAME` dosyasını yazar. Eski adres kalırsa hata verip
+durur — atlanan bir canonical yeni alan adının indekslenmesini engeller.
+
+**3.** commit + push
+
+**4.** GitHub → Settings → Pages → Custom domain: `herkim.com.tr`,
+ardından **Enforce HTTPS**. Sertifika birkaç dakikada gelir.
+
+### Geçişten sonra
+
+- Web3Forms panelinde formun "Website URL" alanı `herkimgroup.com` yazıyor;
+  `herkim.com.tr` yapılmalı (yalnız bilgi amaçlı, gönderimi etkilemez).
+- Google Search Console'a yeni alan adı eklenip `sitemap.xml` gönderilir.
+
 ## Altın kurallar (bozmayın)
 
 1. **`innerHTML` kullanmak yasak.** Dinamik içerik yalnız `createElement` / `textContent` ile (XSS güvenliği).

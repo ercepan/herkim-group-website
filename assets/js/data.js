@@ -206,7 +206,7 @@ const HK_COMPANY = {
   //   index.html ≈439 / iletisim.html ≈138
   phone2: "+90 216 394 11 25",
   // → index.html ≈439, iletisim.html ≈138 (telefon satırının ikinci yarısı)
-  phoneTel: "+902163941133",
+  phoneTel: "+902163941125",
   // → hiçbir yerde karşılığı yok: sitedeki tel: bağlantıları 444'lü numarayı
   //   (tel:4445658) kullanıyor. Bu alan tamamen boşta duruyor.
   fax: "+90 216 394 10 04",
