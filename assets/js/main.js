@@ -723,6 +723,48 @@
   if (clearBtn) clearBtn.addEventListener("click", () => { setBasket([]); toast(T("basket.cleared")); });
 
   /* ============ 7) Ürün kartı ============ */
+  /* ============ Fiyat ============
+     Fiyatlar data.js'teki HK_FIYAT bloğundan okunur. Ürünlerin çoğunda
+     fiyat YOKTUR — o zaman "Teklif alın" yazılır, boş hücre bırakılmaz.
+     Biçimlendirme sayfanın diline göre yapılır (tr: 0,86 / en: 0.86). */
+  const FIYAT = (typeof HK_FIYAT !== "undefined" && HK_FIYAT) ? HK_FIYAT : null;
+
+  function fiyatlariAl(p) {
+    if (!FIYAT || !FIYAT.liste) return null;
+    const f = FIYAT.liste[p.id];
+    return (f && f.length) ? f : null;
+  }
+
+  function fiyatYaz(deger) {
+    const dil = L();
+    const yerel = dil === "tr" ? "tr-TR" : (dil === "ru" ? "ru-RU" : "en-US");
+    let n;
+    try {
+      n = deger.toLocaleString(yerel, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } catch (e) {
+      n = deger.toFixed(2);
+    }
+    return n + " " + (FIYAT ? FIYAT.paraBirimi : "USD") + T("fiyat.kg");
+  }
+
+  /* Fiyat hücresi/satırı. Tek ambalajda tek satır, birden fazla ambalajda
+     her ambalaj kendi satırında yazılır (formik asit IBC ve bidon gibi). */
+  function fiyatDugumu(p, sinif) {
+    const kutu = el("div", sinif || "fiyat-kutu");
+    const f = fiyatlariAl(p);
+    if (!f) {
+      kutu.appendChild(el("span", "fiyat-yok", T("fiyat.teklif")));
+      return kutu;
+    }
+    f.forEach(satir => {
+      const s = el("div", "fiyat-satir");
+      s.appendChild(el("b", "fiyat-tutar", fiyatYaz(satir.usd)));
+      if (satir.ambalaj) s.appendChild(el("span", "fiyat-ambalaj", pick(satir.ambalaj)));
+      kutu.appendChild(s);
+    });
+    return kutu;
+  }
+
   function productCard(p) {
     const card = el("article", "element-card");
     card.dataset.cat = CAT_OF(p.sub);
@@ -740,6 +782,8 @@
     const meta = el("div", "ec-meta");
     meta.appendChild(el("span", null, SUB_LABEL(p.sub)));
     card.appendChild(meta);
+    /* Fiyatı olan üründe fiyat, olmayanda "Teklif alın" yazar. */
+    card.appendChild(fiyatDugumu(p, "fiyat-kutu fiyat-kart"));
 
     /* "+" teklif sepetine ekler. Faz 1'de sepet yalnızca TEKLİF sepetidir:
        sipariş verme kapalı (HK_FEATURES.siparis === false), sepetten
@@ -811,6 +855,12 @@
     if (rc) rc.textContent = list.length + " / " + all.length;
   }
 
+  /* Fiyat listesi tarihini sayfaya yaz (varsa). */
+  (function () {
+    const kutu = $("#fiyat-tarih");
+    if (kutu && FIYAT && FIYAT.guncelleme) kutu.textContent = FIYAT.guncelleme;
+  })();
+
   function renderTable() {
     const tbody = $("#ptable-body");
     if (!tbody) return;
@@ -841,6 +891,9 @@
       tdCat.appendChild(el("span", "cat-pill", CAT_LABEL(CAT_OF(p.sub))));
       tr.appendChild(tdCat);
       tr.appendChild(el("td", "td-cas", p.brand));
+      const tdFiyat = el("td", "td-fiyat");
+      tdFiyat.appendChild(fiyatDugumu(p));
+      tr.appendChild(tdFiyat);
       const tdDocs = el("td");
       const docs = el("div", "doc-btns");
       const tds = el("a", null, "TDS"); tds.href = "dokumanlar.html"; tds.title = "TDS";

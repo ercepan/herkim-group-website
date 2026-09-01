@@ -547,6 +547,12 @@ const HK_I18N = {
     "th.brand": "Marka",
     "th.doc": "Doküman",
     "th.quote": "Teklif",
+    "th.price": "Fiyat",
+    "fiyat.kdvNot": "Fiyatlar KDV hariç, kilogram başına ABD dolarıdır.",
+    "fiyat.teklif": "Teklif alın",
+    "fiyat.guncelleme": "Fiyat listesi güncellemesi:",
+    "fiyat.not": "Liste fiyatıdır; miktar, ambalaj ve teslim şekline göre değişir. Kesin fiyat teklifle netleşir.",
+    "fiyat.kg": "/kg",
 
     /* Doküman merkezi kart bağlantıları */
     "doc.download": "İndir (PDF) ↓",
@@ -1076,6 +1082,12 @@ const HK_I18N = {
     "th.brand": "Brand",
     "th.doc": "Docs",
     "th.quote": "Quote",
+    "th.price": "Price",
+    "fiyat.kdvNot": "Prices are per kilogram in US dollars, VAT excluded.",
+    "fiyat.teklif": "Request a quote",
+    "fiyat.guncelleme": "Price list updated:",
+    "fiyat.not": "List price. It varies with quantity, packaging and delivery terms; the final price is confirmed with the quotation.",
+    "fiyat.kg": "/kg",
 
     /* Doküman merkezi kart bağlantıları */
     "doc.download": "Download (PDF) ↓",
@@ -1605,6 +1617,12 @@ const HK_I18N = {
     "th.brand": "Бренд",
     "th.doc": "Док.",
     "th.quote": "Запрос",
+    "th.price": "Цена",
+    "fiyat.kdvNot": "Цены указаны за килограмм в долларах США, без НДС.",
+    "fiyat.teklif": "Запросить цену",
+    "fiyat.guncelleme": "Прайс-лист обновлён:",
+    "fiyat.not": "Прайсовая цена. Она зависит от объёма, упаковки и условий поставки; окончательная цена подтверждается предложением.",
+    "fiyat.kg": "/кг",
 
     /* Doküman merkezi kart bağlantıları */
     "doc.download": "Скачать (PDF) ↓",

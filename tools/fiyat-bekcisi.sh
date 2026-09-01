@@ -5,7 +5,17 @@
 # Fiyat YALNIZCA çalışma zamanında (satış temsilcisinin girdiği teklif
 # nesnesinde) yaşar; kaynağa/depoya asla yazılmaz.
 # Kurulum: chmod +x tools/fiyat-bekcisi.sh && ln -s ../../tools/fiyat-bekcisi.sh .git/hooks/pre-commit
-DOSYALAR="assets/js/data.js assets/js/portal-store.js assets/js/portal-app.js assets/js/main.js"
+# data.js ARTIK LISTEDE DEGIL: sirket karari geregi liste fiyatlari
+# HK_FIYAT blogunda herkese acik yayinlaniyor (transit mal, fiyat gizli
+# degil). Bekci gorevini surduruyor: fiyat verisi YALNIZ data.js'teki o
+# blokta olabilir; asagidaki dosyalardan birine fiyat/iskonto/marj
+# sizarsa commit yine reddedilir.
+#
+# data.js'e yazarken kural: yalnizca herkese soylenebilecek LISTE fiyati.
+# Musteriye ozel fiyat, iskonto, marj ve maliyet oraya da yazilmaz —
+# bunlarin yeri sunucu tarafidir (bkz. herkim-backend, satir seviyesi
+# guvenlik ve 29 sizinti testi).
+DOSYALAR="assets/js/portal-store.js assets/js/portal-app.js assets/js/main.js"
 
 ALAN='(^|[^A-Za-z])(price|unitPrice|listPrice|birimFiyat|listeFiyat|fiyat|tutar|araToplam|subtotal|kdv|iskonto|discount|katsayi|marj)[[:space:]]*:'
 RAKAM='[0-9]+([.,][0-9]+)?[[:space:]]*(TL|TRY|USD|EUR)([[:space:]]*/[[:space:]]*(kg|ton|lt|adet))?'

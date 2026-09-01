@@ -1688,3 +1688,32 @@ body::before { opacity: 0.028; }
   transition: background 0.25s var(--ease-out);
 }
 .sunum-durdur:hover, .sunum-durdur:focus-visible { background: var(--crimson); }
+
+/* ============================================================
+   FİYAT GÖSTERİMİ
+   Liste fiyatları (data.js -> HK_FIYAT). Fiyatı olmayan üründe
+   "Teklif alın" yazar; boş hücre bırakılmaz.
+   ============================================================ */
+.fiyat-kutu { display: grid; gap: 3px; }
+.fiyat-satir { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.fiyat-tutar {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.fiyat-ambalaj { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+.fiyat-yok { font-size: var(--fs-small); color: var(--ink-3); font-style: italic; }
+.td-fiyat { white-space: nowrap; }
+
+/* Katalog kartında fiyat, ürün adının altında ayrı bir satır */
+.fiyat-kart { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+
+.fiyat-not {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  margin-bottom: var(--space-md);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+.fiyat-not .mono { font-family: var(--font-mono); color: var(--ink-3); }

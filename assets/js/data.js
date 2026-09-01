@@ -97,6 +97,51 @@ const HK_ADMIN = {
   ]
 };
 
+/* ============================================================
+   FIYAT LISTESI  (HK_FIYAT)
+   Liste fiyatlari. Ayri bir blok: guncelleme gelince YALNIZ burasi
+   degistirilir, urun listesine (HK_PRODUCTS) dokunulmaz.
+
+   HERKESE ACIK: bu dosya ziyaretcinin tarayicisina iniyor ve depo
+   public. Buraya yazilan fiyati kaynak koda bakan herkes gorur ve
+   commit gecmisinden silinmez. Musteriye ozel fiyat, iskonto, marj
+   ya da maliyet BURAYA YAZILMAZ — yalnizca herkese soylenebilecek
+   liste fiyati. (tools/fiyat-bekcisi.sh bu blok disinda fiyat
+   gorurse commit'i reddeder.)
+
+   Yapisi:  urunKimligi: [ { ambalaj, usd } , ... ]
+   Bir urunun birden fazla ambalaji olabilir; her ambalajin kendi
+   fiyati vardir (ornek: formik asit IBC ve bidon).
+
+   Tum fiyatlar KDV HARIC ve KILOGRAM basinadir.
+   ============================================================ */
+const HK_FIYAT = {
+  guncelleme: "2026-09-01",   // sitede "son guncelleme" olarak gosterilir
+  paraBirimi: "USD",
+  kdvHaric: true,
+  birim: "kg",
+
+  liste: {
+    // #5 Formik Asit %85 — Cin/Luxi. Iki ambalaj, iki fiyat.
+    5: [
+      { ambalaj: { tr: "IBC 1200 L", en: "IBC 1200 L", ru: "IBC 1200 л" }, usd: 0.86 },
+      { ambalaj: { tr: "35 L bidon", en: "35 L drum", ru: "Бидон 35 л" }, usd: 1.10 }
+    ],
+    // #16 Mimoza Tozu — Tanac
+    16: [
+      { ambalaj: { tr: "25 kg paket", en: "25 kg bag", ru: "Мешок 25 кг" }, usd: 2.50 }
+    ],
+    // #17 Kebrako (Quebracho)
+    17: [
+      { ambalaj: null, usd: 3.35 }
+    ],
+    // #28 Sodyum Sulfhidrat (NaHS) — Iran mensei
+    28: [
+      { ambalaj: null, usd: 2.50 }
+    ]
+  }
+};
+
 /* Şirket künyesi.
    DİKKAT: burası "tek kaynak" DEĞİL. Yalnız ilk bloktaki alanlar koddan
    okunur. İkinci bloktaki değerler sitede elle yazılıdır; burayı değiştirmek
