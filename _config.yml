@@ -7,7 +7,10 @@
 #   pan/            → başka bir şirketin (Pan Holding) örnek sitesi
 #   herkim-backend/ → veritabanı şeması, güvenlik politikaları,
 #                     temsilî müşteri adlı e-posta önizlemeleri
-#   tools/          → katalog üretici ve fiyat bekçisi betikleri
+#   tools/          → katalog üretici, fiyat bekçisi ve yönetici
+#                     kimliği üretici betikleri
+#   package.json    → boş npm iskeleti; sitenin derleme adımı yok,
+#                     yayında karşılığı da yok
 #
 # DİKKAT: Depoya .nojekyll dosyası EKLEMEYİN — eklenirse bu
 # dosya devre dışı kalır ve yukarıdakilerin hepsi yayına çıkar.
@@ -18,6 +21,7 @@ exclude:
   - tools/
   - README.md
   - .gitignore
+  - package.json
 
 # Site kökündeki HTML dosyaları olduğu gibi yayınlanır (Jekyll işlemez).
 plugins: []
