@@ -1,0 +1,81 @@
+# ============================================================
+# herkim.com.tr — TAM DNS BOLGESI
+#
+# Bu dosya Natro panelindeki DNS Yonetimi ekraninin TAMAMINDAN
+# cikarilmistir. Onceki anlik goruntu (dns-anlik-20260901-1447.txt)
+# EKSIKTI: panelin alt bolumleri ekrana sigmadigi icin DKIM, mail
+# alt alaninin SPF'i, Google dogrulama CNAME'i ve iki Sectigo SSL
+# kaydi gorulmemisti. Kayitlarin hicbirine dokunulmadi; eksik olan
+# yedegin kendisiydi. Bu dosya o eksigi kapatir.
+#
+# Alindigi an: 1 Eylul 2026, alan adi gecisi TAMAMLANDIKTAN sonra
+# Kaynak: dig ... @ns1.natrohost.com  (yetkili sunucu)
+# ============================================================
+
+== NS ==
+  ns1.natrohost.com.
+  ns2.natrohost.com.
+
+== A — WEB (GECISTE DEGISEN TEK SEY) ==
+  herkim.com.tr.        A  185.199.108.153
+  herkim.com.tr.        A  185.199.109.153
+  herkim.com.tr.        A  185.199.110.153
+  herkim.com.tr.        A  185.199.111.153
+  www.herkim.com.tr.    A  185.199.108.153
+  www.herkim.com.tr.    A  185.199.109.153
+  www.herkim.com.tr.    A  185.199.110.153
+  www.herkim.com.tr.    A  185.199.111.153
+
+  ESKI HALI (geri donmek gerekirse ikisi de tek kayda dusurulur):
+  herkim.com.tr.        A  94.73.145.212
+  www.herkim.com.tr.    A  94.73.145.212
+
+== A — MAIL (DOKUNULMADI) ==
+  mail.herkim.com.tr.   A  85.97.197.8
+
+== MX (DOKUNULMADI) ==
+  herkim.com.tr.        MX 10 mail.herkim.com.tr.
+
+== TXT (DOKUNULMADI) ==
+  herkim.com.tr.        TXT "v=spf1 mx ip4:85.97.197.8 -all"
+  herkim.com.tr.        TXT "google-site-verification=s2e0cxDzgzDPl832ltjFgPDbiS2Mo01kPnq4mkz8zuU"
+  mail.herkim.com.tr.   TXT "v=spf1 mx ip4:85.97.197.8 -all"
+  _dmarc.herkim.com.tr. TXT "v=DMARC1; p=quarantine; rua=mailto:rua@herkim.com.tr; ruf=mailto:ruf@herkim.com.tr; sp=none; fo=1; ri=86400; adkim=r; aspf=r"
+
+== TXT — DKIM (DOKUNULMADI) ==
+# Iki parcali bir kayittir; panelde tek satir gorunur, DNS iki string
+# dondurur. Geri yazmak gerekirse tirnaklar dahil aynen kullanilmalidir.
+  mail._domainkey.herkim.com.tr. TXT
+  "v=DKIM1;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsuz/6jLChn4BIJVumfOLuK5qicywISWJ/swMMk3ErSGpAzfPB8RaMp3ezuSXXwaO7NqMdxqE2/qKMdFpJG+73YbcUxdHb2jOJcCLhrSauFlnBI5NwPgN+8oEmXR0yjVo7K6UKEeig87ltwWLnXL3pwFX+2n/o58XMlCcqlqfQ7kNxcDi/SXzNKSadAwBl91HITB9YFU09" "FeHM2rKNDiOslGph+SDUIXI3Ig5yOutZ4Xv0KXjlbG+SmYXYoSoD9Fgp48WyHezdPqP17jRA++97zElwE6eWIYt1UAZw7DP37fQexf0r996J3t3DXX9NJiA/OMAPRcJ46pWsGDsMap4KQIDAQAB"
+
+== CNAME (DOKUNULMADI) ==
+  autodiscover.herkim.com.tr.  CNAME mail.kurumsaleposta.com.
+      -> Outlook'un ayarlari otomatik bulmasi
+  phaa4qp2icpx.herkim.com.tr.  CNAME gv-nzi7bmu57rk5ah.dv.googlehosted.com.
+      -> Google Workspace alan adi dogrulamasi
+  _ba247021ef8fdd01ef61c86ddb05be19.herkim.com.tr. CNAME
+      531014256F709374D97216829CEEC5F2.E6D74762B82B3EC446D7EAECF94E659D.20241004230601pm.sectigo.com.
+  _ce5dd93e01dfddec301fd0296d61ecc8.herkim.com.tr. CNAME
+      2C2563F23AA6F4F7F7F2D87530B71E17.2C17800C3034FA484B9F036CCBD97A13.20251108122149pm.sectigo.com.
+      -> Yukaridaki ikisi Sectigo SSL dogrulama (DCV) kayitlaridir.
+         Natro'daki SSL sertifikasi bunlarla yenileniyor. SILMEYIN.
+
+# ============================================================
+# NATRO PANELINDE DNS EKRANI NASIL ACILIR
+#   Natro > Hosting Yonetimi > "Sinirsiz Xtreme Hosting" satirinda Yonet
+#   > Web Alani Yonetimi > herkim.com.tr satirindaki "Web Sitesi" oku
+#   > DNS Yonetimi
+#
+# EKRANIN TAMAMI SIGMAZ. Pencere sabit yukseklikte ve kaydirilmaz;
+# alttaki CNAME/TXT bolumleri ilk bakista gorunmez. Gormek icin
+# tarayici penceresini uzatin ya da sayfayi kucultun. "Gormedim =
+# yok" diye dusunmeyin, `dig` ile dogrulayin.
+#
+# ASLA BASILMAYACAK IKI DUGME (ekranin en ustunde):
+#   "DNS Kayitlarini Sifirla"  ve  "MX Kayitlarini Sifirla"
+# Bolgeyi varsayilana dondururler; info@herkim.com.tr o anda calismaz
+# hale gelir ve DKIM/DMARC kayitlari kaybolur.
+#
+# APEX'E (@) ASLA CNAME KONULMAZ. RFC 1034 geregi o isimdeki MX ve TXT
+# kayitlari gecersizlesir, mail kesilir. Apex icin A kaydi kullanilir.
+# ============================================================

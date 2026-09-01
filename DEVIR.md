@@ -48,9 +48,9 @@ Kullanıcı adı ve şifre hiçbir dosyaya yazılmaz, ekranda bir kez görünür
 
 ## 2. Sitenin şu anki durumu
 
-Depo: `ercepan/herkim-group-website` — GitHub Pages'te yayınlanıyor.
-Alan adı: `herkim.com.tr` — geçiş 1 Eylül 2026'da başlatıldı; kod tarafı
-bitti (kökteki `CNAME` dosyası), DNS adımı için §4'e bakın.
+Adres: **https://herkim.com.tr** — geçiş 1 Eylül 2026'da tamamlandı.
+Depo: `ercepan/herkim-group-website`, GitHub Pages. Özel alan adını kökteki
+`CNAME` dosyası belirler. Eski `ercepan.github.io/...` adresi buraya yönlenir.
 
 **Faz 1 — teklif modeli.** Sitede sipariş verme ve müşteri hesabı KAPALI.
 Alıcı ürünleri görür, teklif sepetine atar, WhatsApp veya e-posta ile satış
@@ -134,53 +134,81 @@ sonuna harf ekleyin: `2026-09-02b`.
 
 ---
 
-## 4. Alan adı geçişi — herkim.com.tr
+## 4. Alan adı — herkim.com.tr
 
-**DİKKAT: `herkim.com.tr` boş değil.** Natro'da (94.73.145.212) çalışan eski
-Herkim sitesi var ve `info@herkim.com.tr` e-postası aktif (MX kaydı
-`mail.herkim.com.tr`). Geçiş eski sitenin yerini alır.
+Geçiş **1 Eylül 2026'da yapıldı ve doğrulandı.** Site GitHub Pages'te,
+e-posta eskisi gibi Natro'da. İkisi ayrı sunucularda; biri diğerini etkilemez.
 
-### Sıra önemli
+### Kim neyi tutuyor
 
-**1. Natro panelinde DNS.** `herkim.com.tr` bir apex alan adıdır.
-**Apex'e CNAME KONULMAZ** — konursa MX kaydı geçersizleşir ve
-`info@herkim.com.tr` mailleri gelmez olur (RFC 1034). Mevcut
-`A → 94.73.145.212` kaydı şunlarla değiştirilir:
+| Ne | Nerede | Değer |
+|---|---|---|
+| Alan adı tescili | Natro'nun 34 alan adı listesinde YOK — başka bir kayıt firmasında | `herkim.com.tr` |
+| DNS bölgesi | Natro paneli (aşağıdaki yol) | `ns1/ns2.natrohost.com` |
+| Web sitesi | GitHub Pages | A: 185.199.108–111.153 |
+| E-posta | Natro, **ayrı sunucu** | MX → `mail.herkim.com.tr` → 85.97.197.8 |
+
+### DNS ekranına nasıl gidilir
+
+Natro → Hosting Yönetimi → **Sınırsız Xtreme Hosting [120155HH9ZIX]** satırında
+`Yönet` → Web Alanı Yönetimi → `herkim.com.tr` satırındaki **Web Sitesi** oku →
+**DNS Yönetimi**.
+
+`herkim.com.tr` bu hosting hesabının *birincil* alan adıdır; alan adı listesinde
+aramayın, orada yok. cPanel'de Zone Editor **yoktur**, DNS yalnız buradan
+düzenlenir.
+
+**Ekranın tamamı sığmaz.** Pencere sabit yükseklikte ve kaydırılamaz; alttaki
+CNAME ve TXT bölümleri ilk bakışta görünmez. İlk yedeği alırken bu yüzden DKIM
+ve dört CNAME kaydı gözden kaçtı. Görmediğinize "yok" demeyin — `dig` ile
+doğrulayın. Tam bölge dökümü: `yedek/dns-tam-bolge-20260901.txt`.
+
+### Üç kural
+
+1. **"DNS Kayıtlarını Sıfırla" ve "MX Kayıtlarını Sıfırla" düğmelerine
+   basılmaz.** Ekranın en üstündedirler. Bölgeyi varsayılana döndürürler;
+   `info@herkim.com.tr` o anda çalışmaz hâle gelir, DKIM ve DMARC kaybolur.
+2. **Apex'e (`@`) CNAME konulmaz.** RFC 1034 gereği o isimdeki MX ve TXT
+   kayıtları geçersizleşir, mail kesilir. Apex için A kaydı kullanılır.
+3. **Panel "değiştirmez", ekler.** `Değiştir` düğmesine rağmen her kayıt yeni
+   satır olarak eklenir; eskisini ayrıca silmeniz gerekir. Ayrıca Server alanı
+   textarea gibi görünse de **tek IP** kabul eder; alt alta birden fazla
+   yazarsanız "DNS kayıt güncelleme işlemi tamamlanamadı" der.
+
+### Şu anki kayıtlar
 
 ```
-A     @      185.199.108.153
-A     @      185.199.109.153
-A     @      185.199.110.153
-A     @      185.199.111.153
-CNAME www    ercepan.github.io.
+A      @      185.199.108.153 / .109.153 / .110.153 / .111.153
+A      www    185.199.108.153 / .109.153 / .110.153 / .111.153
+A      mail   85.97.197.8                          <- dokunulmaz
+MX     @      10 mail.herkim.com.tr.               <- dokunulmaz
+TXT    @      v=spf1 mx ip4:85.97.197.8 -all       <- dokunulmaz
+TXT    @      google-site-verification=...         <- dokunulmaz
+TXT    mail   v=spf1 mx ip4:85.97.197.8 -all       <- dokunulmaz
+TXT    _dmarc v=DMARC1; p=quarantine; ...          <- dokunulmaz
+TXT    mail._domainkey   v=DKIM1;p=...             <- dokunulmaz
+CNAME  autodiscover      mail.kurumsaleposta.com.  <- dokunulmaz
+CNAME  phaa4qp2icpx      ...googlehosted.com.      <- dokunulmaz
+CNAME  _ba2470… / _ce5dd9…  ...sectigo.com.        <- SSL doğrulama, dokunulmaz
 ```
 
-**MX kaydına DOKUNULMAZ.**
+Geri dönüş gerekirse: `yedek/GERI-DONUS.md`.
 
-**2. DNS yayılınca** (`dig +short herkim.com.tr` GitHub adreslerini gösterince):
+### Geçiş sırası neden böyleydi
 
-```bash
-bash tools/alan-adi-gecisi.sh
-```
+`CNAME` dosyası depoya **DNS'ten önce** gönderildi. Böylece DNS herkim.com.tr'yi
+GitHub'a çevirdiği anda Pages siteyi zaten o isimle sunmaya hazırdı ve arada
+"site yok" ekranı çıkmadı. Tersi yapılsaydı, DNS'i taze çözen bir ziyaretçi
+GitHub'ın 404 sayfasını görürdü.
 
-Betik 21 dosyadaki adresi günceller — canonical, og:url, sitemap, robots,
-JSON-LD, şema üretici ve **e-posta şablonları** dahil. `CNAME` dosyasını yazar.
-Eski adres kalırsa hata verip durur.
+Aynı iş bir daha yapılacaksa (başka bir alan adı için) sıra: `CNAME` + adres
+değişikliği commit'i → push → Pages'in aldığını doğrula → sonra DNS.
 
-**3.** commit + push
+### Geçişten sonra kalanlar
 
-**4.** GitHub → Settings → Pages → Custom domain: `herkim.com.tr`, sonra
-**Enforce HTTPS**. Sertifika birkaç dakikada gelir.
-
-### DNS hazır olmadan `CNAME` dosyasını depoya koymayın
-
-GitHub Pages özel alan adına yönlenir ve `github.io` adresi de kırılır — site
-tamamen erişilemez olur.
-
-### Geçişten sonra
-
-- Web3Forms panelinde formun "Website URL" alanını `herkim.com.tr` yapın
-- Google Search Console'a yeni alan adını ekleyip `sitemap.xml` gönderin
+- `bash tools/alan-adi-gecisi.sh` çalıştırıldı, 21 dosyadaki adres güncellendi
+- Web3Forms panelinde formun "Website URL" alanı `herkim.com.tr` yapılmalı
+- Google Search Console'a yeni alan adı eklenip `sitemap.xml` gönderilmeli
 - Eski sayfa adresleri (`hakkimizda.html`, `fuar.html`…) 404 verecek —
   yönlendirme koymama kararı alındı
 
@@ -190,12 +218,35 @@ tamamen erişilemez olur.
 
 | İş | Durum | Kimde |
 |---|---|---|
-| DNS'i GitHub'a yöneltmek | bekliyor | Natro paneli olan kişi |
+| **Natro hosting yenilemesi — 19 Eylül 2026** | **ACİL, aşağıya bakın** | şirket |
+| `info@herkim.com.tr` gönder/al testi | yapılmadı | şirket |
+| HTTPS zorlaması (Enforce HTTPS) | sertifika beklendi, sonra açılacak | GitHub hesabı olan |
+| Web3Forms "Website URL" alanı → herkim.com.tr | yapılmadı | hesap sahibi |
+| Google Search Console'a yeni alan adı + sitemap | yapılmadı | hesap sahibi |
+| İletişim formunun canlı denemesi (captcha çözülerek) | yapılmadı | şirket |
 | Filigransız tanıtım videosu | bekliyor | video kaynağı olan kişi |
 | KVKK metni | şablon — hukukçuya danışılacak | şirket |
 | MERSİS / ticaret sicil numarası | eksik | şirket |
 | ISO 9001 belgesi | kartı var, belge yok | şirket |
 | Web3Forms alan adı kısıtlaması | Pro özelliği, kapalı | karar |
+
+### Natro hosting 19 Eylül 2026'da bitiyor — DNS oraya bağlı
+
+Panelde "Hosting Yaşam Bilgisi (18 gün kaldı)" yazıyor. Hizmet 19 Eylül 2012'de
+başlamış, son yenileme tarihi **19 Eylül 2026** (Sınırsız Xtreme Paket,
+290,28 $/12 ay).
+
+Site artık GitHub'da duruyor, o yüzden "hosting'e ne gerek var" diye
+düşünülebilir. **Düşünmeyin.** O hosting hesabı iki kritik şeyi taşıyor:
+
+1. **DNS bölgesi.** `herkim.com.tr`'nin bütün kayıtları o hesabın altında
+   duruyor. Hesap kapanırsa alan adı hiçbir yeri göstermez — site de, mail de.
+2. **`info@herkim.com.tr` postası.** Mail sunucusu ayrı makinede ama hesap
+   aynı.
+
+Yenilenmezse ya da DNS başka bir sağlayıcıya taşınmazsa 19 Eylül'de hem site
+hem e-posta durur. Karar şirkete ait; bu notun amacı tarihin gözden
+kaçmamasıdır.
 
 **Filigran notu:** tanıtım videosundaki `clideo.com` filigranı silinemedi —
 kendi PAN HOLDING logonuzun üstüne biniyor. Üzerine opak bir PAN HOLDING
