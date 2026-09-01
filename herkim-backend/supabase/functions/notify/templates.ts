@@ -28,7 +28,7 @@ const esc = (v: unknown) =>
   String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const SITE = "https://ercepan.github.io/herkim-group-website";
+const SITE = "https://herkim.com.tr";
 
 type Dil = "tr" | "en" | "ru";
 

@@ -48,8 +48,9 @@ Kullanıcı adı ve şifre hiçbir dosyaya yazılmaz, ekranda bir kez görünür
 
 ## 2. Sitenin şu anki durumu
 
-Yayında: `https://ercepan.github.io/herkim-group-website/`
-Hedef alan adı: `herkim.com.tr` (henüz bağlanmadı)
+Depo: `ercepan/herkim-group-website` — GitHub Pages'te yayınlanıyor.
+Alan adı: `herkim.com.tr` — geçiş 1 Eylül 2026'da başlatıldı; kod tarafı
+bitti (kökteki `CNAME` dosyası), DNS adımı için §4'e bakın.
 
 **Faz 1 — teklif modeli.** Sitede sipariş verme ve müşteri hesabı KAPALI.
 Alıcı ürünleri görür, teklif sepetine atar, WhatsApp veya e-posta ile satış

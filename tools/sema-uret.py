@@ -40,7 +40,7 @@ import sys
 from pathlib import Path
 
 KOK_DIZIN = Path(__file__).resolve().parent.parent
-SITE_KOK = "https://ercepan.github.io/herkim-group-website/"
+SITE_KOK = "https://herkim.com.tr/"
 
 # Dosyayı yalıtılmış bir bağlamda çalıştırıp istenen değişkeni JSON olarak alır.
 OKUYUCU = """

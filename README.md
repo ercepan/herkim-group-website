@@ -2,7 +2,7 @@
 
 **Herkim Group Kimyevi Maddeler A.Ş.** (1975, Tuzla/İstanbul) için üç dilli (TR/EN/RU), sunucu gerektirmeyen statik kurumsal site ve uçtan uca sipariş/CRM demosu.
 
-- **Canlı site:** https://ercepan.github.io/herkim-group-website/
+- **Canlı site:** https://herkim.com.tr/
 - **Yayın:** `main` dalına push → GitHub Pages ~1 dakikada otomatik günceller.
 
 ## Sayfalar
@@ -77,7 +77,7 @@ CRM, siparişler ve müşteri kartları kapalıdır.
 
 ## Alan adı geçişi — herkim.com.tr
 
-Site şu an `https://ercepan.github.io/herkim-group-website/` adresinde.
+Site şu an `https://herkim.com.tr/` adresinde.
 Hedef: `https://herkim.com.tr`.
 
 **O alan adında ŞU AN ÇALIŞAN ESKİ BİR SİTE VAR** (Natro, 94.73.145.212) ve
