@@ -124,7 +124,7 @@ const HK_FIYAT = {
   liste: {
     // #5 Formik Asit %85 — Cin/Luxi. Iki ambalaj, iki fiyat.
     5: [
-      { ambalaj: { tr: "IBC 1200 L", en: "IBC 1200 L", ru: "IBC 1200 л" }, usd: 0.86 },
+      { ambalaj: { tr: "IBC 1200 L", en: "IBC 1200 L", ru: "IBC 1200 л" }, usd: 0.95 },
       { ambalaj: { tr: "35 L bidon", en: "35 L drum", ru: "Бидон 35 л" }, usd: 1.10 }
     ],
     // #16 Mimoza Tozu — Tanac
@@ -135,9 +135,13 @@ const HK_FIYAT = {
     17: [
       { ambalaj: null, usd: 3.35 }
     ],
+    // #20 Tara Tozu — Peru mensei
+    20: [
+      { ambalaj: null, usd: 2.65 }
+    ],
     // #28 Sodyum Sulfhidrat (NaHS) — Iran mensei
     28: [
-      { ambalaj: null, usd: 2.50 }
+      { ambalaj: null, usd: 1.35 }
     ]
   }
 };
