@@ -167,7 +167,15 @@ const HK_COMPANY = {
                               // beslenir; numara TEK bu satırda değişir.
                               // Ülke kodu bitişik yazılır,
                               // başında + ve arada boşluk YOKTUR.
-  web3forms: "",              // portal-store.js hgNotify. Anahtar girilince iletişim ve
+  web3forms: "6114ef54-8b21-4ab1-a344-88842a23c542",
+
+  /* hCaptcha site anahtari. Web3Forms'un ucretsiz plan icin verdigi ortak
+     anahtardir (kendi hesabimiza ait DEGIL, onlarin dokumanindaki deger).
+     Bos birakilirsa captcha tamamen devre disi kalir.
+
+     DIKKAT: Web3Forms panelinde captcha ACIKKEN bu anahtar bos olursa
+     hicbir gonderim gecmez. Ikisi birlikte acilir, birlikte kapatilir. */
+  hcaptchaSitekey: "50b2fe65-b00b-4b9e-ad62-3ba471098be2",              // portal-store.js hgNotify. Anahtar girilince iletişim ve
                               // teklif talepleri şirket e-postasına ANINDA düşer.
                               // NASIL ALINIR: web3forms.com adresine girip aşağıdaki
                               // notifyTo adresini (sales@herkimgroup.com) yazın; o adrese

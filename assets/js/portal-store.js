@@ -1042,6 +1042,77 @@
     } catch (e) { return true; }   // depo kapalıysa akışı engelleme
   }
 
+  /* ============================================================
+     hCAPTCHA — görünmez doğrulama
+     Web3Forms panelinde captcha açıkken, o erişim anahtarıyla yapılan HER
+     gönderim bir captcha jetonu ister. Sitede gönderim yapan tek bir form
+     yok (iletişim formu, teklif sepeti, hesap başvurusu, e-bülten hepsi
+     hgNotify'dan geçiyor), bu yüzden her birine ayrı kutu koymak yerine
+     TEK bir görünmez bileşen kuruluyor ve jetonu hgNotify kendisi alıyor.
+
+     Betik ancak ilk gönderimde indirilir: sayfayı açan herkese hCaptcha
+     yüklemek hem gereksiz hem de gizlilik açısından yanlış olurdu.
+
+     Başarısız olursa jeton döndürmez; hgNotify de false döner ve sitedeki
+     mevcut yedek kutu (WhatsApp / telefon / e-posta) açılır. Sessizce
+     "gönderildi" demek en kötü sonuç olurdu.
+     ============================================================ */
+  var HGP_CAPTCHA_ID = null;
+  var hgpCaptchaSozu = null;
+
+  function hgpCaptchaAnahtari() {
+    try { return (HK_COMPANY && HK_COMPANY.hcaptchaSitekey) || ""; }
+    catch (e) { return ""; }
+  }
+
+  /* Betiği bir kez yükler ve görünmez bileşeni bir kez çizer. */
+  function hgpCaptchaHazirla() {
+    if (hgpCaptchaSozu) return hgpCaptchaSozu;
+    var anahtar = hgpCaptchaAnahtari();
+    if (!anahtar) return (hgpCaptchaSozu = Promise.resolve(false));
+
+    hgpCaptchaSozu = new Promise(function (coz) {
+      var bitti = false;
+      var kapat = function (sonuc) { if (!bitti) { bitti = true; coz(sonuc); } };
+
+      /* Ağ takılırsa gönderim sonsuza kadar beklemesin. */
+      var sure = setTimeout(function () { kapat(false); }, 12000);
+
+      window.hgpCaptchaYuklendi = function () {
+        try {
+          var kutu = document.createElement("div");
+          kutu.id = "hg-captcha";
+          kutu.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden";
+          document.body.appendChild(kutu);
+          HGP_CAPTCHA_ID = window.hcaptcha.render(kutu, {
+            sitekey: anahtar,
+            size: "invisible"
+          });
+          clearTimeout(sure); kapat(true);
+        } catch (e) { clearTimeout(sure); kapat(false); }
+      };
+
+      var b = document.createElement("script");
+      b.src = "https://js.hcaptcha.com/1/api.js?render=explicit&onload=hgpCaptchaYuklendi";
+      b.async = true; b.defer = true;
+      b.onerror = function () { clearTimeout(sure); kapat(false); };
+      document.head.appendChild(b);
+    });
+    return hgpCaptchaSozu;
+  }
+
+  /* Jeton üretir. Captcha yapılandırılmamışsa null döner (gönderim
+     captcha'sız denenir; panel kapalıysa zaten sorun olmaz). */
+  function hgpCaptchaJetonu() {
+    if (!hgpCaptchaAnahtari()) return Promise.resolve(null);
+    return hgpCaptchaHazirla().then(function (hazir) {
+      if (!hazir || !window.hcaptcha || HGP_CAPTCHA_ID === null) return null;
+      return window.hcaptcha.execute(HGP_CAPTCHA_ID, { async: true })
+        .then(function (c) { return (c && c.response) || null; })
+        .catch(function () { return null; });
+    }).catch(function () { return null; });
+  }
+
   function hgNotify(subject, lines, senderName, senderEmail) {
     try {
       var key = (typeof HK_COMPANY !== "undefined" && HK_COMPANY.web3forms) || "";
@@ -1063,13 +1134,24 @@
          boş bırakılırsa kopya gönderilmez. */
       var kopya = (typeof HK_COMPANY !== "undefined" && HK_COMPANY.notifyCc) || "";
       if (kopya && kopya.indexOf("@") > 0) body.cc = [kopya];
-      return fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(body)
-      }).then(function (r) { return r.json(); })
-        .then(function (j) { return !!(j && j.success); })
-        .catch(function () { return false; });
+
+      /* Captcha jetonu (varsa) gövdeye eklenir. Panelde captcha açıksa
+         bu alan olmadan Web3Forms gönderimi REDDEDER. */
+      return hgpCaptchaJetonu().then(function (jeton) {
+        if (jeton) body["h-captcha-response"] = jeton;
+        return fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(body)
+        }).then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (!(j && j.success)) {
+              console.warn("Herkim: bildirim gönderilemedi —", (j && j.message) || "bilinmeyen hata");
+            }
+            return !!(j && j.success);
+          })
+          .catch(function () { return false; });
+      });
     } catch (e) { return Promise.resolve(false); }
   }
 
