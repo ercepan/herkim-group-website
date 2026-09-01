@@ -1103,14 +1103,37 @@
 
   /* Jeton üretir. Captcha yapılandırılmamışsa null döner (gönderim
      captcha'sız denenir; panel kapalıysa zaten sorun olmaz). */
+  /* Son denemede captcha neden başarısız oldu:
+       ""            sorun yok
+       "kapatildi"   kullanıcı doğrulama penceresini kapattı / bitiremedi
+       "yuklenemedi" betik inmedi ya da bileşen çizilemedi
+     Arayüz buna göre farklı mesaj gösterir — "bağlantı sorunu" demek,
+     bulmacayı kapatan kullanıcıyı yanlış yönlendirirdi. */
+  var HGP_CAPTCHA_HATA = "";
+
   function hgpCaptchaJetonu() {
+    HGP_CAPTCHA_HATA = "";
     if (!hgpCaptchaAnahtari()) return Promise.resolve(null);
     return hgpCaptchaHazirla().then(function (hazir) {
-      if (!hazir || !window.hcaptcha || HGP_CAPTCHA_ID === null) return null;
+      if (!hazir || !window.hcaptcha || HGP_CAPTCHA_ID === null) {
+        HGP_CAPTCHA_HATA = "yuklenemedi";
+        return null;
+      }
       return window.hcaptcha.execute(HGP_CAPTCHA_ID, { async: true })
-        .then(function (c) { return (c && c.response) || null; })
-        .catch(function () { return null; });
-    }).catch(function () { return null; });
+        .then(function (c) {
+          var j = (c && c.response) || null;
+          if (!j) HGP_CAPTCHA_HATA = "kapatildi";
+          return j;
+        })
+        .catch(function () {
+          /* hCaptcha pencereyi kapatınca da, süre dolunca da buraya düşer.
+             İkisi de kullanıcının doğrulamayı tamamlamadığı anlamına gelir. */
+          HGP_CAPTCHA_HATA = "kapatildi";
+          /* Bir sonraki denemede taze bir istek yapılabilsin diye sıfırla. */
+          try { window.hcaptcha.reset(HGP_CAPTCHA_ID); } catch (e) { /* önemsiz */ }
+          return null;
+        });
+    }).catch(function () { HGP_CAPTCHA_HATA = "yuklenemedi"; return null; });
   }
 
   function hgNotify(subject, lines, senderName, senderEmail) {
@@ -1224,6 +1247,8 @@
   window.hgpExportDocs = hgpExportDocs;
 
   window.hgpReset = hgpReset;
+  /* Arayüz, captcha'nın neden başarısız olduğunu buradan öğrenir. */
+  window.hgpCaptchaHata = function () { return HGP_CAPTCHA_HATA; };
   window.hgpClean = hgpClean;
   window.hgpRateOk = hgpRateOk;
   window.hgNotify = hgNotify;

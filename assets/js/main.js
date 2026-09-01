@@ -1098,8 +1098,13 @@
       if (kutu) kutu.remove();
       kutu = el("div", "cf-fallback");
       kutu.id = "cf-fallback";
-      kutu.appendChild(el("b", null, T("f.failTitle")));
-      kutu.appendChild(el("p", null, T("f.failBody")));
+      /* Sebebe göre mesaj. Captcha yarıda kaldıysa "bağlantı sorunu" demek
+         kullanıcıyı yanlış yere yönlendirir: yapması gereken doğrulamayı
+         bitirmek, tekrar denemek değil. */
+      var capHata = (typeof window.hgpCaptchaHata === "function") ? window.hgpCaptchaHata() : "";
+      var capYarim = (capHata === "kapatildi");
+      kutu.appendChild(el("b", null, T(capYarim ? "f.capTitle" : "f.failTitle")));
+      kutu.appendChild(el("p", null, T(capYarim ? "f.capBody" : "f.failBody")));
       const sira = el("div", "cf-fallback-links");
       const wa = el("a", "btn btn--primary btn--sm", T("f.failWa"));
       wa.href = "https://wa.me/" + HK.whatsapp + "?text=" + encodeURIComponent(T("wa.msg"));
