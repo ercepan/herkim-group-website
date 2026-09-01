@@ -855,10 +855,11 @@
     if (rc) rc.textContent = list.length + " / " + all.length;
   }
 
-  /* Fiyat listesi tarihini sayfaya yaz (varsa). */
+  /* Fiyat listesi tarihini sayfaya yaz. Sınıf kullanılıyor çünkü not
+     hem ürün listesinde hem katalogda var. */
   (function () {
-    const kutu = $("#fiyat-tarih");
-    if (kutu && FIYAT && FIYAT.guncelleme) kutu.textContent = FIYAT.guncelleme;
+    if (!FIYAT || !FIYAT.guncelleme) return;
+    $$(".fiyat-tarih").forEach(n => { n.textContent = FIYAT.guncelleme; });
   })();
 
   function renderTable() {

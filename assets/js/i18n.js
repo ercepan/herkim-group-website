@@ -548,10 +548,10 @@ const HK_I18N = {
     "th.doc": "Doküman",
     "th.quote": "Teklif",
     "th.price": "Fiyat",
-    "fiyat.kdvNot": "Fiyatlar KDV hariç, kilogram başına ABD dolarıdır.",
+    "fiyat.kdvNot": "Fiyatlar depomuzdan teslim, KDV hariç, peşin ve perakende satış fiyatıdır. Kilogram başına ABD dolarıdır.",
     "fiyat.teklif": "Teklif alın",
     "fiyat.guncelleme": "Fiyat listesi güncellemesi:",
-    "fiyat.not": "Liste fiyatıdır; miktar, ambalaj ve teslim şekline göre değişir. Kesin fiyat teklifle netleşir.",
+    "fiyat.not": "Yüksek tonaj ve perakende satış için teklif isteyin.",
     "fiyat.kg": "/kg",
 
     /* Doküman merkezi kart bağlantıları */
@@ -1083,10 +1083,10 @@ const HK_I18N = {
     "th.doc": "Docs",
     "th.quote": "Quote",
     "th.price": "Price",
-    "fiyat.kdvNot": "Prices are per kilogram in US dollars, VAT excluded.",
+    "fiyat.kdvNot": "Prices are ex-warehouse, VAT excluded, for cash retail sales, per kilogram in US dollars.",
     "fiyat.teklif": "Request a quote",
     "fiyat.guncelleme": "Price list updated:",
-    "fiyat.not": "List price. It varies with quantity, packaging and delivery terms; the final price is confirmed with the quotation.",
+    "fiyat.not": "Please request a quotation for high tonnage and retail purchases.",
     "fiyat.kg": "/kg",
 
     /* Doküman merkezi kart bağlantıları */
@@ -1618,10 +1618,10 @@ const HK_I18N = {
     "th.doc": "Док.",
     "th.quote": "Запрос",
     "th.price": "Цена",
-    "fiyat.kdvNot": "Цены указаны за килограмм в долларах США, без НДС.",
+    "fiyat.kdvNot": "Цены указаны со склада, без НДС, за наличный расчёт, розничные, за килограмм в долларах США.",
     "fiyat.teklif": "Запросить цену",
     "fiyat.guncelleme": "Прайс-лист обновлён:",
-    "fiyat.not": "Прайсовая цена. Она зависит от объёма, упаковки и условий поставки; окончательная цена подтверждается предложением.",
+    "fiyat.not": "Для больших объёмов и розничных закупок запросите коммерческое предложение.",
     "fiyat.kg": "/кг",
 
     /* Doküman merkezi kart bağlantıları */

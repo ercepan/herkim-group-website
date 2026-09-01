@@ -1710,10 +1710,21 @@ body::before { opacity: 0.028; }
 /* Katalog kartında fiyat, ürün adının altında ayrı bir satır */
 .fiyat-kart { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
 
+/* Ticari koşul kutusu. Fiyatlar herkese açık olduğu için bu satırlar
+   göz ardı edilemeyecek kadar belirgin olmalı: sol kenarda bordo şerit. */
 .fiyat-not {
-  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: 6px 18px;
   margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--crimson);
+  border-radius: var(--radius);
+  background: var(--white);
   font-size: var(--fs-small);
   color: var(--ink-2);
+  line-height: 1.55;
 }
-.fiyat-not .mono { font-family: var(--font-mono); color: var(--ink-3); }
+.fiyat-not p { margin: 0; max-width: 72ch; }
+.fiyat-not b { color: var(--ink); }
+.fiyat-not .mono { font-family: var(--font-mono); color: var(--ink-3); white-space: nowrap; }
