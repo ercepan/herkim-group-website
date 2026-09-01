@@ -34,8 +34,8 @@ type Dil = "tr" | "en" | "ru";
 
 const ALTBILGI: Record<Dil, string> = {
   tr: "Herkim Group Kimyevi Maddeler A.Ş. · Deri OSB Mah. Pres Sok. No: 3, Tuzla / İstanbul · 444 56 58 · sales@herkimgroup.com<br>Bu e-posta, sitemiz üzerinden yaptığınız işlem nedeniyle gönderilmiştir.",
-  en: "Herkim Group Kimyevi Maddeler A.Ş. · Deri OSB Mah. Pres Sok. No: 3, Tuzla / İstanbul, Türkiye · +90 216 394 11 33 · sales@herkimgroup.com<br>You are receiving this e-mail because of a transaction you made on our website.",
-  ru: "Herkim Group Kimyevi Maddeler A.Ş. · Deri OSB Mah. Pres Sok. No: 3, Тузла / Стамбул · +90 216 394 11 33 · sales@herkimgroup.com<br>Вы получили это письмо в связи с действием, совершённым на нашем сайте.",
+  en: "Herkim Group Kimyevi Maddeler A.Ş. · Deri OSB Mah. Pres Sok. No: 3, Tuzla / İstanbul, Türkiye · +90 216 394 11 25 · sales@herkimgroup.com<br>You are receiving this e-mail because of a transaction you made on our website.",
+  ru: "Herkim Group Kimyevi Maddeler A.Ş. · Deri OSB Mah. Pres Sok. No: 3, Тузла / Стамбул · +90 216 394 11 25 · sales@herkimgroup.com<br>Вы получили это письмо в связи с действием, совершённым на нашем сайте.",
 };
 
 /* ---------- İskelet ---------- */

@@ -78,7 +78,7 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org
   <text x="392" y="110" font-size="11.4" fill="{MUT}">Deri OSB Mah. Pres Sok. No: 3</text>
   <text x="392" y="128" font-size="11.4" fill="{MUT}">Tuzla / İstanbul</text>
   <text x="392" y="146" font-size="11.4" fill="{MUT}">sales@herkimgroup.com</text>
-  <text x="392" y="164" font-size="11.4" fill="{MUT}">+90 (216) 394 11 33 (Ext: 224)</text>
+  <text x="392" y="164" font-size="11.4" fill="{MUT}">+90 (216) 394 11 25</text>
 </g>
 
 <!-- İnce ayraç -->

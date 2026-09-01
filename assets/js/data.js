@@ -202,10 +202,19 @@ const HK_COMPANY = {
   address: "Deri OSB Mah. Pres Sok. No: 3, Tuzla — İstanbul / Türkiye",
   // → index.html ≈47 (JSON-LD streetAddress), index.html ≈435, iletisim.html ≈134
   phone: "444 56 58",
-  // → her sayfanın üst şeridi (tel:4445658, örn. index.html ≈73) ve
-  //   index.html ≈439 / iletisim.html ≈138
+  // → 11 sayfanın hepsinde üst şeritte (tel:4445658)
+
+  /* İKİNCİ NUMARA. Bu alanı KOD OKUMUYOR; değer sitede ve katalogda ELLE
+     yazılıdır. Değiştirirken aşağıdaki DÖRT yeri birlikte güncelleyin,
+     yoksa numara yer yer eski kalır (bir kez tam olarak bu oldu):
+       1. iletisim.html   → "Telefon" satırı (444 56 58 · +90 216 394 11 25)
+       2. index.html      → JSON-LD "telephone" alanı
+       3. tools/katalog-uret.py → PDF künyesi, sonra betiği ÇALIŞTIRIN:
+          assets/docs/herkim-urun-katalogu-2026.pdf müşteriye iniyor
+       4. herkim-backend/.../notify/templates.ts → EN ve RU e-posta altlığı
+     Doğrulama:  grep -rn "394 11" --exclude-dir=.git .  */
   phone2: "+90 216 394 11 25",
-  // → index.html ≈439, iletisim.html ≈138 (telefon satırının ikinci yarısı)
+  // → yalnızca yukarıdaki 4 yerde; koddan okunmaz
   phoneTel: "+902163941125",
   // → hiçbir yerde karşılığı yok: sitedeki tel: bağlantıları 444'lü numarayı
   //   (tel:4445658) kullanıyor. Bu alan tamamen boşta duruyor.
