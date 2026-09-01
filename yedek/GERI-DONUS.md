@@ -15,7 +15,10 @@ eklenmedi, silinmedi, düzenlenmedi.
 | İsim | Önce | Sonra |
 |---|---|---|
 | `herkim.com.tr` (apex) | `A 94.73.145.212` | `A 185.199.108.153` + `.109` + `.110` + `.111` |
-| `www.herkim.com.tr` | `A 94.73.145.212` | aynı dört adres |
+| `www.herkim.com.tr` | `A 94.73.145.212` | `CNAME ercepan.github.io.` |
+
+`www` önce dört A kaydına çevrilmişti; aynı gün CNAME'e dönüştürüldü. Sebebi
+§"www neden CNAME" başlığında.
 
 Dört adres GitHub Pages'in kendi adresleridir; biri erişilemezse diğerleri
 devreye girer. 1 Eylül 2026'da `dig ercepan.github.io` ile doğrulandı,
@@ -23,8 +26,8 @@ belgeden ezbere alınmadı.
 
 ## Eski hâle döndürmek için
 
-1. Natro DNS panelinde apex ve `www` için eklenen sekiz A kaydını silin,
-   her ikisine birer `A 94.73.145.212` kaydı ekleyin.
+1. Natro DNS panelinde apex'in dört A kaydını ve `www`'nin CNAME kaydını
+   silin, her ikisine birer `A 94.73.145.212` kaydı ekleyin.
 2. Depodaki `CNAME` dosyasını silin ve GitHub → Settings → Pages → Custom
    domain alanını boşaltın.
 3. `bash tools/alan-adi-gecisi.sh` betiğinin yaptığı adres değişikliğini geri
@@ -35,6 +38,31 @@ Yayılım 10 dakika ile bir saat arasında sürer (bölgenin TTL'i 3600 sn).
 Eski sitenin sayfaları `yedek/eski-site/` klasöründe duruyor (7 sayfa, 140 KB).
 Natro sunucusundaki dosyalar silinmedi; site hâlâ `94.73.145.212` üzerinde
 duruyor, sadece alan adı artık oraya bakmıyor.
+
+---
+
+## www neden CNAME
+
+GitHub Pages'in sağlık kontrolü, `www` bir **A kaydı** olduğunda onu geçersiz
+sayıyor (`InvalidARecordError`) ve HTTPS sertifikası siparişi hiç
+oluşturulmuyordu — iki saat beklendi, `https_certificate` alanı API'de hiç
+görünmedi.
+
+Çalışan apex Pages siteleri ölçüldü:
+
+| site | sertifikanın kapsadığı adlar | www nasıl |
+|---|---|---|
+| semver.org | apex + www | CNAME → `semver.github.io.` |
+| brew.sh | apex + www | CNAME → `homebrew.github.io.` |
+| keepachangelog.com | apex + www | CNAME → `olivierlacan.github.io.` |
+| jekyllrb.com | yalnız apex | www Pages'te değil (Cloudflare) |
+
+Sertifika apex ile www'yi birlikte kapsıyor ve www'nin CNAME olmasını
+bekliyor. Bu yüzden `www`'nin dört A kaydı silinip yerine tek CNAME kondu.
+
+**Apex'e CNAME konulamaz** (RFC 1034; MX ve TXT geçersizleşir) — apex A kaydı
+olarak kaldı. Hedefe depo adı eklenmez: `ercepan.github.io.` doğru,
+`ercepan.github.io/herkim-group-website` yanlış.
 
 ---
 
@@ -77,8 +105,8 @@ kesilir. Bu yüzden apex için **A kaydı** kullanıldı.
 ## Geçiş sonrası doğrulama — 1 Eylül 2026'da yapıldı
 
 ```bash
-dig +short herkim.com.tr @ns1.natrohost.com        # dört GitHub adresi ✓
-dig +short www.herkim.com.tr @ns1.natrohost.com    # dört GitHub adresi ✓
+dig +short herkim.com.tr @ns1.natrohost.com            # dört GitHub adresi ✓
+dig +short www.herkim.com.tr CNAME @ns1.natrohost.com  # ercepan.github.io. ✓
 dig +short herkim.com.tr MX @ns1.natrohost.com     # 10 mail.herkim.com.tr. ✓
 dig +short herkim.com.tr TXT @ns1.natrohost.com    # SPF + Google ✓
 dig +short mail._domainkey.herkim.com.tr TXT @ns1.natrohost.com   # DKIM ✓

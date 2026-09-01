@@ -21,12 +21,10 @@
   herkim.com.tr.        A  185.199.109.153
   herkim.com.tr.        A  185.199.110.153
   herkim.com.tr.        A  185.199.111.153
-  www.herkim.com.tr.    A  185.199.108.153
-  www.herkim.com.tr.    A  185.199.109.153
-  www.herkim.com.tr.    A  185.199.110.153
-  www.herkim.com.tr.    A  185.199.111.153
 
-  ESKI HALI (geri donmek gerekirse ikisi de tek kayda dusurulur):
+  www ARTIK A KAYDI DEGIL — asagidaki CNAME bolumune bakin.
+
+  ESKI HALI (geri donmek gerekirse):
   herkim.com.tr.        A  94.73.145.212
   www.herkim.com.tr.    A  94.73.145.212
 
@@ -48,7 +46,15 @@
   mail._domainkey.herkim.com.tr. TXT
   "v=DKIM1;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsuz/6jLChn4BIJVumfOLuK5qicywISWJ/swMMk3ErSGpAzfPB8RaMp3ezuSXXwaO7NqMdxqE2/qKMdFpJG+73YbcUxdHb2jOJcCLhrSauFlnBI5NwPgN+8oEmXR0yjVo7K6UKEeig87ltwWLnXL3pwFX+2n/o58XMlCcqlqfQ7kNxcDi/SXzNKSadAwBl91HITB9YFU09" "FeHM2rKNDiOslGph+SDUIXI3Ig5yOutZ4Xv0KXjlbG+SmYXYoSoD9Fgp48WyHezdPqP17jRA++97zElwE6eWIYt1UAZw7DP37fQexf0r996J3t3DXX9NJiA/OMAPRcJ46pWsGDsMap4KQIDAQAB"
 
-== CNAME (DOKUNULMADI) ==
+== CNAME ==
+  www.herkim.com.tr.           CNAME ercepan.github.io.
+      -> Web sitesi. 1 Eylul 2026'da dort A kaydinin yerine konuldu.
+         SEBEP: GitHub Pages'in saglik kontrolu www icin A kaydini
+         gecersiz sayiyor (InvalidARecordError) ve HTTPS sertifikasi
+         siparisi bu yuzden hic olusmuyordu. Calisan apex Pages
+         siteleri (semver.org, brew.sh, keepachangelog.com) olculdu:
+         ucunde de sertifika apex + www adlarini birlikte tasiyor ve
+         ucunde de www bir CNAME. Depo adi hedefe EKLENMEZ.
   autodiscover.herkim.com.tr.  CNAME mail.kurumsaleposta.com.
       -> Outlook'un ayarlari otomatik bulmasi
   phaa4qp2icpx.herkim.com.tr.  CNAME gv-nzi7bmu57rk5ah.dv.googlehosted.com.

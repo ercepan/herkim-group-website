@@ -170,7 +170,14 @@ doğrulayın. Tam bölge dökümü: `yedek/dns-tam-bolge-20260901.txt`.
    `info@herkim.com.tr` o anda çalışmaz hâle gelir, DKIM ve DMARC kaybolur.
 2. **Apex'e (`@`) CNAME konulmaz.** RFC 1034 gereği o isimdeki MX ve TXT
    kayıtları geçersizleşir, mail kesilir. Apex için A kaydı kullanılır.
-3. **Panel "değiştirmez", ekler.** `Değiştir` düğmesine rağmen her kayıt yeni
+3. **`www` CNAME kalmalı, A kaydına çevrilmemeli.** GitHub Pages'in sağlık
+   kontrolü `www` bir A kaydıysa onu geçersiz sayıyor (`InvalidARecordError`)
+   ve HTTPS sertifikası siparişi hiç oluşmuyor. Bu tam olarak yaşandı: 1 Eylül
+   2026'da www dört A kaydıyla kuruldu, iki saat bekledik, sertifika gelmedi;
+   CNAME'e çevrilince kontrol düzeldi. Sertifika apex ile www'yi birlikte
+   kapsıyor (semver.org, brew.sh, keepachangelog.com ölçüldü — üçünde de
+   böyle), o yüzden www'nin geçerli olması şart.
+4. **Panel "değiştirmez", ekler.** `Değiştir` düğmesine rağmen her kayıt yeni
    satır olarak eklenir; eskisini ayrıca silmeniz gerekir. Ayrıca Server alanı
    textarea gibi görünse de **tek IP** kabul eder; alt alta birden fazla
    yazarsanız "DNS kayıt güncelleme işlemi tamamlanamadı" der.
@@ -179,7 +186,7 @@ doğrulayın. Tam bölge dökümü: `yedek/dns-tam-bolge-20260901.txt`.
 
 ```
 A      @      185.199.108.153 / .109.153 / .110.153 / .111.153
-A      www    185.199.108.153 / .109.153 / .110.153 / .111.153
+CNAME  www    ercepan.github.io.        <- depo adi EKLENMEZ
 A      mail   85.97.197.8                          <- dokunulmaz
 MX     @      10 mail.herkim.com.tr.               <- dokunulmaz
 TXT    @      v=spf1 mx ip4:85.97.197.8 -all       <- dokunulmaz
@@ -220,7 +227,7 @@ değişikliği commit'i → push → Pages'in aldığını doğrula → sonra DN
 |---|---|---|
 | **Natro hosting yenilemesi — 19 Eylül 2026** | **ACİL, aşağıya bakın** | şirket |
 | `info@herkim.com.tr` gönder/al testi | yapılmadı | şirket |
-| HTTPS zorlaması (Enforce HTTPS) | sertifika beklendi, sonra açılacak | GitHub hesabı olan |
+| HTTPS zorlaması (Enforce HTTPS) | sertifika gelince açılacak — §4'e bakın | GitHub hesabı olan |
 | Web3Forms "Website URL" alanı → herkim.com.tr | yapılmadı | hesap sahibi |
 | Google Search Console'a yeni alan adı + sitemap | yapılmadı | hesap sahibi |
 | İletişim formunun canlı denemesi (captcha çözülerek) | yapılmadı | şirket |
