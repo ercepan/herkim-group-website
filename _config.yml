@@ -11,6 +11,9 @@
 #                     kimliği üretici betikleri
 #   package.json    → boş npm iskeleti; sitenin derleme adımı yok,
 #                     yayında karşılığı da yok
+#   DEVIR.md        → devir notu. İç bilgi: hangi anahtarın neyi
+#                     açtığı, bekleyen işler, DNS adımları.
+#                     Yayına çıkarsa herkes okur.
 #
 # DİKKAT: Depoya .nojekyll dosyası EKLEMEYİN — eklenirse bu
 # dosya devre dışı kalır ve yukarıdakilerin hepsi yayına çıkar.
@@ -20,6 +23,7 @@ exclude:
   - herkim-backend/
   - tools/
   - README.md
+  - DEVIR.md
   - .gitignore
   - package.json
 
