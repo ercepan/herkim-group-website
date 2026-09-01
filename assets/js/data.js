@@ -131,7 +131,7 @@ const HK_FIYAT = {
     16: [
       { ambalaj: { tr: "25 kg paket", en: "25 kg bag", ru: "Мешок 25 кг" }, usd: 2.50 }
     ],
-    // #17 Kebrako (Quebracho)
+    // #17 Kebrako / Quebracho — Unitan ATO
     17: [
       { ambalaj: null, usd: 3.35 }
     ],
@@ -264,7 +264,7 @@ const HK_PRODUCTS = [
 
   // ---- Deri & Tabaklama ----
   { id: 16, sub: "deri",    n: { tr: "Mimoza Tozu",                          en: "Mimosa Powder",                                      ru: "Порошок мимозы" },                            brand: "Tanac",       tag: "one" },
-  { id: 17, sub: "deri",    n: { tr: "Kebrako (Quebracho)",                  en: "Quebracho",                                          ru: "Квебрахо" },                                  brand: "Herkim",       tag: null },
+  { id: 17, sub: "deri",    n: { tr: "Kebrako",                              en: "Quebracho",                                          ru: "Квебрахо" },                                  brand: "Unitan ATO",  tag: null },
   { id: 18, sub: "deri",    n: { tr: "Saviotan A (Astrenjan)",               en: "Saviotan A (Astringent)",                            ru: "Saviotan A (вяжущий)" },                      brand: "Saviotan",       tag: null },
   { id: 19, sub: "deri",    n: { tr: "Saviotan RS (Tatlandırılmış)",         en: "Saviotan RS (Sweetened)",                            ru: "Saviotan RS (подслащённый)" },                brand: "Saviotan",       tag: null },
   { id: 20, sub: "deri",    n: { tr: "Tara Tozu",                            en: "Tara Powder",                                        ru: "Порошок тары" },                              brand: "Herkim",       tag: null },
