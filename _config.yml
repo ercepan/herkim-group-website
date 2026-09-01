@@ -11,6 +11,8 @@
 #                     kimliği üretici betikleri
 #   package.json    → boş npm iskeleti; sitenin derleme adımı yok,
 #                     yayında karşılığı da yok
+#   yedek/          → DNS anlık görüntüsü ve eski sitenin arşivi.
+#                     Altyapı bilgisi, yayınlanmaz.
 #   DEVIR.md        → devir notu. İç bilgi: hangi anahtarın neyi
 #                     açtığı, bekleyen işler, DNS adımları.
 #                     Yayına çıkarsa herkes okur.
@@ -24,6 +26,7 @@ exclude:
   - tools/
   - README.md
   - DEVIR.md
+  - yedek/
   - .gitignore
   - package.json
 

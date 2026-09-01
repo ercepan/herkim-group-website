@@ -1,0 +1,35 @@
+# DNS ANLIK GORUNTUSU — herkim.com.tr
+# Alindigi an: 2026-09-01 14:47:48 +03
+# Amac: alan adi GitHub Pages e tasinmadan onceki durumun kaydi.
+# Ters giderse Natro panelinde bu kayitlar birebir geri yazilir.
+
+== herkim.com.tr  SOA ==
+  herkim.com.tr.		3577	IN	SOA	ns1.natrohost.com. hostmaster.natrohost.com. 2025110801 10800 3600 777600 3600
+
+== herkim.com.tr  NS ==
+  herkim.com.tr.		3577	IN	NS	ns2.natrohost.com.
+  herkim.com.tr.		3577	IN	NS	ns1.natrohost.com.
+
+== herkim.com.tr  A ==
+  herkim.com.tr.		3577	IN	A	94.73.145.212
+
+== herkim.com.tr  AAAA ==
+
+== herkim.com.tr  MX ==
+  herkim.com.tr.		3578	IN	MX	10 mail.herkim.com.tr.
+
+== herkim.com.tr  TXT ==
+  herkim.com.tr.		3578	IN	TXT	"v=spf1 mx ip4:85.97.197.8 -all"
+  herkim.com.tr.		3578	IN	TXT	"google-site-verification=s2e0cxDzgzDPl832ltjFgPDbiS2Mo01kPnq4mkz8zuU"
+
+== herkim.com.tr  CAA ==
+
+== ALT ALAN ADLARI ==
+  www            94.73.145.212  
+  mail           85.97.197.8  "v=spf1 mx ip4:85.97.197.8 -all" 
+  autodiscover   mail.kurumsaleposta.com. 94.73.187.200  mail.kurumsaleposta.com. 
+  _dmarc         — "v=DMARC1; p=quarantine; rua=mailto:rua@herkim.com.tr; ruf=mailto:ruf@herkim.com.tr; sp=none; fo=1; ri=86400; adkim=r; aspf=r" 
+
+== MAIL GUVENLIGI (kaybolursa mailler spam e duser) ==
+  SPF   : "v=spf1 mx ip4:85.97.197.8 -all"
+  DMARC : "v=DMARC1; p=quarantine; rua=mailto:rua@herkim.com.tr; ruf=mailto:ruf@herkim.com.tr; sp=none; fo=1; ri=86400; adkim=r; aspf=r"
