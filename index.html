@@ -66,7 +66,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=2026-08-25q">
+  <link rel="stylesheet" href="assets/css/style.css?v=2026-08-25r">
 </head>
 <body>
 
@@ -105,13 +105,7 @@
   <header class="site-header">
     <div class="wrap">
       <a class="brand" href="index.html" aria-label="Herkim Kimya">
-        <svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true">
-          <circle cx="160" cy="160" r="148" fill="#FFFFFF" stroke="#A31C3C" stroke-width="10"/>
-          <g fill="#A31C3C">
-            <rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/>
-            <polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/>
-          </g>
-        </svg>
+        <img class="brand-mark" src="assets/img/herkim-mark.svg?v=2026-08-25r" width="52" height="52" alt="" aria-hidden="true">
         <span class="brand-name"><b>HERKİM</b><span>KİMYA</span></span>
       </a>
 
@@ -207,11 +201,11 @@
               <circle cx="372" cy="93" r="6" fill="#A31C3C" style="animation:pulse-node 3.4s 1s ease-in-out infinite"/>
             </g>
             <g style="animation:float-y 7s ease-in-out infinite">
-              <circle cx="230" cy="175" r="52" fill="#FAF6F1" stroke="#A31C3C" stroke-width="4"/>
-              <g fill="#A31C3C" transform="translate(230 175) scale(0.31) translate(-160 -160)">
-                <rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/>
-                <polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/>
-              </g>
+              <!-- Resmî marka (assets/img/herkim-mark.svg ile aynı vektör).
+                   Arkasındaki dolu daire, altıgen dokunun harflerin arasından
+                   görünmemesi için duruyor; halkanın kendisi markanın içinde. -->
+              <circle cx="230" cy="175" r="50" fill="#FAF6F1"/>
+              <image href="assets/img/herkim-mark.svg?v=2026-08-25r" x="178" y="123" width="104" height="104"/>
             </g>
             <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#7A6A70">
               <!-- Yıl sayısı main.js tarafından HK_COMPANY.founded'dan türetilir (bkz. HK_YEARS).
@@ -425,13 +419,7 @@ yakınız.</h2>
     <div class="wrap footer-main">
       <div class="footer-brand">
         <a class="brand" href="index.html" aria-label="Herkim Kimya">
-          <svg class="brand-mark" viewBox="0 0 320 320" aria-hidden="true">
-            <circle cx="160" cy="160" r="148" fill="#1B1216" stroke="#C42449" stroke-width="10"/>
-            <g fill="#FAF6F1">
-              <rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/>
-              <polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/>
-            </g>
-          </svg>
+          <img class="brand-mark" src="assets/img/herkim-mark-acik.svg?v=2026-08-25r" width="52" height="52" alt="" aria-hidden="true">
           <span class="brand-name"><b style="color:var(--crimson-hot)">HERKİM</b><span style="color:rgba(250,246,241,.6)">KİMYA</span></span>
         </a>
         <p data-i18n="foot.brand.desc">1975'ten bu yana deri ve tekstil kimyasalları tedarikinde güvenilir çözüm ortağı.</p>
@@ -522,10 +510,10 @@ yakınız.</h2>
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </button>
 
-  <script src="assets/js/i18n.js?v=2026-08-25q"></script>
-  <script src="assets/js/data.js?v=2026-08-25q"></script>
-  <script src="assets/js/portal-store.js?v=2026-08-25q"></script>
-  <script src="assets/js/site-auth.js?v=2026-08-25q"></script>
-  <script src="assets/js/main.js?v=2026-08-25q"></script>
+  <script src="assets/js/i18n.js?v=2026-08-25r"></script>
+  <script src="assets/js/data.js?v=2026-08-25r"></script>
+  <script src="assets/js/portal-store.js?v=2026-08-25r"></script>
+  <script src="assets/js/site-auth.js?v=2026-08-25r"></script>
+  <script src="assets/js/main.js?v=2026-08-25r"></script>
 </body>
 </html>

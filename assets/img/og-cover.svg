@@ -11,14 +11,10 @@
     <path d="M1080 294 l60 35 v70 l-60 35 -60-35 v-70z"/>
     <path d="M980 352 l60 35 v70 l-60 35 -60-35 v-70z"/>
   </g>
-  <!-- HK logo -->
-  <g transform="translate(110 175)">
-    <circle cx="140" cy="140" r="132" fill="#FFFFFF" stroke="#A31C3C" stroke-width="12"/>
-    <g fill="#A31C3C" transform="translate(140 140) scale(0.78) translate(-160 -160)">
-      <rect x="76" y="92" width="27" height="136"/><rect x="103" y="146" width="43" height="28"/><rect x="126" y="92" width="27" height="136"/>
-      <polygon points="153,152 215,92 253,92 181,164"/><polygon points="153,166 179,142 255,228 217,228"/>
-    </g>
-  </g>
+  <!-- HK logo — resmî vektörün açık (koyu zemin) varyantı.
+       Tam kilit kullanılıyor: paylaşım görseli 1200x630, "HERKİM GROUP"
+       yazısı bu boyutta rahat okunur. -->
+  <image href="herkim-logo-acik.svg" x="110" y="175" width="280" height="280"/>
   <!-- Metin -->
   <g font-family="DejaVu Sans, Arial, sans-serif">
     <text x="410" y="250" fill="#FFFFFF" font-size="88" font-weight="bold" letter-spacing="1">HERK&#304;M K&#304;MYA</text>

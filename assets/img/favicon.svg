@@ -1,10 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
-  <circle cx="160" cy="160" r="156" fill="#A31C3C"/>
-  <g fill="#FFFFFF">
-    <rect x="76" y="92" width="28" height="136"/>
-    <rect x="104" y="146" width="42" height="28"/>
-    <rect x="126" y="92" width="28" height="136"/>
-    <polygon points="154,152 216,92 254,92 182,164"/>
-    <polygon points="154,166 180,142 256,228 218,228"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 77.1873 77.1873" role="img" aria-label="Herkim Group">
+  <!-- Favicon 16-32 pikselde görünür: resmî logonun ince halkası ve
+       "HERKİM GROUP" yazısı o boyutta lekeye döner. Bu yüzden dolu daire
+       + resmî HK harfleri kullanılır; harfler logonun birebir vektörü. -->
+  <circle cx="38.5936" cy="38.5936" r="38.5936" fill="#A32136"/>
+  <g transform="translate(38.5936,38.5936) scale(1.5) translate(-37.99,-34.04)">
+    <g transform="matrix(1,0,0,-1,1,76.1873)" fill="#FFFFFF">
+      <path d="M19.1007 54.2514H25.808V45.754H33.0446V54.2514H41.8445V46.2399L47.4262 54.2534 54.8821 54.2449 46.7453 43.1623 54.8841 30.2284H46.7838L41.8445 38.2088V30.0453H33.0446V39.1983H25.808V30.0453H19.1007Z"/>
+    </g>
   </g>
 </svg>

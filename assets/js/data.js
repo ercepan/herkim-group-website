@@ -111,10 +111,12 @@ const HK_COMPANY = {
   // yanlıştı ve zaten hiçbir yerden okunmuyordu).
   email: "info@herkimgroup.com",      // main.js — iletişim formu mailto yedeği
   mailQuote: "sales@herkimgroup.com", // main.js — sepetten teklif mailto yedeği
-  whatsapp: "905301447373",   // main.js — wa.me bağlantıları ve sepet teklif butonu.
-                              // GEÇİCİ TEST NUMARASI (+90 530 144 73 73).
-                              // Canlıya çıkmadan önce şirketin WhatsApp Business
-                              // hattıyla değiştirilecek. Ülke kodu bitişik yazılır,
+  whatsapp: "905330206628",   // main.js — wa.me bağlantıları ve sepet teklif butonu.
+                              // SATIŞ HATTI: +90 533 020 66 28. Sitedeki yüzen
+                              // WhatsApp düğmesi, iletişim sayfasındaki hat ve
+                              // sepetteki "WhatsApp ile Teklif İste" hep buradan
+                              // beslenir; numara TEK bu satırda değişir.
+                              // Ülke kodu bitişik yazılır,
                               // başında + ve arada boşluk YOKTUR.
   web3forms: "",              // portal-store.js hgNotify. Anahtar girilince iletişim ve
                               // teklif talepleri şirket e-postasına ANINDA düşer.
@@ -145,7 +147,7 @@ const HK_COMPANY = {
   phone: "444 56 58",
   // → her sayfanın üst şeridi (tel:4445658, örn. index.html ≈73) ve
   //   index.html ≈439 / iletisim.html ≈138
-  phone2: "+90 216 394 11 33 (Dahili 224)",
+  phone2: "+90 216 394 11 25",
   // → index.html ≈439, iletisim.html ≈138 (telefon satırının ikinci yarısı)
   phoneTel: "+902163941133",
   // → hiçbir yerde karşılığı yok: sitedeki tel: bağlantıları 444'lü numarayı
