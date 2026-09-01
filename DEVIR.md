@@ -227,7 +227,8 @@ değişikliği commit'i → push → Pages'in aldığını doğrula → sonra DN
 |---|---|---|
 | **Natro hosting yenilemesi — 19 Eylül 2026** | **ACİL, aşağıya bakın** | şirket |
 | `info@herkim.com.tr` gönder/al testi | yapılmadı | şirket |
-| HTTPS zorlaması (Enforce HTTPS) | sertifika gelince açılacak — §4'e bakın | GitHub hesabı olan |
+| HTTPS sertifikası | GitHub üretiyor, gecikti — §4'e bakın | GitHub (kendiliğinden) |
+| HTTPS zorlaması (Enforce HTTPS) | otomatikleştirildi, aşağıya bakın | — |
 | Web3Forms "Website URL" alanı → herkim.com.tr | yapılmadı | hesap sahibi |
 | Google Search Console'a yeni alan adı + sitemap | yapılmadı | hesap sahibi |
 | İletişim formunun canlı denemesi (captcha çözülerek) | yapılmadı | şirket |
@@ -236,6 +237,33 @@ değişikliği commit'i → push → Pages'in aldığını doğrula → sonra DN
 | MERSİS / ticaret sicil numarası | eksik | şirket |
 | ISO 9001 belgesi | kartı var, belge yok | şirket |
 | Web3Forms alan adı kısıtlaması | Pro özelliği, kapalı | karar |
+
+### HTTPS sertifikası neden gecikti, ne yapıldı
+
+Alan adı taşındıktan sonra GitHub sertifika siparişini hiç oluşturmadı —
+`gh api .../pages` yanıtında `https_certificate` alanı "beklemede" değil, hiç
+yoktu. Sebebi: sipariş, alan adı ilk atandığında (DNS hâlâ Natro'yu
+gösterirken) başarısız olmuş ve GitHub bunu kendiliğinden tekrar denemiyor.
+
+Sırayla denenenler:
+1. `www`'yi A kaydından CNAME'e çevirmek — sağlık kontrolündeki
+   `InvalidARecordError` böyle kapandı, apex ve www ikisi de geçerli oldu.
+2. Pages'e yeniden derleme isteği (kesintisiz) — tetiklemedi.
+3. Özel alan adını kaldırıp yeniden eklemek (GitHub'ın belgelediği çözüm) —
+   alan adı 2 saniye bağsız kaldı, site kesintiye uğramadı. Sağlık kontrolü
+   tamamen yeşile döndü ama sipariş yine oluşmadı.
+
+Bu noktadan sonra alan adına DOKUNULMAMALI: her `PUT .../pages` çağrısı
+süreci baştan başlatır ve sertifikayı daha da geciktirir.
+
+`.github/workflows/https-zorlamasi.yml` saatte bir bakar ve sertifika hazır
+olduğunda "Enforce HTTPS" ayarını kendisi açar. Sertifikayı üretmez, yalnızca
+kutucuğu işaretler. İşi bitince silinebilir.
+
+**24 saat içinde gelmezse** GitHub Support'a başvurulmalı: depo adı,
+`gh api .../pages` ve `.../pages/health` çıktıları ve `https_certificate`
+alanının hiç oluşmadığı bilgisiyle. Sertifika siparişini elle kuyruğa
+alabiliyorlar.
 
 ### Natro hosting 19 Eylül 2026'da bitiyor — DNS oraya bağlı
 
