@@ -1004,11 +1004,17 @@
          herhangi bir betikle ya da konsoldan elle yazılabilir ve buradaki değer
          her ziyaretçinin tıkladığı <a href> olur. Denetim başarısızsa bağlantı
          indirme değil "talep et" hâline döner — bozuk kayıt kartı gizlemez. */
-      const safeFile = (typeof window.hgpSafeDocPath === "function")
-        ? window.hgpSafeDocPath(d.file) : d.file;
-      const link = el("a", "dc-link", safeFile ? T("doc.download") : T("doc.request"));
-      link.href = safeFile || "iletisim.html";
-      if (safeFile) link.setAttribute("download", "");
+      const guvenli = (yol) => (typeof window.hgpSafeDocPath === "function")
+        ? window.hgpSafeDocPath(yol) : yol;
+      const safeFile = guvenli(d.file);
+      /* Sitedeki bir sayfaya işaret eden kayıt (örn. KVKK metni): indirilmez,
+         açılır. download özniteliği KONMAZ — konsaydı tarayıcı HTML'i dosya
+         olarak kaydetmeye çalışırdı. Yol aynı denetimden geçer. */
+      const safeSayfa = guvenli(d.sayfa);
+      const etiket = safeSayfa ? T("doc.read") : (safeFile ? T("doc.download") : T("doc.request"));
+      const link = el("a", "dc-link", etiket);
+      link.href = safeSayfa || safeFile || "iletisim.html";
+      if (!safeSayfa && safeFile) link.setAttribute("download", "");
       meta.appendChild(link); card.appendChild(meta);
       return card;
     }));

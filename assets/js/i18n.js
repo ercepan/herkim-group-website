@@ -559,6 +559,7 @@ const HK_I18N = {
     /* Doküman merkezi kart bağlantıları */
     "doc.download": "İndir (PDF) ↓",
     "doc.request": "Talep et →",
+    "doc.read": "Oku →",
 
     /* Teklif & iletişim formu */
     "f.kicker": "Teklif & İletişim Formu",
@@ -1098,6 +1099,7 @@ const HK_I18N = {
     /* Doküman merkezi kart bağlantıları */
     "doc.download": "Download (PDF) ↓",
     "doc.request": "Request →",
+    "doc.read": "Read →",
 
     /* Teklif & iletişim formu */
     "f.kicker": "Quote & Contact Form",
@@ -1637,6 +1639,7 @@ const HK_I18N = {
     /* Doküman merkezi kart bağlantıları */
     "doc.download": "Скачать (PDF) ↓",
     "doc.request": "Запросить →",
+    "doc.read": "Читать →",
 
     /* Teklif & iletişim formu */
     "f.kicker": "Форма запроса и контакта",
