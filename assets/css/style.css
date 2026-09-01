@@ -1520,3 +1520,92 @@ body::before { opacity: 0.028; }
 .cf-fallback b { display: block; font-size: var(--fs-body); color: var(--ink); margin-bottom: 4px; }
 .cf-fallback p { font-size: var(--fs-small); color: var(--ink-2); line-height: 1.55; margin-bottom: 12px; }
 .cf-fallback-links { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ============================================================
+   TESİS GALERİSİ
+   Kurumsal ve hizmetler sayfalarındaki gerçek tesis fotoğrafları.
+   Izgara auto-fit ile kırılır: dar ekranda tek sütun, geniş ekranda
+   3-4 sütun. Her kart sabit oranda (4:3) kırpılır ki satırlar hizalı
+   dursun — fotoğraflar farklı en-boy oranlarında geliyor.
+   ============================================================ */
+.tesis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
+}
+.tesis-card {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: var(--shadow-offset-sm);
+  cursor: zoom-in;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
+}
+.tesis-card:hover, .tesis-card:focus-visible { transform: translateY(-3px); box-shadow: var(--shadow-offset); }
+.tesis-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--sand);
+}
+/* Bina panoraması ve vitrin dikey: kendi oranlarında dursunlar */
+.tesis-card--wide { grid-column: 1 / -1; }
+.tesis-card--wide img { aspect-ratio: 21 / 10; }
+.tesis-cap {
+  display: block;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--ink-2);
+  border-top: 1px solid var(--line);
+}
+
+/* --- Büyütme penceresi --- */
+.lightbox {
+  position: fixed; inset: 0; z-index: 120;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(27, 18, 22, 0.92);
+  padding: var(--space-md);
+}
+.lightbox.show { display: flex; }
+.lightbox img {
+  max-width: min(1200px, 94vw);
+  max-height: 82vh;
+  width: auto; height: auto;
+  border-radius: var(--radius);
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+}
+.lb-cap {
+  position: absolute; left: 0; right: 0; bottom: max(16px, env(safe-area-inset-bottom));
+  text-align: center; color: var(--paper);
+  font-size: var(--fs-small); font-weight: 600;
+  padding: 0 var(--space-md);
+}
+.lb-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: 0; cursor: pointer;
+  color: var(--paper); font-weight: 800; letter-spacing: .08em;
+  font-size: var(--fs-small); padding: 10px 12px;
+}
+.lb-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(250,246,241,.14); border: 0; cursor: pointer;
+  color: var(--paper); font-size: 26px; line-height: 1;
+  width: 46px; height: 46px; border-radius: 50%;
+}
+.lb-nav:hover { background: rgba(250,246,241,.26); }
+.lb-prev { left: 12px; } .lb-next { right: 12px; }
+@media (max-width: 640px) { .lb-nav { display: none; } }
+
+/* --- Anasayfa şeridi: dört küçük kare --- */
+.tesis-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-sm); }
+.tesis-strip img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: var(--radius); border: 1px solid var(--line); }

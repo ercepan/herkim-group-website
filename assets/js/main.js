@@ -1351,6 +1351,76 @@
     f.replaceWith(iframe);
   }));
 
+  /* ============ Tesis galerisi — büyütme penceresi ============
+     [data-lb] taşıyan her düğme tıklanınca büyük sürümü tam ekranda açar.
+     Pencere TEK kez kurulur ve DOM'da kalır; her açılışta yeniden
+     yaratmak, ok tuşlarıyla gezerken görüntüyü sıfırdan indirtirdi.
+     Metin yalnız textContent ile basılır (innerHTML yasak — XSS). */
+  (function () {
+    const kartlar = $$("[data-lb]");
+    if (!kartlar.length) return;
+
+    const kutu = el("div", "lightbox");
+    kutu.setAttribute("role", "dialog");
+    kutu.setAttribute("aria-modal", "true");
+
+    const gorsel = el("img");
+    gorsel.alt = "";
+    const yazi = el("div", "lb-cap");
+    const kapat = el("button", "lb-close", T("tesis.close"));
+    kapat.type = "button";
+    const geri = el("button", "lb-nav lb-prev", "‹");
+    geri.type = "button";
+    const ileri = el("button", "lb-nav lb-next", "›");
+    ileri.type = "button";
+    [gorsel, yazi, kapat, geri, ileri].forEach(n => kutu.appendChild(n));
+    document.body.appendChild(kutu);
+
+    let sira = 0;
+    let acanDugme = null;
+
+    function ciz() {
+      const d = kartlar[sira];
+      gorsel.src = d.getAttribute("data-lb");
+      const anahtar = d.getAttribute("data-lb-cap");
+      yazi.textContent = anahtar ? T(anahtar) : "";
+      const ic = d.querySelector("img");
+      gorsel.alt = ic ? ic.alt : "";
+    }
+    function ac(i, dugme) {
+      sira = i; acanDugme = dugme || null;
+      ciz();
+      kutu.classList.add("show");
+      document.body.style.overflow = "hidden";
+      kapat.focus();
+    }
+    function kapatPencere() {
+      kutu.classList.remove("show");
+      document.body.style.overflow = "";
+      /* Odağı geldiği düğmeye geri veriyoruz: klavyeyle gezen kullanıcı
+         listenin başına fırlamasın. */
+      if (acanDugme) { acanDugme.focus(); acanDugme = null; }
+    }
+    const kaydir = (adim) => { sira = (sira + adim + kartlar.length) % kartlar.length; ciz(); };
+
+    kartlar.forEach((d, i) => d.addEventListener("click", () => ac(i, d)));
+    kapat.addEventListener("click", kapatPencere);
+    geri.addEventListener("click", () => kaydir(-1));
+    ileri.addEventListener("click", () => kaydir(1));
+    kutu.addEventListener("click", (e) => { if (e.target === kutu) kapatPencere(); });
+    document.addEventListener("keydown", (e) => {
+      if (!kutu.classList.contains("show")) return;
+      if (e.key === "Escape") kapatPencere();
+      else if (e.key === "ArrowLeft") kaydir(-1);
+      else if (e.key === "ArrowRight") kaydir(1);
+    });
+    /* Dil değişince açık penceredeki başlık ve KAPAT etiketi de değişsin */
+    document.addEventListener("hk:langchange", () => {
+      kapat.textContent = T("tesis.close");
+      if (kutu.classList.contains("show")) ciz();
+    });
+  })();
+
   /* WhatsApp bağlantıları */
   const setWa = () => $$("[data-wa]").forEach(a => {
     a.href = "https://wa.me/" + HK.whatsapp + "?text=" + encodeURIComponent(T("wa.msg"));
