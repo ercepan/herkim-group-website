@@ -1,0 +1,59 @@
+# ============================================================
+# HTTPS ZORLAMASINI OTOMATİK AÇ  —  geçici iş
+#
+# NEDEN VAR: 1 Eylül 2026'da alan adı herkim.com.tr'ye taşındı. GitHub'ın
+# Let's Encrypt sertifikasını üretmesi gecikti; sertifika gelmeden "Enforce
+# HTTPS" ayarı açılamıyor. Bu iş saatte bir bakar, sertifika hazır olunca
+# ayarı kendisi açar. Kimsenin başında beklemesi gerekmez.
+#
+# NE ZAMAN SİLİNİR: https://herkim.com.tr uyarısız açılıyorsa ve
+# `gh api repos/ercepan/herkim-group-website/pages --jq .https_enforced`
+# true dönüyorsa bu dosya silinebilir. İşini bitirmiştir.
+#
+# Sertifikayı bu iş ÜRETMEZ; üretimi GitHub kendi yapar. Bu yalnızca
+# hazır olduğu anda kutucuğu işaretler.
+# ============================================================
+name: HTTPS zorlamasını aç
+
+on:
+  schedule:
+    - cron: "7 * * * *"     # her saat başı 7. dakikada
+  workflow_dispatch:         # elle de çalıştırılabilir
+
+permissions:
+  pages: write
+
+jobs:
+  ac:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sertifika hazırsa HTTPS zorlamasını aç
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPO: ${{ github.repository }}
+        run: |
+          set -u
+          DURUM=$(gh api "repos/$DEPO/pages" 2>/dev/null || echo '{}')
+          ZORLAMA=$(printf '%s' "$DURUM" | jq -r '.https_enforced // false')
+          SERT=$(printf '%s' "$DURUM" | jq -r 'if has("https_certificate") then (.https_certificate.state // "durumsuz") else "YOK" end')
+          echo "https_enforced = $ZORLAMA"
+          echo "sertifika      = $SERT"
+
+          if [ "$ZORLAMA" = "true" ]; then
+            echo "Zaten açık — yapacak bir şey yok. Bu iş dosyası artık silinebilir."
+            exit 0
+          fi
+
+          if [ "$SERT" != "approved" ]; then
+            echo "Sertifika henüz hazır değil, bir sonraki turda tekrar bakılacak."
+            exit 0
+          fi
+
+          echo "Sertifika hazır — zorlama açılıyor."
+          echo '{"https_enforced":true}' | gh api -X PUT "repos/$DEPO/pages" --input - || {
+            echo "PUT başarısız. Kutucuğu elle açın: Settings > Pages > Enforce HTTPS"
+            exit 1
+          }
+          sleep 20
+          gh api "repos/$DEPO/pages" --jq '"https_enforced = \(.https_enforced)"'
+          curl -sS -o /dev/null -w "https://herkim.com.tr -> %{http_code}\n" https://herkim.com.tr/ --max-time 25 || true
