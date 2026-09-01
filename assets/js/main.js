@@ -329,23 +329,28 @@
   let bdView = "cart"; // cart | confirm | quoteform | success
   let lastOrderId = "";
 
-  function addToBasket(id) {
+  function addToBasket(id, amb) {
     // Portalda eklenen ürünler de sepete girebilmeli: birleşik listede aranır.
     const p = allProducts().find(x => x.id === id);
     if (!p) return;
     const b = getBasket();
-    const line = b.find(x => x.id === id);
+    /* Birden fazla ambalajı olan üründe varsayılan ilk ambalajdır; alıcı
+       sepette değiştirir. Aynı ürünün farklı ambalajı AYRI satırdır. */
+    const sira = amb || 0;
+    const line = b.find(x => x.id === id && (x.amb || 0) === sira);
     bdView = "cart";
+    const ambEk = ambalajAdi(p, sira);
+    const ad = PNAME(p) + (ambEk ? " (" + ambEk + ")" : "");
     if (line) {
       line.qty = Math.min(qtyMaxFor(p), (line.qty || 1) + 1);
       setBasket(b);
-      toast("“" + PNAME(p) + "” — " + T("basket.inc") + ": " + line.qty);
+      toast("“" + ad + "” — " + T("basket.inc") + ": " + line.qty);
       openBasket();
       return;
     }
-    b.push({ id: id, qty: 1 });
+    b.push({ id: id, qty: 1, amb: sira });
     setBasket(b);
-    toast("“" + PNAME(p) + "” " + T("basket.added"));
+    toast("“" + ad + "” " + T("basket.added"));
   }
   window.hkAdd = addToBasket;
 
@@ -355,10 +360,38 @@
      Teklif metni, sipariş kalemleri ve e-posta yedekleri hep bunu kullanır.
      Eşleme birleşik listeden yapılır; yoksa portalda eklenip sepete konan bir
      ürün diğer sayfada sessizce düşerdi. */
+  /* ---- Ambalaj ----
+     Bir ürünün birden fazla ambalajı olabilir ve her ambalajın fiyatı
+     farklıdır (formik asit: IBC 1200 L ve 35 L bidon). Alıcı hangisini
+     istediğini seçebilmeli; seçmezse satış ekibi hangi fiyatı vereceğini
+     bilemez. Sepet satırı bu yüzden "amb" (ambalaj sırası) taşır.
+
+     HK_FIYAT'a doğrudan bakılır: bu yardımcılar sepet çizilirken de
+     çağrılıyor ve dosyanın ilerisindeki FIYAT sabitine erişim
+     sırasına bağlı olurdu. */
+  function ambalajListesi(p) {
+    try {
+      var f = (typeof HK_FIYAT !== "undefined" && HK_FIYAT.liste) ? HK_FIYAT.liste[p.id] : null;
+      if (!f || f.length < 2) return null;           // tek ambalaj: seçime gerek yok
+      return f.filter(function (x) { return x && x.ambalaj; });
+    } catch (e) { return null; }
+  }
+  function ambalajAdi(p, amb) {
+    var l = ambalajListesi(p);
+    if (!l || !l.length) return "";
+    var k = l[Math.min(Math.max(0, amb || 0), l.length - 1)];
+    return (k && k.ambalaj) ? pick(k.ambalaj) : "";
+  }
+  /* Sepet satırının kimliği: aynı ürün iki farklı ambalajla ayrı satırdır. */
+  const lineKey = (l) => String(l.id) + "#" + (l.amb || 0);
+
   const basketEntries = () => {
     const all = allProducts();
     return getBasket()
-      .map(line => { const p = all.find(x => x.id === line.id); return p ? { p: p, qty: line.qty || 1 } : null; })
+      .map(line => {
+        const p = all.find(x => x.id === line.id);
+        return p ? { p: p, qty: line.qty || 1, amb: line.amb || 0 } : null;
+      })
       .filter(Boolean);
   };
 
@@ -459,11 +492,43 @@
       const info = el("div");
       info.appendChild(el("b", null, PNAME(p)));
       info.appendChild(el("span", "mono", p.brand));
+
+      /* Ambalaj seçimi. Yalnız birden fazla ambalajı olan üründe çıkar —
+         tek ambalajlı üründe gereksiz bir kutu göstermek kalabalık olurdu. */
+      const ambL = ambalajListesi(p);
+      if (ambL) {
+        const sec = el("select", "bd-amb");
+        sec.setAttribute("aria-label", T("basket.ambLabel"));
+        ambL.forEach((k, i) => {
+          const o = el("option", null, pick(k.ambalaj));
+          o.value = String(i);
+          if (i === (line.amb || 0)) o.selected = true;
+          sec.appendChild(o);
+        });
+        sec.addEventListener("change", () => {
+          const yeniAmb = parseInt(sec.value, 10) || 0;
+          const sepet = getBasket();
+          const bu = sepet.find(x => x.id === line.id && (x.amb || 0) === (line.amb || 0));
+          if (!bu) { renderBasket(); return; }
+          /* Seçilen ambalaj sepette zaten varsa iki satırı birleştir —
+             aksi hâlde aynı ambalajdan iki satır oluşurdu. */
+          const varOlan = sepet.find(x => x.id === line.id && (x.amb || 0) === yeniAmb && x !== bu);
+          if (varOlan) {
+            varOlan.qty = Math.min(qtyMaxFor(p), (varOlan.qty || 1) + (bu.qty || 1));
+            setBasket(sepet.filter(x => x !== bu));
+          } else {
+            bu.amb = yeniAmb;
+            setBasket(sepet);
+          }
+        });
+        info.appendChild(sec);
+      }
+
       const right = el("div", "bd-right");
       right.appendChild(qtyControl(b, line, p));
       const rm = el("button", "bd-remove", "×");
       rm.setAttribute("aria-label", "×");
-      rm.addEventListener("click", () => setBasket(getBasket().filter(x => x.id !== line.id)));
+      rm.addEventListener("click", () => setBasket(getBasket().filter(x => lineKey(x) !== lineKey(line))));
       right.appendChild(rm);
       item.appendChild(info); item.appendChild(right);
       body.appendChild(item);
@@ -506,7 +571,9 @@
       const row = el("div", "bd-item");
       const info = el("div");
       info.appendChild(el("b", null, PNAME(p)));
-      info.appendChild(el("span", "mono", qtyLabel({ p: p, qty: line.qty })));
+      info.appendChild(el("span", "mono",
+        (ambalajAdi(p, line.amb) ? ambalajAdi(p, line.amb) + " · " : "") +
+        qtyLabel({ p: p, qty: line.qty })));
       row.appendChild(info);
       body.appendChild(row);
     });
@@ -687,8 +754,16 @@
   if (bdClose) bdClose.addEventListener("click", closeBasket);
 
   /* ---- 6f) Teklif gönderimi (WhatsApp / e-posta) ---- */
+  /* Kalem adı: ambalajı olan üründe ambalaj da yazılır. Satış ekibi
+     hangi ambalajın fiyatlanacağını bu satırdan görür. */
+  const kalemAdi = (e, dil) => {
+    const ad = dil === "tr" ? e.p.n.tr : PNAME(e.p);
+    const amb = ambalajAdi(e.p, e.amb);
+    return ad + (amb ? " [" + amb + "]" : "");
+  };
+
   function basketMessage() {
-    const lines = basketEntries().map(e => "• " + PNAME(e.p) + " — " + qtyLabel(e));
+    const lines = basketEntries().map(e => "• " + kalemAdi(e) + " — " + qtyLabel(e));
     const foot = "\n\n" + T("mail.firm") + ": \n" + T("mail.contact") + ": \n" + T("mail.qty") + ": ";
     return encodeURIComponent(T("quote.mailIntro") + "\n\n" + lines.join("\n") + foot);
   }
@@ -703,7 +778,7 @@
   }
   function sendQuote(name, firm, contact, done) {
     const lines = ["Ad: " + name, "Firma: " + (firm || "—"), "İletişim: " + (contact || "—"), ""]
-      .concat(basketEntries().map(e => "• " + e.p.n.tr + " — " + qtyLabel(e)));
+      .concat(basketEntries().map(e => "• " + kalemAdi(e, "tr") + " — " + qtyLabel(e)));
     hgNotify("Teklif Talebi — " + (firm || name), lines, name, contact).then(ok => {
       if (done) done();
       if (ok) { bdView = "cart"; renderBasket(); toast(T("quote.sentOk")); }

@@ -1728,3 +1728,21 @@ body::before { opacity: 0.028; }
 .fiyat-not p { margin: 0; max-width: 72ch; }
 .fiyat-not b { color: var(--ink); }
 .fiyat-not .mono { font-family: var(--font-mono); color: var(--ink-3); white-space: nowrap; }
+
+/* Sepette ambalaj seçici. Yalnız birden fazla ambalajı olan üründe çıkar
+   (bkz. main.js ambalajListesi). Ürün adının altında, marka satırının
+   yanında durur; küçük ve sade — çekmecede yer dar. */
+.bd-amb {
+  display: block;
+  margin-top: 6px;
+  max-width: 190px;
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.bd-amb:focus-visible { outline: 2px solid var(--crimson); outline-offset: 1px; }
