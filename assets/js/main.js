@@ -1103,24 +1103,38 @@
          bitirmek, tekrar denemek değil. */
       var capHata = (typeof window.hgpCaptchaHata === "function") ? window.hgpCaptchaHata() : "";
       var capYarim = (capHata === "kapatildi");
-      kutu.appendChild(el("b", null, T(capYarim ? "f.capTitle" : "f.failTitle")));
-      kutu.appendChild(el("p", null, T(capYarim ? "f.capBody" : "f.failBody")));
+      /* data-i18n ŞART: bu kutu JS ile sonradan kuruluyor. Öznitelik olmadan
+         metin bir kez basılıp öylece kalıyordu ve ziyaretçi dili değiştirince
+         kutu eski dilde donuyordu. i18n motoru dil değişiminde [data-i18n]
+         taşıyan her düğümü yeniden yazar; sonradan eklenenler dahil. */
+      const basAnahtar = capYarim ? "f.capTitle" : "f.failTitle";
+      const govdeAnahtar = capYarim ? "f.capBody" : "f.failBody";
+      const bas = el("b", null, T(basAnahtar));
+      bas.setAttribute("data-i18n", basAnahtar);
+      const govde = el("p", null, T(govdeAnahtar));
+      govde.setAttribute("data-i18n", govdeAnahtar);
+      kutu.appendChild(bas); kutu.appendChild(govde);
+
       const sira = el("div", "cf-fallback-links");
       const wa = el("a", "btn btn--primary btn--sm", T("f.failWa"));
+      wa.setAttribute("data-i18n", "f.failWa");
+      /* data-wa: setWa() dil değişiminde bağlantı metnini de tazeler. */
+      wa.setAttribute("data-wa", "");
       wa.href = "https://wa.me/" + HK.whatsapp + "?text=" + encodeURIComponent(T("wa.msg"));
       wa.target = "_blank"; wa.rel = "noopener noreferrer";
       const tel = el("a", "btn btn--sm", HK.phone);
       tel.href = "tel:" + String(HK.phone).replace(/\s/g, "");
       sira.appendChild(wa); sira.appendChild(tel);
-      /* Her iki kurumsal kutu da gösterilir: ticari talepler sales@, genel
-         konular info@ adresine gider. Ziyaretçi hangisini isterse seçer. */
-      [HK.notifyTo || HK.mailQuote, HK.notifyCc || HK.email]
-        .filter(function (a, i, d) { return a && d.indexOf(a) === i; })
-        .forEach(function (adres) {
-          const m = el("a", "btn btn--sm", adres);
-          m.href = "mailto:" + adres;
-          sira.appendChild(m);
-        });
+      /* TEK kurumsal adres gösterilir: satış kutusu. Önceden info@ da
+         listeleniyordu; ziyaretçiye iki adres sunmak onu hangisini
+         seçeceğine karar vermek zorunda bırakıyordu ve ticari talep
+         yanlış kutuya düşebiliyordu. */
+      const satisAdresi = HK.notifyTo || HK.mailQuote || HK.email;
+      if (satisAdresi) {
+        const m = el("a", "btn btn--sm", satisAdresi);
+        m.href = "mailto:" + satisAdresi;
+        sira.appendChild(m);
+      }
       kutu.appendChild(sira);
       cform.appendChild(kutu);
       kutu.scrollIntoView({ block: "nearest", behavior: "smooth" });
