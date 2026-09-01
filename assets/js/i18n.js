@@ -479,6 +479,7 @@ const HK_I18N = {
     "page.contact.lead": "Formu doldurun, arayın ya da WhatsApp'tan yazın.",
     "page.kvkk.title": "KVKK & Çerez Politikası",
     "page.kvkk.lead": "Kişisel verilerin korunması ve çerez kullanımı.",
+    "kvkk.langNote": "Bu metin Türkçedir. Kişisel verilerin korunmasına ilişkin aydınlatma yükümlülüğü 6698 sayılı Kanun kapsamında Türkçe olarak yerine getirilir. Sorularınız için:",
 
     /* Misyon & vizyon */
     "mission.kicker": "02 — Misyon & Vizyon",
@@ -1017,6 +1018,7 @@ const HK_I18N = {
     "page.contact.lead": "Fill in the form, call us or message us on WhatsApp.",
     "page.kvkk.title": "Privacy & Cookie Policy",
     "page.kvkk.lead": "Protection of personal data and cookie usage.",
+    "kvkk.langNote": "This notice is in Turkish. The data protection disclosure is issued in Turkish as required by Turkish Law No. 6698 (KVKK); the Turkish text is the binding version. For questions in English, please write to:",
 
     /* Misyon & vizyon */
     "mission.kicker": "02 — Mission & Vision",
@@ -1555,6 +1557,7 @@ const HK_I18N = {
     "page.contact.lead": "Заполните форму, позвоните или напишите в WhatsApp.",
     "page.kvkk.title": "Конфиденциальность и cookie",
     "page.kvkk.lead": "Защита персональных данных и использование cookie.",
+    "kvkk.langNote": "Этот текст на турецком языке. Уведомление о защите персональных данных публикуется на турецком в соответствии с Законом Турции № 6698 (KVKK); турецкая версия является обязательной. По вопросам пишите на:",
 
     /* Misyon & vizyon */
     "mission.kicker": "02 — Миссия и видение",

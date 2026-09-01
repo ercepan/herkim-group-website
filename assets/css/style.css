@@ -1746,3 +1746,68 @@ body::before { opacity: 0.028; }
   cursor: pointer;
 }
 .bd-amb:focus-visible { outline: 2px solid var(--crimson); outline-offset: 1px; }
+
+/* ============================================================
+   KVKK / ÇEREZ POLİTİKASI
+   Uzun hukuki metin. Okunabilirlik önce gelir: satır uzunluğu sınırlı,
+   satır aralığı geniş, tablolar dar ekranda yatay kayar.
+   ============================================================ */
+.kvkk-h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--ink);
+  margin: 30px 0 10px;
+}
+.kvkk-p {
+  color: var(--ink-2);
+  line-height: 1.72;
+  margin-bottom: 14px;
+}
+.kvkk-liste { margin-bottom: 14px; }
+.kvkk-liste li { line-height: 1.66; }
+
+/* Tablo dar ekranda sayfayı yatay kaydırmasın, kendi içinde kaysın */
+.kvkk-tablo { overflow-x: auto; margin: 4px 0 18px; }
+.kvkk-tablo table {
+  width: 100%;
+  min-width: 460px;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+}
+.kvkk-tablo th, .kvkk-tablo td {
+  text-align: left;
+  vertical-align: top;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.kvkk-tablo th {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .06em;
+  text-transform: none;   /* Türkçe i→İ bozulmasın diye büyük harf YOK */
+  color: var(--ink-3);
+  border-bottom-width: 1.5px;
+}
+.kvkk-tablo td { color: var(--ink-2); line-height: 1.6; }
+.kvkk-tablo td.mono { font-family: var(--font-mono); color: var(--ink); white-space: nowrap; }
+
+/* Yabancı ziyaretçiye metnin Türkçe olduğunu söyleyen kutu */
+.kvkk-dil {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--crimson);
+  border-radius: var(--radius);
+  background: var(--white);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+.kvkk-guncelleme {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--ink-3);
+}
