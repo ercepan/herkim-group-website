@@ -491,7 +491,10 @@
       var initials = (a.contact || "??").split(/\s+/).map(function (w) { return (w[0] || "").toLocaleUpperCase("tr"); }).join("").slice(0, 2);
       s.accounts.push({ email: a.email, name: a.contact, company: a.firm, initials: initials });
       s.customers.push({
-        id: "C-1" + String(s.seq).slice(-2), name: a.firm, city: a.taxOffice || "—",
+        /* slice(-2) yalnız son iki basamağı alıyordu: kimlik uzayı 100 ile
+           sınırlıydı ve her 100 onayda bir çakışma üretiyordu (seq 1050 ve
+           1150 ikisi de C-150). Tohum verisindeki C-001 biçimiyle de uyumsuzdu. */
+        id: "C-" + String(s.seq).padStart(4, "0"), name: a.firm, city: a.taxOffice || "—",
         contact: a.contact, phone: a.mobile || a.phone, email: a.email,
         rep: "Ayşe Yılmaz", since: hgpYear(),
         history: [{ via: "WEB", t: "Web başvurusu onaylandı", n: a.msg || "Hesap aktifleştirildi.", when: hgpToday() }]
@@ -819,9 +822,14 @@
      Ana site her render'da çağırır: asla istisna fırlatmaz, her zaman dizi
      döner, HK_PRODUCTS'ı değiştirmez (concat yeni dizi üretir). */
   function hgpAllProducts() {
-    var custom = [], gizli = [];
-    try { custom = (hgpPeek() || {}).customProducts || []; } catch (e) { custom = []; }
-    try { gizli = hgpHiddenIds(); } catch (e) { gizli = []; }
+    /* Depo TEK kez okunur. Önceden customProducts için bir, hgpHiddenIds
+       içinden bir daha olmak üzere iki kez localStorage okunup JSON
+       ayrıştırılıyordu; bu fonksiyon ana sitede her çizimde ve arama
+       kutusunda her tuş vuruşunda çağrılıyor. */
+    var anlik = {};
+    try { anlik = hgpPeek() || {}; } catch (e) { anlik = {}; }
+    var custom = Array.isArray(anlik.customProducts) ? anlik.customProducts : [];
+    var gizli = Array.isArray(anlik.hiddenProducts) ? anlik.hiddenProducts : [];
     var taban = hgpBaseProducts();
     if (gizli.length) {
       taban = taban.filter(function (p) { return gizli.indexOf(Number(p.id)) === -1; });
@@ -967,10 +975,10 @@
       "   bağlantısı üretir — dosyanın gerçekten assets/docs/ altında ve depoda",
       "   olduğundan emin olun, yoksa bağlantı 404 verir.",
       "   SONRA: değişikliği commit edip push ETMEDEN bu dokümanlar yayındaki",
+      "   siteye ULAŞMAZ. Portaldaki kayıt yalnızca eklendiği tarayıcıda görünür.",
       "   YAPIŞTIRDIKTAN SONRA: bu kayıtları portaldaki listeden SİLİN. Silmezseniz",
       "   bir sonraki dışa aktarım aynı dokümanları YENİDEN üretir ve ikinci kez",
       "   yapıştırılırsa doküman merkezinde çift kart oluşur.",
-      "   siteye ULAŞMAZ. Portaldaki kayıt yalnızca eklendiği tarayıcıda görünür.",
       "   ============================================================ */"
     ];
     var i, d, line;

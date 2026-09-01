@@ -42,12 +42,20 @@
 
   /* ---------- Oturum ---------- */
   async function girisYap(eposta, sifre) {
+    /* Önbellek temizlenmezse aynı sekmede çıkış yapan ya da
+       başka hesapla giren kullanıcı, önceki kişinin profiliyle
+       görünmeye devam eder (onayliMusteri fiyat/sipariş kapısıdır). */
+    profilCache = null;
     var c = istemci(); if (!c) throw new Error("Backend bağlı değil");
     var r = await c.auth.signInWithPassword({ email: eposta, password: sifre });
     if (r.error) throw hata(r.error);
     return r.data.user;
   }
   async function cikisYap() {
+    /* Önbellek temizlenmezse aynı sekmede çıkış yapan ya da
+       başka hesapla giren kullanıcı, önceki kişinin profiliyle
+       görünmeye devam eder (onayliMusteri fiyat/sipariş kapısıdır). */
+    profilCache = null;
     var c = istemci(); if (!c) return;
     await c.auth.signOut();
   }
@@ -60,6 +68,10 @@
     return true;
   }
   async function sifreBelirle(yeniSifre) {
+    /* Önbellek temizlenmezse aynı sekmede çıkış yapan ya da
+       başka hesapla giren kullanıcı, önceki kişinin profiliyle
+       görünmeye devam eder (onayliMusteri fiyat/sipariş kapısıdır). */
+    profilCache = null;
     var c = istemci(); if (!c) throw new Error("Backend bağlı değil");
     var r = await c.auth.updateUser({ password: yeniSifre });
     if (r.error) throw hata(r.error);
@@ -114,9 +126,14 @@
   /* ---------- Fiyatlar (YALNIZ onaylı müşteri kendi fiyatını) ---------- */
   async function fiyatlarim() {
     var c = istemci(); if (!c) return null;
+    var bugun = new Date().toISOString().slice(0, 10);
     var r = await c.from("customer_prices")
       .select("product_id, birim_fiyat, para_birimi, min_miktar, gecerli_bit")
-      .lte("gecerli_bas", new Date().toISOString().slice(0, 10))
+      .lte("gecerli_bas", bugun)
+      /* gecerli_bit SEÇİLİYOR ama süzülmüyordu: sözleşme dönemi bitmiş
+         bir satır, yerine yenisi girilmediyse "güncel fiyat" olarak
+         dönüyordu. Bitiş tarihi boş olan ya da bugünden ileri olanlar. */
+      .or("gecerli_bit.is.null,gecerli_bit.gte." + bugun)
       .order("gecerli_bas", { ascending: false });
     if (r.error) throw hata(r.error);
     // Ürün başına en güncel kayıt

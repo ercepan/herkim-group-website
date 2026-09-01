@@ -146,7 +146,13 @@
     var payload = { role: role, at: nowMs() };
     if (acct) payload.acct = acct;
     try {
-      if (!hgpSesWrite(payload)) throw new Error("sessionStorage yazılamadı");
+      /* persist=false ZORUNLU. Üçüncü argüman verilmezse hgpSesWrite,
+         localStorage'daki "beni hatırla" bayrağına bakıyor; müşteri tarafında
+         o kutu bir kez işaretlenip çıkış yapılmadan sekme kapatılmışsa bayrak
+         kalıyor ve YÖNETİCİ oturumu da localStorage'a yazılıp tarayıcı
+         kapansa bile yaşıyordu. Personel girişi bir müşterinin tercihini
+         devralmaz: sekme kapanınca oturum bitmeli. */
+      if (!hgpSesWrite(payload, false)) throw new Error("sessionStorage yazılamadı");
       localStorage.removeItem(HGP_LOCK_KEY);
       localStorage.setItem(HGP_LAST_LOGIN + role, hgpNow());
     } catch (e) {
@@ -2001,7 +2007,12 @@
           } else {
             /* Kalan hak yazılır: meşru yönetici yanlış tuşa bastığını
                anlasın, kilide yakalanmadan düzeltsin. */
-            var kalanHak = 3 - d.hata;
+            /* Eşik HK_ADMIN.gecikme'den türetilir. Sabit 3 yazılıydı; tablo
+               ayarlanınca mesaj sessizce yanlış sayı gösterirdi. Dizi büyükten
+               küçüğe sıralı, ilk kilit eşiği son elemandır. */
+            var bsm = (typeof HK_ADMIN !== "undefined" && HK_ADMIN.gecikme) || [[3, 60]];
+            var esik = bsm[bsm.length - 1][0];
+            var kalanHak = esik - d.hata;
             admHata("Kullanıcı adı veya parola hatalı." +
               (kalanHak > 0 ? " Kilitlenmeden önce " + kalanHak + " deneme hakkınız kaldı." : ""));
             kulGirdi.focus();
