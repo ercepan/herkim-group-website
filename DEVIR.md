@@ -48,9 +48,10 @@ Kullanıcı adı ve şifre hiçbir dosyaya yazılmaz, ekranda bir kez görünür
 
 ## 2. Sitenin şu anki durumu
 
-Adres: **https://herkim.com.tr** — geçiş 1 Eylül 2026'da tamamlandı.
-Depo: `ercepan/herkim-group-website`, GitHub Pages. Özel alan adını kökteki
-`CNAME` dosyası belirler. Eski `ercepan.github.io/...` adresi buraya yönlenir.
+Adres: **https://herkim.com.tr**
+Site **Natro hosting'de** duruyor (2 Eylül 2026'dan beri), GitHub Pages'te DEĞİL.
+Depo (`ercepan/herkim-group-website`) yine ana kaynaktır; sunucuya oradan
+kopyalanır. Nedeni ve yayın adımları §4'te.
 
 **Faz 1 — teklif modeli.** Sitede sipariş verme ve müşteri hesabı KAPALI.
 Alıcı ürünleri görür, teklif sepetine atar, WhatsApp veya e-posta ile satış
@@ -134,90 +135,89 @@ sonuna harf ekleyin: `2026-09-02b`.
 
 ---
 
-## 4. Alan adı — herkim.com.tr
+## 4. Site nerede duruyor, nasıl güncellenir
 
-Geçiş **1 Eylül 2026'da yapıldı ve doğrulandı.** Site GitHub Pages'te,
-e-posta eskisi gibi Natro'da. İkisi ayrı sunucularda; biri diğerini etkilemez.
+**Site Natro hosting'de.** GitHub Pages'te değil. Sebep aşağıda.
 
-### Kim neyi tutuyor
+| Ne | Nerede |
+|---|---|
+| Web sitesi | Natro, `94.73.145.212`, `/home/u5922390/public_html` |
+| HTTPS sertifikası | Natro'daki Sectigo — `herkim.com.tr` + `www`, 8 Aralık 2026'ya kadar |
+| Kaynak kod | GitHub `ercepan/herkim-group-website` (ana kaynak) |
+| Sunucudaki git klonu | `/home/u5922390/site-repo` (web kökünün DIŞINDA) |
+| E-posta | Natro, ayrı sunucu `85.97.197.8` |
+| DNS bölgesi | Natro paneli → Hosting Yönetimi → Yönet → herkim.com.tr → DNS Yönetimi |
 
-| Ne | Nerede | Değer |
-|---|---|---|
-| Alan adı tescili | Natro'nun 34 alan adı listesinde YOK — başka bir kayıt firmasında | `herkim.com.tr` |
-| DNS bölgesi | Natro paneli (aşağıdaki yol) | `ns1/ns2.natrohost.com` |
-| Web sitesi | GitHub Pages | A: 185.199.108–111.153 |
-| E-posta | Natro, **ayrı sunucu** | MX → `mail.herkim.com.tr` → 85.97.197.8 |
+### Neden GitHub Pages'te değil
 
-### DNS ekranına nasıl gidilir
+1 Eylül 2026'da site GitHub Pages'e taşındı ve DNS oraya çevrildi. **GitHub 19
+saat boyunca alan adı için HTTPS sertifikası üretemedi.** Sertifika siparişi
+API'de hiç oluşmadı; ayarlar ekranı `DNS Check in Progress` durumunda takılı
+kaldı. Denenenler:
 
-Natro → Hosting Yönetimi → **Sınırsız Xtreme Hosting [120155HH9ZIX]** satırında
-`Yönet` → Web Alanı Yönetimi → `herkim.com.tr` satırındaki **Web Sitesi** oku →
-**DNS Yönetimi**.
+- `www`'yi A kaydından CNAME'e çevirmek → sağlık kontrolü tamamen yeşile döndü,
+  sertifika yine gelmedi
+- Pages'e yeniden derleme isteği → tetiklemedi
+- Özel alan adını API ile kaldırıp yeniden eklemek → tetiklemedi
+- Aynısını **web arayüzünden** yapmak → sipariş ilk kez oluştu (`dns_changed`,
+  "Requesting a new certificate") ama 12 saatte tamamlanmadı
 
-`herkim.com.tr` bu hosting hesabının *birincil* alan adıdır; alan adı listesinde
-aramayın, orada yok. cPanel'de Zone Editor **yoktur**, DNS yalnız buradan
-düzenlenir.
+Sertifika şeffaflık kayıtları (crt.sh) doğruladı: GitHub bu alan adı için tek
+bir sertifika bile almadı. Ziyaretçiler https ile girdiğinde uyarı görüyordu.
+Natro'da zaten geçerli bir Sectigo sertifikası bulunduğu için site oraya alındı.
 
-**Ekranın tamamı sığmaz.** Pencere sabit yükseklikte ve kaydırılamaz; alttaki
-CNAME ve TXT bölümleri ilk bakışta görünmez. İlk yedeği alırken bu yüzden DKIM
-ve dört CNAME kaydı gözden kaçtı. Görmediğinize "yok" demeyin — `dig` ile
-doğrulayın. Tam bölge dökümü: `yedek/dns-tam-bolge-20260901.txt`.
+**GitHub tarafı bozulmadı.** Depodaki `CNAME` dosyası ve Pages ayarı duruyor;
+sertifikası bir gün gelirse DNS'i geri çevirmek yeterlidir (§"Geri dönüş").
 
-### Üç kural
+### Siteyi güncelleme — DEĞİŞTİ
 
-1. **"DNS Kayıtlarını Sıfırla" ve "MX Kayıtlarını Sıfırla" düğmelerine
-   basılmaz.** Ekranın en üstündedirler. Bölgeyi varsayılana döndürürler;
-   `info@herkim.com.tr` o anda çalışmaz hâle gelir, DKIM ve DMARC kaybolur.
-2. **Apex'e (`@`) CNAME konulmaz.** RFC 1034 gereği o isimdeki MX ve TXT
-   kayıtları geçersizleşir, mail kesilir. Apex için A kaydı kullanılır.
-3. **`www` CNAME kalmalı, A kaydına çevrilmemeli.** GitHub Pages'in sağlık
-   kontrolü `www` bir A kaydıysa onu geçersiz sayıyor (`InvalidARecordError`)
-   ve HTTPS sertifikası siparişi hiç oluşmuyor. Bu tam olarak yaşandı: 1 Eylül
-   2026'da www dört A kaydıyla kuruldu, iki saat bekledik, sertifika gelmedi;
-   CNAME'e çevrilince kontrol düzeldi. Sertifika apex ile www'yi birlikte
-   kapsıyor (semver.org, brew.sh, keepachangelog.com ölçüldü — üçünde de
-   böyle), o yüzden www'nin geçerli olması şart.
-4. **Panel "değiştirmez", ekler.** `Değiştir` düğmesine rağmen her kayıt yeni
-   satır olarak eklenir; eskisini ayrıca silmeniz gerekir. Ayrıca Server alanı
-   textarea gibi görünse de **tek IP** kabul eder; alt alta birden fazla
-   yazarsanız "DNS kayıt güncelleme işlemi tamamlanamadı" der.
+Artık `git push` yayına çıkmaz. İki adım:
 
-### Şu anki kayıtlar
+**1. Sunucudaki klonu güncelle.** cPanel → Git™ Version Control → `herkim-site`
+→ Yönet → **Update from Remote**. (Depoya push ettikten sonra.)
+
+**2. Yayın dosyalarını kopyala.** cPanel → Dosya Yöneticisi →
+`/home/u5922390/site-repo` → şunları seç ve `/public_html` içine **Kopyala**:
 
 ```
-A      @      185.199.108.153 / .109.153 / .110.153 / .111.153
-CNAME  www    ercepan.github.io.        <- depo adi EKLENMEZ
-A      mail   85.97.197.8                          <- dokunulmaz
-MX     @      10 mail.herkim.com.tr.               <- dokunulmaz
-TXT    @      v=spf1 mx ip4:85.97.197.8 -all       <- dokunulmaz
-TXT    @      google-site-verification=...         <- dokunulmaz
-TXT    mail   v=spf1 mx ip4:85.97.197.8 -all       <- dokunulmaz
-TXT    _dmarc v=DMARC1; p=quarantine; ...          <- dokunulmaz
-TXT    mail._domainkey   v=DKIM1;p=...             <- dokunulmaz
-CNAME  autodiscover      mail.kurumsaleposta.com.  <- dokunulmaz
-CNAME  phaa4qp2icpx      ...googlehosted.com.      <- dokunulmaz
-CNAME  _ba2470… / _ce5dd9…  ...sectigo.com.        <- SSL doğrulama, dokunulmaz
+assets/          robots.txt       sitemap.xml
+dokumanlar.html  hesap.html       hizmetler.html   iletisim.html
+index.html       kurumsal.html    kvkk.html        portal.html
+siparislerim.html  urun-listesi.html  urunler.html
 ```
 
-Geri dönüş gerekirse: `yedek/GERI-DONUS.md`.
+**KOPYALANMAZ** (yayınlanmamalı): `tools/`, `yedek/`, `herkim-backend/`,
+`pan/`, `.git/`, `.github/`, `DEVIR.md`, `README.md`, `_config.yml`, `CNAME`,
+`package.json`, `.gitignore`. Depo bilerek web kökünün DIŞINA klonlandı;
+`public_html`'e yalnız yukarıdaki 14 öğe konur.
 
-### Geçiş sırası neden böyleydi
+Çoklu seçim: Mac'te **cmd+tık** (ctrl+tık sağ tık açar).
 
-`CNAME` dosyası depoya **DNS'ten önce** gönderildi. Böylece DNS herkim.com.tr'yi
-GitHub'a çevirdiği anda Pages siteyi zaten o isimle sunmaya hazırdı ve arada
-"site yok" ekranı çıkmadı. Tersi yapılsaydı, DNS'i taze çözen bir ziyaretçi
-GitHub'ın 404 sayfasını görürdü.
+`.htaccess`'e dokunmayın — `public_html/.htaccess` http→https ve www→apex
+yönlendirmelerini yapar, kendi açıklaması içindedir. Kopyalama onu ezmez.
 
-Aynı iş bir daha yapılacaksa (başka bir alan adı için) sıra: `CNAME` + adres
-değişikliği commit'i → push → Pages'in aldığını doğrula → sonra DNS.
+### Eski PHP sitesi
 
-### Geçişten sonra kalanlar
+`/home/u5922390/eski-php-site-yedek-20260902/` içinde duruyor, silinmedi. Web
+kökünün dışında olduğu için internetten erişilemez. İçinde eski CodeIgniter
+uygulaması ve onun `.htaccess`'i var.
 
-- `bash tools/alan-adi-gecisi.sh` çalıştırıldı, 21 dosyadaki adres güncellendi
-- Web3Forms panelinde formun "Website URL" alanı `herkim.com.tr` yapılmalı
-- Google Search Console'a yeni alan adı eklenip `sitemap.xml` gönderilmeli
-- Eski sayfa adresleri (`hakkimizda.html`, `fuar.html`…) 404 verecek —
-  yönlendirme koymama kararı alındı
+### Geri dönüş (GitHub Pages'e)
+
+Sertifika bir gün gelirse: Natro DNS panelinde apex ve `www`'yi
+`94.73.145.212` yerine GitHub'ın dört adresine (`185.199.108–111.153`) çevirin;
+`www` için CNAME `ercepan.github.io.` tercih edilir. Depodaki `CNAME` dosyası
+zaten yerinde. `public_html` içeriğini silmeyin, sadece DNS'i çevirin.
+
+### DNS — bozmayın
+
+**"DNS Kayıtlarını Sıfırla" ve "MX Kayıtlarını Sıfırla" düğmelerine basılmaz.**
+Bölgeyi varsayılana döndürür, `info@herkim.com.tr` çalışmaz hâle gelir, DKIM ve
+DMARC kaybolur. **Apex'e CNAME konulmaz** (RFC 1034; MX ve TXT geçersizleşir).
+Panelin "Değiştir" düğmesi aslında **ekler**, eskisini ayrıca silmek gerekir;
+Server alanı textarea görünse de **tek IP** kabul eder.
+
+Şu anki kayıtlar ve tam döküm: `yedek/dns-tam-bolge-20260901.txt`.
 
 ---
 
@@ -227,8 +227,7 @@ değişikliği commit'i → push → Pages'in aldığını doğrula → sonra DN
 |---|---|---|
 | **Natro hosting yenilemesi — 19 Eylül 2026** | **ACİL, aşağıya bakın** | şirket |
 | `info@herkim.com.tr` gönder/al testi | yapılmadı | şirket |
-| HTTPS sertifikası | GitHub üretiyor, gecikti — §4'e bakın | GitHub (kendiliğinden) |
-| HTTPS zorlaması (Enforce HTTPS) | otomatikleştirildi, aşağıya bakın | — |
+| HTTPS | **çalışıyor** — Natro'daki Sectigo sertifikası | — |
 | Web3Forms "Website URL" alanı → herkim.com.tr | yapılmadı | hesap sahibi |
 | Google Search Console'a yeni alan adı + sitemap | yapılmadı | hesap sahibi |
 | İletişim formunun canlı denemesi (captcha çözülerek) | yapılmadı | şirket |

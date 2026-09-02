@@ -12,13 +12,16 @@ DNS yönetimi: `ns1.natrohost.com` / `ns2.natrohost.com` (Natro panelinde)
 Bölgede **yalnız web'i gösteren A kayıtlarına** dokunuldu. Başka hiçbir kayıt
 eklenmedi, silinmedi, düzenlenmedi.
 
-| İsim | Önce | Sonra |
-|---|---|---|
-| `herkim.com.tr` (apex) | `A 94.73.145.212` | `A 185.199.108.153` + `.109` + `.110` + `.111` |
-| `www.herkim.com.tr` | `A 94.73.145.212` | `CNAME ercepan.github.io.` |
+| İsim | 1 Eyl öncesi | 1 Eyl (GitHub) | 2 Eyl (şu an) |
+|---|---|---|---|
+| `herkim.com.tr` | `A 94.73.145.212` | `A 185.199.108–111.153` | **`A 94.73.145.212`** |
+| `www.herkim.com.tr` | `A 94.73.145.212` | `CNAME ercepan.github.io.` | **`A 94.73.145.212`** |
 
-`www` önce dört A kaydına çevrilmişti; aynı gün CNAME'e dönüştürüldü. Sebebi
-§"www neden CNAME" başlığında.
+**Site 2 Eylül 2026'da Natro'ya geri alındı** — GitHub Pages 19 saatte HTTPS
+sertifikası üretemedi, Natro'daki Sectigo sertifikası ise apex ve www'yi
+kapsıyor ve çalışıyor. Ayrıntı: `DEVIR.md` §4. Site artık Natro'da,
+`/home/u5922390/public_html`; eski PHP sitesi
+`/home/u5922390/eski-php-site-yedek-20260902/` içinde saklı.
 
 Dört adres GitHub Pages'in kendi adresleridir; biri erişilemezse diğerleri
 devreye girer. 1 Eylül 2026'da `dig ercepan.github.io` ile doğrulandı,
